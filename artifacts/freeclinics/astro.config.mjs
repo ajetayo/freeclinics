@@ -5,6 +5,7 @@ export default defineConfig({
   site: 'https://freeclinics.us',
   server: {
     host: '0.0.0.0',
+    allowedHosts: true,
   },
   vite: {
     server: {

@@ -1,10 +1,21 @@
 ---
 // Generic explainer for how sliding-scale and free-clinic pricing works.
-// Used on both the service+location page and the clinic detail page so the
-// copy stays consistent and only has to be updated in one place.
+// Used on the service+location page, the city hub, and the clinic detail page,
+// so the copy stays consistent and only has to be updated in one place.
+//
+// `headingLevel` controls which heading tag this section's title is rendered as
+// (2 → <h2>, 3 → <h3>, etc). Default is 2 — appropriate when the explainer is
+// a top-level section of the page (service+location). When the explainer is
+// nested inside another section (city hub's "Other ways to find care", clinic
+// page's "Eligibility & cost"), pass 3 so the heading hierarchy stays correct.
+export interface Props {
+  headingLevel?: 2 | 3 | 4;
+}
+const { headingLevel = 2 } = Astro.props as Props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
 ---
 <section class="sliding-scale-explainer" aria-labelledby="how-it-works">
-  <h2 id="how-it-works">How free and low-cost care works</h2>
+  <Heading id="how-it-works">How free and low-cost care works</Heading>
   <p>
     A "sliding-scale fee" means the clinic adjusts what you pay based on your
     household income and family size. If you make very little, many visits and

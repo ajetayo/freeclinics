@@ -1,0 +1,11 @@
+All Phase 1 templates are built. This is a production-correctness pass — no new pages, no design work yet.
+1. Sitemap. Add the @astrojs/sitemap integration and configure it in astro.config.mjs. site is already set, so it should generate cleanly from the static routes. Run the build and confirm the sitemap files appear in dist/.
+2. robots.txt. Add public/robots.txt that allows all crawlers and points to the sitemap index (https://freeclinics.us/sitemap-index.xml).
+3. Build-time data assertions (both should throw and fail the build on mismatch):
+
+In the city hub getStaticPaths: assert each city's clinicCount in phase1-cities.json equals getClinicsByCityState(stateSlug, citySlug).length. Right now clinicCount is printed in the meta description and intro but never checked — if the dataset is re-ingested it could silently lie.
+Also in the city hub: validate every slug in each city's servicePages array actually exists as a combo in phase1-service-locations.json. A typo there currently produces a broken hub link with no warning.
+
+4. Make SlidingScaleExplainer's heading level a prop. It's now used on three page types; on the city hub and clinic page it's nested under another <h2>, which makes the heading hierarchy h2→h2 instead of h2→h3. Add a prop (e.g. headingLevel, default 2) so the nested usages can pass 3. Update the three call sites: service+location page keeps 2, city hub and clinic page pass 3.
+5. Fix the JSON-LD priceRange. It's currently hardcoded to "Free / Sliding scale" on every clinic, even ones whose feeStructure says something else. Either derive it sensibly from the clinic's feeStructure, or just omit priceRange entirely — an absent field is better than an inaccurate one. Your call, but it shouldn't be a hardcoded constant.
+After building, run astro build and show me: the build output (confirming sitemap generation and page count still 593), the contents of astro.config.mjs and public/robots.txt, the updated SlidingScaleExplainer.astro signature, and confirm the two build-time assertions are in place (you can describe them — I don't need to see a forced failure).

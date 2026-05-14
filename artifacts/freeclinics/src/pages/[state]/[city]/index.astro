@@ -4,6 +4,7 @@ import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.ast
 import { getServiceDisplayName } from '../../../lib/constants';
 import { getClinicsByCityState } from '../../../lib/clinics';
 import phase1Cities from '../../../data/phase1-cities.json';
+import phase1ServiceLocations from '../../../data/phase1-service-locations.json';
 
 // ---------------------------------------------------------------------------
 // Routes — Phase 1 city hubs (12 metros)
@@ -18,10 +19,47 @@ type City = {
 };
 
 export function getStaticPaths() {
-  return (phase1Cities as City[]).map((city) => ({
-    params: { state: city.stateSlug, city: city.citySlug },
-    props: { city },
-  }));
+  // Build a Set of "stateSlug/citySlug/serviceSlug" keys for every combo that
+  // actually has a service+location page. Used to validate each city's
+  // servicePages list — a typo would otherwise produce a hub link to a 404.
+  const SERVICE_LOCATION_KEYS = new Set(
+    (phase1ServiceLocations as Array<{ stateSlug: string; citySlug: string; serviceSlug: string }>).map(
+      (combo) => `${combo.stateSlug}/${combo.citySlug}/${combo.serviceSlug}`,
+    ),
+  );
+
+  return (phase1Cities as City[]).map((city) => {
+    // Assertion 1: clinicCount must match the live dataset. If the dataset
+    // is re-ingested without updating phase1-cities.json, this catches it
+    // before the wrong number ships in the meta description and intro line.
+    const actualCount = getClinicsByCityState(city.stateSlug, city.citySlug).length;
+    if (city.clinicCount !== actualCount) {
+      throw new Error(
+        `phase1-cities.json: "${city.stateSlug}/${city.citySlug}" declares ` +
+          `clinicCount=${city.clinicCount}, but getClinicsByCityState returned ` +
+          `${actualCount} clinics. Update phase1-cities.json to match the dataset.`,
+      );
+    }
+
+    // Assertion 2: every servicePages slug must correspond to a built
+    // service+location page. A typo here would produce a broken hub link
+    // with no warning at build time.
+    for (const slug of city.servicePages) {
+      const key = `${city.stateSlug}/${city.citySlug}/${slug}`;
+      if (!SERVICE_LOCATION_KEYS.has(key)) {
+        throw new Error(
+          `phase1-cities.json: "${city.stateSlug}/${city.citySlug}" lists ` +
+            `servicePages entry "${slug}", but no matching combo exists in ` +
+            `phase1-service-locations.json. Add the combo or fix the slug.`,
+        );
+      }
+    }
+
+    return {
+      params: { state: city.stateSlug, city: city.citySlug },
+      props: { city },
+    };
+  });
 }
 
 const { city } = Astro.props as { city: City };
@@ -100,7 +138,7 @@ const breadcrumbJsonLd = {
 
       <section aria-labelledby="other-options">
         <h2 id="other-options">Other ways to find care</h2>
-        <SlidingScaleExplainer />
+        <SlidingScaleExplainer headingLevel={3} />
         <p>
           If none of the clinics above fit your situation, two other places to try are
           <strong> 211</strong> (dial 2-1-1 from any phone in the US for a referral to

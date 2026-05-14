@@ -88,8 +88,22 @@ const medicalClinicJsonLd: Record<string, unknown> = {
     addressCountry: 'US',
   },
   url: canonicalUrl,
-  priceRange: 'Free / Sliding scale',
 };
+// JSON-LD priceRange — only emit if the dataset gives us something concrete.
+// Previously hardcoded to "Free / Sliding scale" on every clinic, which lied
+// for any clinic whose feeStructure said otherwise. We map the known values
+// in the dataset (e.g. "Sliding scale", "Free", "Low cost") to short
+// schema.org-style ranges; anything else is omitted entirely (per Google,
+// an absent field is better than an inaccurate one).
+if (clinic.feeStructure) {
+  const fs = clinic.feeStructure.toLowerCase();
+  let priceRange: string | null = null;
+  if (fs.includes('free') && fs.includes('sliding')) priceRange = 'Free / Sliding scale';
+  else if (fs.includes('sliding'))                   priceRange = 'Sliding scale';
+  else if (fs.includes('free'))                      priceRange = 'Free';
+  else if (fs.includes('low cost') || fs.includes('low-cost')) priceRange = 'Low cost';
+  if (priceRange) medicalClinicJsonLd.priceRange = priceRange;
+}
 if (clinic.phone) {
   medicalClinicJsonLd.telephone = clinic.phone;
 }
@@ -201,7 +215,7 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
             </>
           )}
         </dl>
-        <SlidingScaleExplainer />
+        <SlidingScaleExplainer headingLevel={3} />
       </section>
 
       {clinic.languages.length > 0 && (

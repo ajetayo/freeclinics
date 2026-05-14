@@ -1,0 +1,102 @@
+[
+  {
+    "stateSlug": "oregon",
+    "citySlug": "portland",
+    "serviceSlug": "womens-health"
+  },
+  {
+    "stateSlug": "idaho",
+    "citySlug": "boise",
+    "serviceSlug": "ob-gyn"
+  },
+  {
+    "stateSlug": "texas",
+    "citySlug": "houston",
+    "serviceSlug": "blood-pressure-screening"
+  },
+  {
+    "stateSlug": "new-york",
+    "citySlug": "new-york",
+    "serviceSlug": "medical"
+  },
+  {
+    "stateSlug": "california",
+    "citySlug": "oakland",
+    "serviceSlug": "womens-health"
+  },
+  {
+    "stateSlug": "illinois",
+    "citySlug": "chicago",
+    "serviceSlug": "pregnancy"
+  },
+  {
+    "stateSlug": "tennessee",
+    "citySlug": "nashville",
+    "serviceSlug": "blood-pressure-screening"
+  },
+  {
+    "stateSlug": "texas",
+    "citySlug": "houston",
+    "serviceSlug": "immunizations"
+  },
+  {
+    "stateSlug": "georgia",
+    "citySlug": "atlanta",
+    "serviceSlug": "x-ray"
+  },
+  {
+    "stateSlug": "louisiana",
+    "citySlug": "metairie",
+    "serviceSlug": "cholesterol-screening"
+  },
+  {
+    "stateSlug": "oregon",
+    "citySlug": "portland",
+    "serviceSlug": "ob-gyn"
+  },
+  {
+    "stateSlug": "georgia",
+    "citySlug": "atlanta",
+    "serviceSlug": "hepatitis-c-testing"
+  },
+  {
+    "stateSlug": "florida",
+    "citySlug": "orlando",
+    "serviceSlug": "x-ray"
+  },
+  {
+    "stateSlug": "new-york",
+    "citySlug": "new-york",
+    "serviceSlug": "family-planning"
+  },
+  {
+    "stateSlug": "idaho",
+    "citySlug": "boise",
+    "serviceSlug": "hepatitis-c-testing"
+  },
+  {
+    "stateSlug": "georgia",
+    "citySlug": "atlanta",
+    "serviceSlug": "diabetes-screening"
+  },
+  {
+    "stateSlug": "texas",
+    "citySlug": "corpus-christi",
+    "serviceSlug": "physical-therapy"
+  },
+  {
+    "stateSlug": "georgia",
+    "citySlug": "atlanta",
+    "serviceSlug": "cholesterol-screening"
+  },
+  {
+    "stateSlug": "texas",
+    "citySlug": "houston",
+    "serviceSlug": "x-ray"
+  },
+  {
+    "stateSlug": "oregon",
+    "citySlug": "portland",
+    "serviceSlug": "blood-pressure-screening"
+  }
+]

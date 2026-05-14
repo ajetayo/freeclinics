@@ -1,138 +1,61 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { getState, getServiceDisplayName, toTitleCase } from '../../../../lib/constants';
-import type { Clinic, FAQ } from '../../../../lib/types';
+import type { Clinic } from '../../../../lib/types';
+import { getClinicsByCityState, getClinicsByService } from '../../../../lib/clinics';
+import { SERVICE_FAQS } from '../../../../data/service-faqs';
+import phase1Combos from '../../../../data/phase1-service-locations.json';
 
 // ---------------------------------------------------------------------------
-// Routes
+// Routes — Phase 1
 // ---------------------------------------------------------------------------
-// Hardcoded for now. When the DB is wired in, replace this with a query that
-// returns one entry per real (state, city, service) combination.
+// One static path per (stateSlug, citySlug, serviceSlug) combo in
+// phase1-service-locations.json. Combos that resolve to zero clinics are
+// skipped with a warning — the build still succeeds, but we want to know
+// whenever the dataset stops covering a curated combo.
 export function getStaticPaths() {
-  return [
-    { params: { state: 'texas',  city: 'houston',  service: 'blood-pressure-screening' } },
-    { params: { state: 'oregon', city: 'portland', service: 'womens-health' } },
-  ];
+  const paths: Array<{
+    params: { state: string; city: string; service: string };
+    props: { clinics: Clinic[] };
+  }> = [];
+
+  for (const combo of phase1Combos as Array<{
+    stateSlug: string;
+    citySlug: string;
+    serviceSlug: string;
+  }>) {
+    const cityClinics = getClinicsByCityState(combo.stateSlug, combo.citySlug);
+    const matching = getClinicsByService(cityClinics, combo.serviceSlug);
+
+    if (matching.length === 0) {
+      console.warn(
+        `[freeclinics] skipping empty combo: ${combo.stateSlug}/${combo.citySlug}/${combo.serviceSlug} ` +
+          `(city has ${cityClinics.length} clinic(s), none match service)`,
+      );
+      continue;
+    }
+
+    paths.push({
+      params: {
+        state: combo.stateSlug,
+        city: combo.citySlug,
+        service: combo.serviceSlug,
+      },
+      props: { clinics: matching },
+    });
+  }
+
+  return paths;
 }
 
 // ---------------------------------------------------------------------------
-// Sample data — Portland, OR women's health
-// ---------------------------------------------------------------------------
-// Illustrative sample listings used to develop the template — websites and
-// coordinates are real, but field values should be re-verified before they
-// go live as part of the production dataset.
-const SAMPLE_CLINICS: Clinic[] = [
-  {
-    slug: 'outside-in-clinic-portland',
-    name: 'Outside In Community Health Clinic',
-    streetAddress: '1132 SW 13th Ave',
-    city: 'Portland',
-    stateAbbr: 'OR',
-    stateSlug: 'oregon',
-    citySlug: 'portland',
-    postalCode: '97205',
-    phone: '(503) 535-3800',
-    website: 'https://outsidein.org',
-    insuranceAccepted: ['Oregon Health Plan (Medicaid)', 'Most commercial insurance', 'Uninsured welcome'],
-    languages: ['English', 'Spanish'],
-    services: [
-      'Annual well-woman exams',
-      'Pap smears & cervical cancer screening',
-      'STI testing & treatment',
-      'Birth control counseling and prescriptions',
-      'Pregnancy testing',
-    ],
-    feeStructure: 'Sliding scale based on income; no one turned away for inability to pay',
-    incomeEligibility: 'No income limit — everyone served on a sliding scale; lowest tier is free',
-    hours: 'Mon–Thu 9:00 AM – 5:00 PM; Fri 9:00 AM – 1:00 PM',
-    serviceArea: 'Tri-county Portland metro (Multnomah, Washington, Clackamas)',
-    lat: 45.5208,
-    long: -122.6850,
-  },
-  {
-    slug: 'virginia-garcia-se-division-portland',
-    name: 'Virginia Garcia Memorial Health Center — SE Division',
-    streetAddress: '4209 SE Division St',
-    city: 'Portland',
-    stateAbbr: 'OR',
-    stateSlug: 'oregon',
-    citySlug: 'portland',
-    postalCode: '97202',
-    phone: '(503) 352-8800',
-    website: 'https://virginiagarcia.org',
-    insuranceAccepted: ['Oregon Health Plan', 'Medicare', 'Most commercial insurance', 'Uninsured patients'],
-    languages: ['English', 'Spanish', 'Vietnamese'],
-    services: [
-      'Prenatal and postpartum care',
-      'Family planning and contraception',
-      'Pap smears and HPV testing',
-      'Breast exams and mammogram referrals',
-      'Menopause care',
-    ],
-    feeStructure: 'Sliding fee scale; discounts based on household size and income',
-    incomeEligibility: 'Sliding scale available up to 200% of the Federal Poverty Level; everyone seen regardless',
-    hours: 'Mon–Fri 8:00 AM – 5:00 PM; some evening appointments',
-    serviceArea: 'Multnomah, Washington, and Yamhill counties',
-    lat: 45.5046,
-    long: -122.6213,
-  },
-  {
-    slug: 'planned-parenthood-ne-portland',
-    name: 'Planned Parenthood — NE Portland Health Center',
-    streetAddress: '3727 NE Martin Luther King Jr Blvd',
-    city: 'Portland',
-    stateAbbr: 'OR',
-    stateSlug: 'oregon',
-    citySlug: 'portland',
-    postalCode: '97212',
-    phone: '(503) 775-0145',
-    website: 'https://www.plannedparenthood.org/health-center/oregon/portland/97212/ne-portland-health-center-2540-91110',
-    insuranceAccepted: ['Oregon Health Plan', 'Most commercial insurance', 'Uninsured patients'],
-    languages: ['English', 'Spanish'],
-    services: [
-      'Birth control (pills, IUDs, implants, injections)',
-      'STI testing and treatment',
-      'Pap smears and cervical screening',
-      'Breast exams',
-      'Pregnancy testing and options counseling',
-      'Emergency contraception',
-    ],
-    feeStructure: 'Sliding scale based on income; many services free for those who qualify',
-    incomeEligibility: 'Free or reduced cost via Oregon Reproductive Health Program for those under 250% FPL',
-    hours: 'Tue–Sat 9:00 AM – 5:30 PM',
-    serviceArea: 'Open to all patients — no county restriction',
-    lat: 45.5478,
-    long: -122.6628,
-  },
-];
-
-const SAMPLE_FAQS: FAQ[] = [
-  {
-    question: "Can I get a Pap smear in Portland if I don't have insurance?",
-    answer:
-      "Yes. Several Portland clinics — including Outside In, Virginia Garcia, and Planned Parenthood — offer Pap smears on a sliding-scale basis. The cost is determined by your household income, and some patients qualify for free screening through the Oregon Breast and Cervical Cancer Program.",
-  },
-  {
-    question: "Do I need to be a US citizen to be seen at a free or low-cost clinic?",
-    answer:
-      "No. Federally Qualified Health Centers and most community clinics in Oregon serve patients regardless of immigration status. You will not be asked about citizenship in order to receive care, and most clinics do not require a Social Security number.",
-  },
-  {
-    question: "What documents should I bring to my first appointment?",
-    answer:
-      "Most clinics ask for a photo ID (any government-issued ID is fine), proof of income for the most recent month (a pay stub, an unemployment letter, or a self-attestation form the clinic provides), and proof of address (a utility bill or piece of mail). If you have any insurance card, bring that too.",
-  },
-  {
-    question: "Is birth control actually free at these clinics?",
-    answer:
-      "Often, yes. Birth control — including IUDs and implants — is fully covered by the Oregon Health Plan, and most low-cost clinics provide it free or near-free to uninsured patients who qualify under the sliding fee scale.",
-  },
-];
-
-// ---------------------------------------------------------------------------
-// Page-level data derived from params
+// Page-level data derived from params + props
 // ---------------------------------------------------------------------------
 const { state, city, service } = Astro.params;
+const { clinics: rawClinics } = Astro.props as { clinics: Clinic[] };
+
+// Sort alphabetically by name (locale-aware so "Élan" doesn't sort after "Z").
+const clinics = [...rawClinics].sort((a, b) => a.name.localeCompare(b.name));
 
 const stateInfo      = getState(state);
 const stateAbbr      = stateInfo?.abbr ?? state.toUpperCase();
@@ -146,10 +69,13 @@ const description   = `Find free and low-cost ${displayService.toLowerCase()} cl
 const canonicalUrl  = `https://freeclinics.us/${state}/${city}/${service}/`;
 const lastVerified  = '2026-05-01';
 
+const faqs = SERVICE_FAQS[service] ?? [];
+const hasFaqs = faqs.length > 0;
+
 // ---------------------------------------------------------------------------
 // JSON-LD structured data
 // ---------------------------------------------------------------------------
-const medicalBusinessJsonLd = SAMPLE_CLINICS.map((clinic) => {
+const medicalBusinessJsonLd = clinics.map((clinic) => {
   const data: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'MedicalBusiness',
@@ -183,25 +109,29 @@ const medicalBusinessJsonLd = SAMPLE_CLINICS.map((clinic) => {
   return data;
 });
 
-const faqJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: SAMPLE_FAQS.map((faq) => ({
-    '@type': 'Question',
-    name: faq.question,
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text: faq.answer,
-    },
-  })),
-};
+const faqJsonLd = hasFaqs
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.answer,
+        },
+      })),
+    }
+  : null;
 ---
 <BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
   <Fragment slot="head">
     {medicalBusinessJsonLd.map((data) => (
       <script type="application/ld+json" set:html={JSON.stringify(data)} />
     ))}
-    <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+    {faqJsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+    )}
   </Fragment>
 
   <main>
@@ -247,12 +177,20 @@ const faqJsonLd = {
       <section aria-labelledby="clinic-list">
         <h2 id="clinic-list">{displayService} clinics in {titleCity}, {stateAbbr}</h2>
         <ol class="clinic-list">
-          {SAMPLE_CLINICS.map((clinic) => (
+          {clinics.map((clinic) => (
             <li class="clinic-card">
               <h3>{clinic.name}</h3>
               <p class="clinic-meta">
-                <span>{clinic.streetAddress}, {clinic.city}, {clinic.stateAbbr} {clinic.postalCode}</span> ·{' '}
-                <a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`}>{clinic.phone}</a>
+                <span>
+                  {[clinic.streetAddress, clinic.city, clinic.stateAbbr].filter(Boolean).join(', ')}
+                  {clinic.postalCode ? ` ${clinic.postalCode}` : ''}
+                </span>
+                {clinic.phone && (
+                  <>
+                    {' '}·{' '}
+                    <a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`}>{clinic.phone}</a>
+                  </>
+                )}
                 {clinic.website && (
                   <>
                     {' '}·{' '}
@@ -262,18 +200,30 @@ const faqJsonLd = {
               </p>
 
               <dl class="clinic-details">
-                <dt>Services offered</dt>
-                <dd>
-                  <ul>
-                    {clinic.services.map((s) => (<li>{s}</li>))}
-                  </ul>
-                </dd>
+                {clinic.services.length > 0 && (
+                  <>
+                    <dt>Services offered</dt>
+                    <dd>
+                      <ul>
+                        {clinic.services.map((s) => (<li>{s}</li>))}
+                      </ul>
+                    </dd>
+                  </>
+                )}
 
-                <dt>Languages spoken</dt>
-                <dd>{clinic.languages.join(', ')}</dd>
+                {clinic.languages.length > 0 && (
+                  <>
+                    <dt>Languages spoken</dt>
+                    <dd>{clinic.languages.join(', ')}</dd>
+                  </>
+                )}
 
-                <dt>Fee structure</dt>
-                <dd>{clinic.feeStructure}</dd>
+                {clinic.feeStructure && (
+                  <>
+                    <dt>Fee structure</dt>
+                    <dd>{clinic.feeStructure}</dd>
+                  </>
+                )}
 
                 {clinic.incomeEligibility && (
                   <>
@@ -282,11 +232,19 @@ const faqJsonLd = {
                   </>
                 )}
 
-                <dt>Insurance accepted</dt>
-                <dd>{clinic.insuranceAccepted.join('; ')}</dd>
+                {clinic.insuranceAccepted.length > 0 && (
+                  <>
+                    <dt>Insurance accepted</dt>
+                    <dd>{clinic.insuranceAccepted.join('; ')}</dd>
+                  </>
+                )}
 
-                <dt>Hours</dt>
-                <dd>{clinic.hours}</dd>
+                {clinic.hours && (
+                  <>
+                    <dt>Hours</dt>
+                    <dd>{clinic.hours}</dd>
+                  </>
+                )}
 
                 {clinic.serviceArea && (
                   <>
@@ -300,17 +258,19 @@ const faqJsonLd = {
         </ol>
       </section>
 
-      <section aria-labelledby="faq">
-        <h2 id="faq">Frequently asked questions</h2>
-        <dl class="faq">
-          {SAMPLE_FAQS.map((faq) => (
-            <>
-              <dt>{faq.question}</dt>
-              <dd>{faq.answer}</dd>
-            </>
-          ))}
-        </dl>
-      </section>
+      {hasFaqs && (
+        <section aria-labelledby="faq">
+          <h2 id="faq">Frequently asked questions</h2>
+          <dl class="faq">
+            {faqs.map((faq) => (
+              <>
+                <dt>{faq.question}</dt>
+                <dd>{faq.answer}</dd>
+              </>
+            ))}
+          </dl>
+        </section>
+      )}
 
       <footer class="page-footer">
         <p><strong>Listings last verified:</strong> {lastVerified}</p>

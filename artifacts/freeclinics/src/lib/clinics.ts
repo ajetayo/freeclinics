@@ -7,13 +7,12 @@
 // in a request hot path.
 
 import rawClinics from '../data/clinics.json';
+import rawTaxonomy from '../data/service-taxonomy.json';
 import type { Clinic } from './types';
 
-// The JSON has the exact runtime shape of `Clinic[]`. We assert through
-// `unknown` rather than letting TS infer a structural type, which would pin
-// every string literal in the file as a literal type and balloon the inferred
-// type into something unusable.
 const ALL_CLINICS: readonly Clinic[] = rawClinics as unknown as Clinic[];
+
+const SERVICE_TAXONOMY: Record<string, string[]> = rawTaxonomy as Record<string, string[]>;
 
 // Pre-built index: "stateSlug/citySlug" → clinics in that city. Built once on
 // module load so per-call lookups are O(1) instead of O(n) over ~18.8k rows.
@@ -52,4 +51,27 @@ export function getClinicsByCityState(stateSlug: string, citySlug: string): Clin
 /** Return a single clinic by slug, or undefined if no clinic has that slug. */
 export function getClinicBySlug(slug: string): Clinic | undefined {
   return BY_SLUG.get(slug);
+}
+
+/**
+ * Filter `clinics` down to those that offer the service identified by
+ * `serviceSlug`. Membership is decided by the canonical mapping in
+ * `service-taxonomy.json`: a clinic matches if its `services` array contains
+ * at least one of the raw source strings the slug maps to.
+ *
+ * Throws if `serviceSlug` is not present in the taxonomy. We deliberately
+ * fail the build here rather than silently shipping an unmapped service —
+ * an unmapped slug would otherwise filter to zero clinics and produce a
+ * broken-looking page.
+ */
+export function getClinicsByService(clinics: Clinic[], serviceSlug: string): Clinic[] {
+  const sourceTerms = SERVICE_TAXONOMY[serviceSlug];
+  if (!sourceTerms) {
+    throw new Error(
+      `getClinicsByService: service slug "${serviceSlug}" is not in service-taxonomy.json. ` +
+        `Add a mapping there before generating routes for this service.`,
+    );
+  }
+  const termSet = new Set(sourceTerms);
+  return clinics.filter((c) => c.services.some((s) => termSet.has(s)));
 }

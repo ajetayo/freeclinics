@@ -1,0 +1,77 @@
+{
+  "womens-health": [
+    "Women's Health"
+  ],
+  "ob-gyn": [
+    "OB/GYN"
+  ],
+  "blood-pressure-screening": [
+    "Blood Pressure Screening"
+  ],
+  "medical": [
+    "Medical"
+  ],
+  "pregnancy": [
+    "Pregnancy"
+  ],
+  "immunizations": [
+    "Immunizations"
+  ],
+  "x-ray": [
+    "X-Ray"
+  ],
+  "cholesterol-screening": [
+    "Cholesterol Screening/Lipid Panel Test"
+  ],
+  "hepatitis-c-testing": [
+    "Hepatitis C Testing"
+  ],
+  "family-planning": [
+    "Family Planning"
+  ],
+  "diabetes-screening": [
+    "Diabetes Screening"
+  ],
+  "physical-therapy": [
+    "Physical Therapy"
+  ],
+  "std-testing": [
+    "Sexually Transmitted Diseases (STD) Testing"
+  ],
+  "std-treatment": [
+    "Sexually Transmitted Diseases (STD) Treatment"
+  ],
+  "hiv-testing": [
+    "HIV/AIDS Testing"
+  ],
+  "dental": [
+    "Dental"
+  ],
+  "primary-care": [
+    "Primary Care"
+  ],
+  "pediatric": [
+    "Pediatric"
+  ],
+  "mental-health": [
+    "Counseling/Mental Health"
+  ],
+  "covid-19-testing": [
+    "COVID-19 Testing"
+  ],
+  "covid-19-vaccination": [
+    "COVID-19 Vaccination"
+  ],
+  "pharmacy": [
+    "Pharmacy"
+  ],
+  "vision": [
+    "Vision"
+  ],
+  "lab": [
+    "Lab"
+  ],
+  "telemedicine": [
+    "Telemedicine"
+  ]
+}

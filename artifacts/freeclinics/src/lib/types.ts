@@ -8,21 +8,21 @@
 export interface Clinic {
   slug: string;
   name: string;
-  streetAddress: string;
+  streetAddress: string | null;
   city: string;
   stateAbbr: string;
   stateSlug: string;
   citySlug: string;
-  postalCode: string;
-  phone: string;
+  postalCode: string | null;
+  phone: string | null;
   website: string | null;
   insuranceAccepted: string[];
   languages: string[];
   /** Raw source strings — not normalized. */
   services: string[];
-  feeStructure: string;
+  feeStructure: string | null;
   incomeEligibility: string | null;
-  hours: string;
+  hours: string | null;
   serviceArea: string | null;
   lat: number | null;
   long: number | null;

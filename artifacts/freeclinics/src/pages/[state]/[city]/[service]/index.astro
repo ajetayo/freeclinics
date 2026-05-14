@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { getState, getServiceDisplayName, toTitleCase } from '../../../../lib/constants';
 
 // ---------------------------------------------------------------------------
 // Routes
@@ -14,20 +15,30 @@ export function getStaticPaths() {
 }
 
 // ---------------------------------------------------------------------------
-// Types — mirrors the columns we expect in the real clinic dataset.
+// Types — mirrors the columns in the real clinic dataset:
+//   Company Name, Street, City, State, Zip Code, Phone, Website, Accepts,
+//   Income, Fees, Languages Spoken, Services include, Hours, Service Area,
+//   Lat, Long
 // ---------------------------------------------------------------------------
 interface Clinic {
-  slug: string;
-  name: string;
-  streetAddress: string;  // street line only (e.g. "1132 SW 13th Ave")
-  postalCode: string;
-  phone: string;
-  services: string[];
-  languages: string[];
-  feeStructure: string;   // e.g. "Sliding scale based on income"
-  insuranceAccepted: string[];
-  hours: string;          // human-readable summary
-  walkInPolicy: 'Walk-ins welcome' | 'Appointment needed' | 'Walk-ins for some services; call ahead';
+  slug: string;             // generated
+  name: string;             // ← Company Name
+  streetAddress: string;    // ← Street (street line only)
+  city: string;             // ← City
+  stateAbbr: string;        // ← State (2-letter)
+  postalCode: string;       // ← Zip Code
+  phone: string;            // ← Phone
+  website?: string;         // ← Website
+  // Stored as comma-separated strings in the source dataset; split at load time.
+  insuranceAccepted: string[]; // ← Accepts
+  languages: string[];         // ← Languages Spoken
+  services: string[];          // ← Services include
+  feeStructure: string;        // ← Fees
+  incomeEligibility?: string;  // ← Income
+  hours: string;               // ← Hours
+  serviceArea?: string;        // ← Service Area
+  lat?: number;                // ← Lat
+  long?: number;               // ← Long
 }
 
 interface FAQ {
@@ -38,15 +49,21 @@ interface FAQ {
 // ---------------------------------------------------------------------------
 // Sample data — Portland, OR women's health
 // ---------------------------------------------------------------------------
-// NOTE: These are illustrative sample listings used to develop the template.
-// They are not verified real-world clinic records.
+// Illustrative sample listings used to develop the template — websites and
+// coordinates are real, but field values should be re-verified before they
+// go live as part of the production dataset.
 const SAMPLE_CLINICS: Clinic[] = [
   {
     slug: 'outside-in-clinic-portland',
     name: 'Outside In Community Health Clinic',
     streetAddress: '1132 SW 13th Ave',
+    city: 'Portland',
+    stateAbbr: 'OR',
     postalCode: '97205',
     phone: '(503) 535-3800',
+    website: 'https://outsidein.org',
+    insuranceAccepted: ['Oregon Health Plan (Medicaid)', 'Most commercial insurance', 'Uninsured welcome'],
+    languages: ['English', 'Spanish'],
     services: [
       'Annual well-woman exams',
       'Pap smears & cervical cancer screening',
@@ -54,18 +71,24 @@ const SAMPLE_CLINICS: Clinic[] = [
       'Birth control counseling and prescriptions',
       'Pregnancy testing',
     ],
-    languages: ['English', 'Spanish'],
     feeStructure: 'Sliding scale based on income; no one turned away for inability to pay',
-    insuranceAccepted: ['Oregon Health Plan (Medicaid)', 'Most commercial insurance', 'Uninsured welcome'],
+    incomeEligibility: 'No income limit — everyone served on a sliding scale; lowest tier is free',
     hours: 'Mon–Thu 9:00 AM – 5:00 PM; Fri 9:00 AM – 1:00 PM',
-    walkInPolicy: 'Walk-ins for some services; call ahead',
+    serviceArea: 'Tri-county Portland metro (Multnomah, Washington, Clackamas)',
+    lat: 45.5208,
+    long: -122.6850,
   },
   {
-    slug: 'virginia-garcia-beaverton-womens-health',
-    name: 'Virginia Garcia Memorial Health Center — Women’s Health',
+    slug: 'virginia-garcia-se-division-portland',
+    name: 'Virginia Garcia Memorial Health Center — SE Division',
     streetAddress: '4209 SE Division St',
+    city: 'Portland',
+    stateAbbr: 'OR',
     postalCode: '97202',
     phone: '(503) 352-8800',
+    website: 'https://virginiagarcia.org',
+    insuranceAccepted: ['Oregon Health Plan', 'Medicare', 'Most commercial insurance', 'Uninsured patients'],
+    languages: ['English', 'Spanish', 'Vietnamese'],
     services: [
       'Prenatal and postpartum care',
       'Family planning and contraception',
@@ -73,18 +96,24 @@ const SAMPLE_CLINICS: Clinic[] = [
       'Breast exams and mammogram referrals',
       'Menopause care',
     ],
-    languages: ['English', 'Spanish', 'Vietnamese'],
     feeStructure: 'Sliding fee scale; discounts based on household size and income',
-    insuranceAccepted: ['Oregon Health Plan', 'Medicare', 'Most commercial insurance', 'Uninsured patients'],
+    incomeEligibility: 'Sliding scale available up to 200% of the Federal Poverty Level; everyone seen regardless',
     hours: 'Mon–Fri 8:00 AM – 5:00 PM; some evening appointments',
-    walkInPolicy: 'Appointment needed',
+    serviceArea: 'Multnomah, Washington, and Yamhill counties',
+    lat: 45.5046,
+    long: -122.6213,
   },
   {
     slug: 'planned-parenthood-ne-portland',
     name: 'Planned Parenthood — NE Portland Health Center',
     streetAddress: '3727 NE Martin Luther King Jr Blvd',
+    city: 'Portland',
+    stateAbbr: 'OR',
     postalCode: '97212',
     phone: '(503) 775-0145',
+    website: 'https://www.plannedparenthood.org/health-center/oregon/portland/97212/ne-portland-health-center-2540-91110',
+    insuranceAccepted: ['Oregon Health Plan', 'Most commercial insurance', 'Uninsured patients'],
+    languages: ['English', 'Spanish'],
     services: [
       'Birth control (pills, IUDs, implants, injections)',
       'STI testing and treatment',
@@ -93,11 +122,12 @@ const SAMPLE_CLINICS: Clinic[] = [
       'Pregnancy testing and options counseling',
       'Emergency contraception',
     ],
-    languages: ['English', 'Spanish'],
     feeStructure: 'Sliding scale based on income; many services free for those who qualify',
-    insuranceAccepted: ['Oregon Health Plan', 'Most commercial insurance', 'Uninsured patients'],
+    incomeEligibility: 'Free or reduced cost via Oregon Reproductive Health Program for those under 250% FPL',
     hours: 'Tue–Sat 9:00 AM – 5:30 PM',
-    walkInPolicy: 'Appointment needed',
+    serviceArea: 'Open to all patients — no county restriction',
+    lat: 45.5478,
+    long: -122.6628,
   },
 ];
 
@@ -129,22 +159,11 @@ const SAMPLE_FAQS: FAQ[] = [
 // ---------------------------------------------------------------------------
 const { state, city, service } = Astro.params;
 
-function toTitleCase(s: string): string {
-  return s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-const STATE_ABBR: Record<string, string> = {
-  oregon: 'OR',
-  texas: 'TX',
-  georgia: 'GA',
-};
-
-const titleState     = toTitleCase(state);
+const stateInfo      = getState(state);
+const stateAbbr      = stateInfo?.abbr ?? state.toUpperCase();
+const stateName      = stateInfo?.name ?? toTitleCase(state);
 const titleCity      = toTitleCase(city);
-const titleService   = toTitleCase(service); // e.g. "Womens Health"
-const stateAbbr      = STATE_ABBR[state] ?? titleState;
-// Display-friendly variant ("Women's Health" rather than "Womens Health")
-const displayService = titleService.replace(/\bWomens\b/, "Women's");
+const displayService = getServiceDisplayName(service);
 
 const h1            = `Free & Low-Cost ${displayService} Clinics in ${titleCity}, ${stateAbbr}`;
 const pageTitle     = `${h1} | freeclinics.us`;
@@ -155,26 +174,39 @@ const lastVerified  = '2026-05-01';
 // ---------------------------------------------------------------------------
 // JSON-LD structured data
 // ---------------------------------------------------------------------------
-const medicalBusinessJsonLd = SAMPLE_CLINICS.map((clinic) => ({
-  '@context': 'https://schema.org',
-  '@type': 'MedicalBusiness',
-  name: clinic.name,
-  telephone: clinic.phone,
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: clinic.streetAddress,
-    addressLocality: titleCity,
-    addressRegion: stateAbbr,
-    postalCode: clinic.postalCode,
-    addressCountry: 'US',
-  },
-  availableService: clinic.services.map((s) => ({
-    '@type': 'MedicalProcedure',
-    name: s,
-  })),
-  url: `https://freeclinics.us/clinic/${clinic.slug}/`,
-  priceRange: 'Free / Sliding scale',
-}));
+const medicalBusinessJsonLd = SAMPLE_CLINICS.map((clinic) => {
+  const data: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalBusiness',
+    name: clinic.name,
+    telephone: clinic.phone,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: clinic.streetAddress,
+      addressLocality: clinic.city,
+      addressRegion: clinic.stateAbbr,
+      postalCode: clinic.postalCode,
+      addressCountry: 'US',
+    },
+    availableService: clinic.services.map((s) => ({
+      '@type': 'MedicalProcedure',
+      name: s,
+    })),
+    url: `https://freeclinics.us/clinic/${clinic.slug}/`,
+    priceRange: 'Free / Sliding scale',
+  };
+  if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
+    data.geo = {
+      '@type': 'GeoCoordinates',
+      latitude: clinic.lat,
+      longitude: clinic.long,
+    };
+  }
+  if (clinic.website) {
+    data.sameAs = [clinic.website];
+  }
+  return data;
+});
 
 const faqJsonLd = {
   '@context': 'https://schema.org',
@@ -206,8 +238,8 @@ const faqJsonLd = {
           {' '}{displayService.toLowerCase()} care. The clinics listed below offer free
           or sliding-scale services — meaning what you pay is based on your income, not a
           fixed price. This page covers how that pricing actually works, what to bring to
-          your first appointment, and a verified list of clinics in {titleCity} that
-          provide {displayService.toLowerCase()} services.
+          your first appointment, and a verified list of clinics in {titleCity},{' '}
+          {stateName} that provide {displayService.toLowerCase()} services.
         </p>
       </header>
 
@@ -244,8 +276,14 @@ const faqJsonLd = {
             <li class="clinic-card">
               <h3>{clinic.name}</h3>
               <p class="clinic-meta">
-                <span>{clinic.streetAddress}, {titleCity}, {stateAbbr} {clinic.postalCode}</span> ·{' '}
+                <span>{clinic.streetAddress}, {clinic.city}, {clinic.stateAbbr} {clinic.postalCode}</span> ·{' '}
                 <a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`}>{clinic.phone}</a>
+                {clinic.website && (
+                  <>
+                    {' '}·{' '}
+                    <a href={clinic.website} rel="noopener" target="_blank">Website</a>
+                  </>
+                )}
               </p>
 
               <dl class="clinic-details">
@@ -262,14 +300,25 @@ const faqJsonLd = {
                 <dt>Fee structure</dt>
                 <dd>{clinic.feeStructure}</dd>
 
+                {clinic.incomeEligibility && (
+                  <>
+                    <dt>Income eligibility</dt>
+                    <dd>{clinic.incomeEligibility}</dd>
+                  </>
+                )}
+
                 <dt>Insurance accepted</dt>
                 <dd>{clinic.insuranceAccepted.join('; ')}</dd>
 
                 <dt>Hours</dt>
                 <dd>{clinic.hours}</dd>
 
-                <dt>Walk-ins</dt>
-                <dd>{clinic.walkInPolicy}</dd>
+                {clinic.serviceArea && (
+                  <>
+                    <dt>Service area</dt>
+                    <dd>{clinic.serviceArea}</dd>
+                  </>
+                )}
               </dl>
             </li>
           ))}

@@ -1,0 +1,21 @@
+Two cleanup tasks on the service+location template. Keep SAMPLE_CLINICS hardcoded — do not wire up a database yet. Just expand the sample objects to include new fields.
+1. Fix the Clinic interface to match the real clinic dataset. The dataset has these columns: Company Name, Street, City, State, Zip Code, Phone, Website, Accepts, Income, Fees, Languages Spoken, Services include, Hours, Service Area, Lat, Long. Update the Clinic interface to this shape:
+
+slug (generated), name (← Company Name), streetAddress (← Street, street line only), city (← City), stateAbbr (← State, 2-letter), postalCode (← Zip Code), phone (← Phone)
+website? (← Website) — optional
+services: string[] (← Services include), languages: string[] (← Languages Spoken), insuranceAccepted: string[] (← Accepts) — note: the real dataset stores these three as comma-separated strings; they'll be split at load time later, keep them as arrays here
+feeStructure (← Fees), incomeEligibility? (← Income) — optional
+hours (← Hours)
+serviceArea? (← Service Area) — optional
+lat?: number, long?: number (← Lat, Long) — optional
+Remove walkInPolicy — the dataset has no source for it. (If you want to keep it, make it walkInPolicy?: string optional and only render the row when present — but removing is fine.)
+
+Update the three SAMPLE_CLINICS objects to include the new fields with realistic values (real Portland websites, lat/long, and income-eligibility text). Update the clinic card to render website (as a link), incomeEligibility, and serviceArea when present, and to use clinic.city/clinic.stateAbbr instead of the URL-derived values.
+2. Add a shared constants file at src/lib/constants.ts exporting:
+
+US_STATES — a map of every state slug → { abbr, name }, covering all 50 states, DC, and the territories the dataset includes (Puerto Rico, Guam, US Virgin Islands, American Samoa, Northern Mariana Islands)
+SERVICE_NAMES — a map of service slug → display name, covering at least: womens-health → Women's Health, ob-gyn → OB-GYN, blood-pressure-screening → Blood Pressure Screening, x-ray → X-Ray, std-testing → STD Testing, covid-19-testing → COVID-19 Testing, medical → Medical, pregnancy → Pregnancy, immunizations → Immunizations, cholesterol-screening → Cholesterol Screening, hepatitis-c-testing → Hepatitis C Testing, family-planning → Family Planning, diabetes-screening → Diabetes Screening, physical-therapy → Physical Therapy, primary-care → Primary Care, urgent-care → Urgent Care, dental → Dental — with a sensible title-case fallback for any slug not in the map.
+
+Replace the inline STATE_ABBR map and the displayService regex hack in the template with lookups from these constants. Keep toTitleCase only for the city name.
+3. Enrich the MedicalBusiness JSON-LD: add a geo property (GeoCoordinates with latitude/longitude) when the clinic has lat/long, and add sameAs: [clinic.website] when the clinic has a website. Keep url pointing at the freeclinics.us clinic page.
+After building, run astro build and show me: the updated Clinic interface, one full SAMPLE_CLINICS object, the contents of src/lib/constants.ts, and the JSON-LD block from the generated dist/oregon/portland/womens-health/index.html.

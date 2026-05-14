@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { getState, getServiceDisplayName, toTitleCase } from '../../../../lib/constants';
+import type { Clinic, FAQ } from '../../../../lib/types';
 
 // ---------------------------------------------------------------------------
 // Routes
@@ -12,38 +13,6 @@ export function getStaticPaths() {
     { params: { state: 'texas',  city: 'houston',  service: 'blood-pressure-screening' } },
     { params: { state: 'oregon', city: 'portland', service: 'womens-health' } },
   ];
-}
-
-// ---------------------------------------------------------------------------
-// Types — mirrors the columns in the real clinic dataset:
-//   Company Name, Street, City, State, Zip Code, Phone, Website, Accepts,
-//   Income, Fees, Languages Spoken, Services include, Hours, Service Area,
-//   Lat, Long
-// ---------------------------------------------------------------------------
-interface Clinic {
-  slug: string;             // generated
-  name: string;             // ← Company Name
-  streetAddress: string;    // ← Street (street line only)
-  city: string;             // ← City
-  stateAbbr: string;        // ← State (2-letter)
-  postalCode: string;       // ← Zip Code
-  phone: string;            // ← Phone
-  website?: string;         // ← Website
-  // Stored as comma-separated strings in the source dataset; split at load time.
-  insuranceAccepted: string[]; // ← Accepts
-  languages: string[];         // ← Languages Spoken
-  services: string[];          // ← Services include
-  feeStructure: string;        // ← Fees
-  incomeEligibility?: string;  // ← Income
-  hours: string;               // ← Hours
-  serviceArea?: string;        // ← Service Area
-  lat?: number;                // ← Lat
-  long?: number;               // ← Long
-}
-
-interface FAQ {
-  question: string;
-  answer: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -59,6 +28,8 @@ const SAMPLE_CLINICS: Clinic[] = [
     streetAddress: '1132 SW 13th Ave',
     city: 'Portland',
     stateAbbr: 'OR',
+    stateSlug: 'oregon',
+    citySlug: 'portland',
     postalCode: '97205',
     phone: '(503) 535-3800',
     website: 'https://outsidein.org',
@@ -84,6 +55,8 @@ const SAMPLE_CLINICS: Clinic[] = [
     streetAddress: '4209 SE Division St',
     city: 'Portland',
     stateAbbr: 'OR',
+    stateSlug: 'oregon',
+    citySlug: 'portland',
     postalCode: '97202',
     phone: '(503) 352-8800',
     website: 'https://virginiagarcia.org',
@@ -109,6 +82,8 @@ const SAMPLE_CLINICS: Clinic[] = [
     streetAddress: '3727 NE Martin Luther King Jr Blvd',
     city: 'Portland',
     stateAbbr: 'OR',
+    stateSlug: 'oregon',
+    citySlug: 'portland',
     postalCode: '97212',
     phone: '(503) 775-0145',
     website: 'https://www.plannedparenthood.org/health-center/oregon/portland/97212/ne-portland-health-center-2540-91110',

@@ -1,44 +1,56 @@
-# [Project name]
+# Free Clinics US
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A static, SEO-focused directory of free and low-cost health clinics in the United States, served as fully pre-rendered HTML via Astro.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/freeclinics run dev` — run the Astro dev server
+- `pnpm --filter @workspace/freeclinics run build` — build static HTML to `artifacts/freeclinics/dist/`
+- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000, not used by the static site yet)
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Frontend: Astro 5 (`output: 'static'`) — fully pre-rendered HTML, no client-side framework
+- API: Express 5 (exists in workspace, not yet wired to the static site)
+- DB: PostgreSQL + Drizzle ORM (exists in workspace, not yet used)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/freeclinics/` — the Astro site package (`@workspace/freeclinics`)
+- `artifacts/freeclinics/astro.config.mjs` — Astro config (output: static, site: https://freeclinics.us)
+- `artifacts/freeclinics/src/layouts/BaseLayout.astro` — base HTML layout with head, title, meta description, viewport, canonical
+- `artifacts/freeclinics/src/pages/` — file-based routing:
+  - `index.astro` → `/`
+  - `[state]/[city]/index.astro` → `/georgia/atlanta/` (city hub)
+  - `[state]/[city]/[service]/index.astro` → `/texas/houston/blood-pressure-screening/` (service + location)
+  - `clinic/[slug]/index.astro` → `/clinic/example-clinic/` (clinic detail)
+- `artifacts/freeclinics/dist/` — static build output (plain `.html` files, no JS bundles)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- **No client-side framework** — Astro with `output: 'static'` produces plain HTML with zero JS overhead. Critical for SEO, especially for a directory site that previously suffered from CSR.
+- **`getStaticPaths()` per route** — each dynamic route declares its own path set. When real data exists, these functions will query the DB at build time via Drizzle.
+- **Canonical URLs baked in at build time** — `BaseLayout` accepts a `canonicalUrl` prop so every page's canonical is set statically, not derived from `window.location`.
+- **`site` set in `astro.config.mjs`** — enables Astro's sitemap integration and ensures absolute URLs are correct in production.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Static HTML directory of free/low-cost US health clinics, SEO-optimized with unique titles, descriptions, and canonical tags per page.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Static output only (`output: 'static'`), no SSR
+- No UI framework integration (no React, Vue, Svelte, etc.)
+- TypeScript throughout
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Always re-run `astro build` after adding new routes — the static site is not auto-rebuilt on file changes in production.
+- `getStaticPaths()` is the gating function for each dynamic route. Pages not returned from it will NOT be built.
+- The `dist/` output is flat HTML — no JS bundles. Do not add framework integrations without confirming the SEO strategy.
+- `pnpm --filter @workspace/freeclinics run typecheck` runs `astro check` (not `tsc --noEmit`), which type-checks `.astro` files.
 
 ## Pointers
 

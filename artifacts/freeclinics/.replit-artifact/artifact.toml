@@ -1,0 +1,26 @@
+kind = "web"
+previewPath = "/"
+title = "Free Clinics US"
+version = "1.0.0"
+id = "artifacts/freeclinics"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22639
+
+[services.development]
+run = "pnpm --filter @workspace/freeclinics run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/freeclinics", "run", "build" ]
+publicDir = "artifacts/freeclinics/dist"
+serve = "static"
+
+[services.env]
+PORT = "22639"

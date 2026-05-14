@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export function getStaticPaths() {
+  return [
+    { params: { state: 'georgia', city: 'atlanta' } },
+  ];
+}
+
+const { state, city } = Astro.params;
+
+function toTitleCase(s: string): string {
+  return s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const titleState = toTitleCase(state);
+const titleCity  = toTitleCase(city);
+const title       = `Free Clinics in ${titleCity}, ${titleState} | freeclinics.us`;
+const description = `Find free and low-cost health clinics in ${titleCity}, ${titleState}. Browse by service type.`;
+const canonicalUrl = `https://freeclinics.us/${state}/${city}/`;
+---
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+  <h1>Free Clinics in {titleCity}, {titleState}</h1>
+  <p>This is the city hub page for {titleCity}, {titleState}. A full directory of free and low-cost clinics will appear here.</p>
+</BaseLayout>

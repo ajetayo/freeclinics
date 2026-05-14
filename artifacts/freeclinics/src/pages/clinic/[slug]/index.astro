@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+export function getStaticPaths() {
+  return [
+    { params: { slug: 'example-clinic' } },
+  ];
+}
+
+const { slug } = Astro.params;
+
+function toTitleCase(s: string): string {
+  return s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const clinicName   = toTitleCase(slug);
+const title        = `${clinicName} — Free Clinic | freeclinics.us`;
+const description  = `Get hours, address, services, and contact information for ${clinicName}, a free or low-cost health clinic.`;
+const canonicalUrl = `https://freeclinics.us/clinic/${slug}/`;
+---
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+  <h1>{clinicName}</h1>
+  <p>This is the clinic detail page for <strong>{clinicName}</strong>. Full clinic information — address, hours, services, and contact details — will appear here.</p>
+</BaseLayout>

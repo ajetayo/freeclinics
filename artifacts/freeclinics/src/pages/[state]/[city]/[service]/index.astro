@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+
+export function getStaticPaths() {
+  return [
+    { params: { state: 'texas', city: 'houston', service: 'blood-pressure-screening' } },
+  ];
+}
+
+const { state, city, service } = Astro.params;
+
+function toTitleCase(s: string): string {
+  return s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const titleState   = toTitleCase(state);
+const titleCity    = toTitleCase(city);
+const titleService = toTitleCase(service);
+
+const title        = `${titleService} in ${titleCity}, ${titleState} — Free Clinics | freeclinics.us`;
+const description  = `Find free ${titleService.toLowerCase()} services in ${titleCity}, ${titleState}. No-cost and low-cost options near you.`;
+const canonicalUrl = `https://freeclinics.us/${state}/${city}/${service}/`;
+---
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+  <h1>{titleService} in {titleCity}, {titleState}</h1>
+  <p>This is the service + location page for <strong>{titleService}</strong> in {titleCity}, {titleState}. Matching clinics will be listed here.</p>
+</BaseLayout>

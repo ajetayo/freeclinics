@@ -15,6 +15,7 @@ const { title, description, canonicalUrl } = Astro.props;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
+    <slot name="head" />
   </head>
   <body>
     <slot />

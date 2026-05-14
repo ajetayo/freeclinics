@@ -1,0 +1,16 @@
+Now build the real template for service + location pages, using /oregon/portland/womens-health/ as the working example. Use hardcoded sample data for now — do not wire up a database or getStaticPaths data source yet. This step is about getting the page structure and schema right.
+Replace the placeholder [state]/[city]/[service]/index.astro with a real template that renders these sections in order:
+
+H1 + intro — H1 like "Free & Low-Cost Women's Health Clinics in Portland, OR". One short paragraph that directly answers the query: how someone uninsured or underinsured can get women's health care in Portland, and what this page covers.
+"How free and low-cost care works" explainer — 2–3 short paragraphs in plain language: what a sliding-scale fee actually means, that "free clinic" can still involve income-based fees, and what documents to typically bring (ID, proof of income, proof of address). This is the eligibility/cost content that makes the page genuinely useful.
+Clinic list — render from a hardcoded array of 3 sample clinics. Each clinic card shows: name, address, phone, services offered, languages spoken, fee structure (e.g. "Sliding scale based on income"), insurance accepted, hours, and a "walk-in" or "appointment needed" note. Make the sample data realistic in shape — these fields map to the columns in the clinic dataset we'll wire in later.
+Short FAQ — 3–4 Q&As relevant to the query (e.g. "Can I get a Pap smear if I don't have insurance?", "Do I need to be a US citizen?").
+"Last verified" line + editorial note — a visible "Listings last verified: [date]" line and one sentence on how listings are maintained.
+
+Add structured data in the <head> (via the layout or page):
+
+MedicalBusiness JSON-LD for each clinic in the list
+FAQPage JSON-LD for the FAQ section
+Make sure the existing canonical tag and meta description are populated for this page
+
+Keep styling minimal and clean — semantic HTML, readable, no CSS framework needed yet. After building, run astro build and show me: the full template file, and the generated dist/oregon/portland/womens-health/index.html so I can verify the rendered HTML and the JSON-LD.

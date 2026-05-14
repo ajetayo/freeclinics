@@ -1,27 +1,320 @@
 ---
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 
+// ---------------------------------------------------------------------------
+// Routes
+// ---------------------------------------------------------------------------
+// Hardcoded for now. When the DB is wired in, replace this with a query that
+// returns one entry per real (state, city, service) combination.
 export function getStaticPaths() {
   return [
-    { params: { state: 'texas', city: 'houston', service: 'blood-pressure-screening' } },
+    { params: { state: 'texas',  city: 'houston',  service: 'blood-pressure-screening' } },
+    { params: { state: 'oregon', city: 'portland', service: 'womens-health' } },
   ];
 }
 
+// ---------------------------------------------------------------------------
+// Types — mirrors the columns we expect in the real clinic dataset.
+// ---------------------------------------------------------------------------
+interface Clinic {
+  slug: string;
+  name: string;
+  streetAddress: string;  // street line only (e.g. "1132 SW 13th Ave")
+  postalCode: string;
+  phone: string;
+  services: string[];
+  languages: string[];
+  feeStructure: string;   // e.g. "Sliding scale based on income"
+  insuranceAccepted: string[];
+  hours: string;          // human-readable summary
+  walkInPolicy: 'Walk-ins welcome' | 'Appointment needed' | 'Walk-ins for some services; call ahead';
+}
+
+interface FAQ {
+  question: string;
+  answer: string;
+}
+
+// ---------------------------------------------------------------------------
+// Sample data — Portland, OR women's health
+// ---------------------------------------------------------------------------
+// NOTE: These are illustrative sample listings used to develop the template.
+// They are not verified real-world clinic records.
+const SAMPLE_CLINICS: Clinic[] = [
+  {
+    slug: 'outside-in-clinic-portland',
+    name: 'Outside In Community Health Clinic',
+    streetAddress: '1132 SW 13th Ave',
+    postalCode: '97205',
+    phone: '(503) 535-3800',
+    services: [
+      'Annual well-woman exams',
+      'Pap smears & cervical cancer screening',
+      'STI testing & treatment',
+      'Birth control counseling and prescriptions',
+      'Pregnancy testing',
+    ],
+    languages: ['English', 'Spanish'],
+    feeStructure: 'Sliding scale based on income; no one turned away for inability to pay',
+    insuranceAccepted: ['Oregon Health Plan (Medicaid)', 'Most commercial insurance', 'Uninsured welcome'],
+    hours: 'Mon–Thu 9:00 AM – 5:00 PM; Fri 9:00 AM – 1:00 PM',
+    walkInPolicy: 'Walk-ins for some services; call ahead',
+  },
+  {
+    slug: 'virginia-garcia-beaverton-womens-health',
+    name: 'Virginia Garcia Memorial Health Center — Women’s Health',
+    streetAddress: '4209 SE Division St',
+    postalCode: '97202',
+    phone: '(503) 352-8800',
+    services: [
+      'Prenatal and postpartum care',
+      'Family planning and contraception',
+      'Pap smears and HPV testing',
+      'Breast exams and mammogram referrals',
+      'Menopause care',
+    ],
+    languages: ['English', 'Spanish', 'Vietnamese'],
+    feeStructure: 'Sliding fee scale; discounts based on household size and income',
+    insuranceAccepted: ['Oregon Health Plan', 'Medicare', 'Most commercial insurance', 'Uninsured patients'],
+    hours: 'Mon–Fri 8:00 AM – 5:00 PM; some evening appointments',
+    walkInPolicy: 'Appointment needed',
+  },
+  {
+    slug: 'planned-parenthood-ne-portland',
+    name: 'Planned Parenthood — NE Portland Health Center',
+    streetAddress: '3727 NE Martin Luther King Jr Blvd',
+    postalCode: '97212',
+    phone: '(503) 775-0145',
+    services: [
+      'Birth control (pills, IUDs, implants, injections)',
+      'STI testing and treatment',
+      'Pap smears and cervical screening',
+      'Breast exams',
+      'Pregnancy testing and options counseling',
+      'Emergency contraception',
+    ],
+    languages: ['English', 'Spanish'],
+    feeStructure: 'Sliding scale based on income; many services free for those who qualify',
+    insuranceAccepted: ['Oregon Health Plan', 'Most commercial insurance', 'Uninsured patients'],
+    hours: 'Tue–Sat 9:00 AM – 5:30 PM',
+    walkInPolicy: 'Appointment needed',
+  },
+];
+
+const SAMPLE_FAQS: FAQ[] = [
+  {
+    question: "Can I get a Pap smear in Portland if I don't have insurance?",
+    answer:
+      "Yes. Several Portland clinics — including Outside In, Virginia Garcia, and Planned Parenthood — offer Pap smears on a sliding-scale basis. The cost is determined by your household income, and some patients qualify for free screening through the Oregon Breast and Cervical Cancer Program.",
+  },
+  {
+    question: "Do I need to be a US citizen to be seen at a free or low-cost clinic?",
+    answer:
+      "No. Federally Qualified Health Centers and most community clinics in Oregon serve patients regardless of immigration status. You will not be asked about citizenship in order to receive care, and most clinics do not require a Social Security number.",
+  },
+  {
+    question: "What documents should I bring to my first appointment?",
+    answer:
+      "Most clinics ask for a photo ID (any government-issued ID is fine), proof of income for the most recent month (a pay stub, an unemployment letter, or a self-attestation form the clinic provides), and proof of address (a utility bill or piece of mail). If you have any insurance card, bring that too.",
+  },
+  {
+    question: "Is birth control actually free at these clinics?",
+    answer:
+      "Often, yes. Birth control — including IUDs and implants — is fully covered by the Oregon Health Plan, and most low-cost clinics provide it free or near-free to uninsured patients who qualify under the sliding fee scale.",
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Page-level data derived from params
+// ---------------------------------------------------------------------------
 const { state, city, service } = Astro.params;
 
 function toTitleCase(s: string): string {
   return s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const titleState   = toTitleCase(state);
-const titleCity    = toTitleCase(city);
-const titleService = toTitleCase(service);
+const STATE_ABBR: Record<string, string> = {
+  oregon: 'OR',
+  texas: 'TX',
+  georgia: 'GA',
+};
 
-const title        = `${titleService} in ${titleCity}, ${titleState} — Free Clinics | freeclinics.us`;
-const description  = `Find free ${titleService.toLowerCase()} services in ${titleCity}, ${titleState}. No-cost and low-cost options near you.`;
-const canonicalUrl = `https://freeclinics.us/${state}/${city}/${service}/`;
+const titleState     = toTitleCase(state);
+const titleCity      = toTitleCase(city);
+const titleService   = toTitleCase(service); // e.g. "Womens Health"
+const stateAbbr      = STATE_ABBR[state] ?? titleState;
+// Display-friendly variant ("Women's Health" rather than "Womens Health")
+const displayService = titleService.replace(/\bWomens\b/, "Women's");
+
+const h1            = `Free & Low-Cost ${displayService} Clinics in ${titleCity}, ${stateAbbr}`;
+const pageTitle     = `${h1} | freeclinics.us`;
+const description   = `Find free and low-cost ${displayService.toLowerCase()} clinics in ${titleCity}, ${stateAbbr}. Verified listings with hours, fees, languages, and walk-in info for uninsured and underinsured patients.`;
+const canonicalUrl  = `https://freeclinics.us/${state}/${city}/${service}/`;
+const lastVerified  = '2026-05-01';
+
+// ---------------------------------------------------------------------------
+// JSON-LD structured data
+// ---------------------------------------------------------------------------
+const medicalBusinessJsonLd = SAMPLE_CLINICS.map((clinic) => ({
+  '@context': 'https://schema.org',
+  '@type': 'MedicalBusiness',
+  name: clinic.name,
+  telephone: clinic.phone,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: clinic.streetAddress,
+    addressLocality: titleCity,
+    addressRegion: stateAbbr,
+    postalCode: clinic.postalCode,
+    addressCountry: 'US',
+  },
+  availableService: clinic.services.map((s) => ({
+    '@type': 'MedicalProcedure',
+    name: s,
+  })),
+  url: `https://freeclinics.us/clinic/${clinic.slug}/`,
+  priceRange: 'Free / Sliding scale',
+}));
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: SAMPLE_FAQS.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
 ---
-<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl}>
-  <h1>{titleService} in {titleCity}, {titleState}</h1>
-  <p>This is the service + location page for <strong>{titleService}</strong> in {titleCity}, {titleState}. Matching clinics will be listed here.</p>
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    {medicalBusinessJsonLd.map((data) => (
+      <script type="application/ld+json" set:html={JSON.stringify(data)} />
+    ))}
+    <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  </Fragment>
+
+  <main>
+    <article>
+      <header>
+        <h1>{h1}</h1>
+        <p>
+          If you are uninsured or underinsured in {titleCity}, you can still get
+          {' '}{displayService.toLowerCase()} care. The clinics listed below offer free
+          or sliding-scale services — meaning what you pay is based on your income, not a
+          fixed price. This page covers how that pricing actually works, what to bring to
+          your first appointment, and a verified list of clinics in {titleCity} that
+          provide {displayService.toLowerCase()} services.
+        </p>
+      </header>
+
+      <section aria-labelledby="how-it-works">
+        <h2 id="how-it-works">How free and low-cost care works</h2>
+        <p>
+          A "sliding-scale fee" means the clinic adjusts what you pay based on your
+          household income and family size. If you make very little, many visits and basic
+          services are free. If you earn more, you might pay $20–$60 for a visit instead
+          of the $200–$400 a private clinic would charge. You will be asked to fill out
+          a short form so the clinic can place you on the right tier.
+        </p>
+        <p>
+          The phrase "free clinic" can be misleading. Most "free" clinics are actually
+          sliding-scale clinics — completely free for the lowest income tier, and very
+          low cost for everyone else. A handful of clinics, usually volunteer-run, are
+          truly free for all patients regardless of income. Both kinds are listed here.
+        </p>
+        <p>
+          To get the lowest fee, bring three things to your first visit: a
+          <strong> photo ID</strong> (any government-issued ID), <strong>proof of income</strong>
+          {' '}(a recent pay stub, an unemployment award letter, or a clinic-provided
+          self-attestation form if you are paid in cash), and <strong>proof of address</strong>
+          {' '}(a utility bill or any piece of mail). If you do not have these, most
+          clinics will still see you — they just may charge you their standard sliding-scale
+          rate until you can verify income.
+        </p>
+      </section>
+
+      <section aria-labelledby="clinic-list">
+        <h2 id="clinic-list">{displayService} clinics in {titleCity}, {stateAbbr}</h2>
+        <ol class="clinic-list">
+          {SAMPLE_CLINICS.map((clinic) => (
+            <li class="clinic-card">
+              <h3>{clinic.name}</h3>
+              <p class="clinic-meta">
+                <span>{clinic.streetAddress}, {titleCity}, {stateAbbr} {clinic.postalCode}</span> ·{' '}
+                <a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`}>{clinic.phone}</a>
+              </p>
+
+              <dl class="clinic-details">
+                <dt>Services offered</dt>
+                <dd>
+                  <ul>
+                    {clinic.services.map((s) => (<li>{s}</li>))}
+                  </ul>
+                </dd>
+
+                <dt>Languages spoken</dt>
+                <dd>{clinic.languages.join(', ')}</dd>
+
+                <dt>Fee structure</dt>
+                <dd>{clinic.feeStructure}</dd>
+
+                <dt>Insurance accepted</dt>
+                <dd>{clinic.insuranceAccepted.join('; ')}</dd>
+
+                <dt>Hours</dt>
+                <dd>{clinic.hours}</dd>
+
+                <dt>Walk-ins</dt>
+                <dd>{clinic.walkInPolicy}</dd>
+              </dl>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section aria-labelledby="faq">
+        <h2 id="faq">Frequently asked questions</h2>
+        <dl class="faq">
+          {SAMPLE_FAQS.map((faq) => (
+            <>
+              <dt>{faq.question}</dt>
+              <dd>{faq.answer}</dd>
+            </>
+          ))}
+        </dl>
+      </section>
+
+      <footer class="page-footer">
+        <p><strong>Listings last verified:</strong> {lastVerified}</p>
+        <p class="editorial-note">
+          Listings on freeclinics.us are reviewed and re-verified by our editorial team
+          on a rolling basis. We confirm hours, services, and fee structure directly with
+          each clinic. If you spot something out of date, please let us know.
+        </p>
+      </footer>
+    </article>
+  </main>
 </BaseLayout>
+
+<style>
+  main { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 4rem; line-height: 1.55; color: #1a1a1a; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
+  h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.75rem; }
+  h2 { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; border-bottom: 1px solid #e5e5e5; padding-bottom: 0.25rem; }
+  h3 { font-size: 1.1rem; margin: 0 0 0.25rem; }
+  p { margin: 0.6rem 0; }
+  .clinic-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.25rem; }
+  .clinic-card { border: 1px solid #d9d9d9; border-radius: 6px; padding: 1rem 1.1rem; background: #fff; }
+  .clinic-meta { color: #555; font-size: 0.95rem; margin: 0 0 0.6rem; }
+  .clinic-details { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1rem; margin: 0; font-size: 0.95rem; }
+  .clinic-details dt { font-weight: 600; color: #333; }
+  .clinic-details dd { margin: 0; }
+  .clinic-details ul { margin: 0; padding-left: 1.1rem; }
+  .faq dt { font-weight: 600; margin-top: 1rem; }
+  .faq dd { margin: 0.25rem 0 0; }
+  .page-footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; font-size: 0.9rem; color: #555; }
+  .editorial-note { font-style: italic; }
+</style>

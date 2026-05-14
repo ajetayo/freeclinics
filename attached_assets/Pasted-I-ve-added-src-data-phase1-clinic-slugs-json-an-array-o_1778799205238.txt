@@ -1,0 +1,15 @@
+I've added src/data/phase1-clinic-slugs.json — an array of 301 clinic slugs (every clinic appearing on a Phase 1 service+location page). This step builds the clinic detail page and completes the cross-linking.
+1. First, extract the sliding-scale explainer into a shared component. The "How free and low-cost care works" section currently lives inline in [state]/[city]/[service]/index.astro. Move it into src/components/SlidingScaleExplainer.astro (it takes no props — it's generic copy) and use that component in the service+location template. The clinic page will use it too.
+2. Build the clinic detail template at clinic/[slug]/index.astro. getStaticPaths reads phase1-clinic-slugs.json, calls getClinicBySlug for each, and returns { params: { slug }, props: { clinic } }. If getClinicBySlug returns undefined for a slug, throw — fail the build loudly. Page sections in order:
+
+H1 + intro — H1 is the clinic name. One factual intro line built from the data: e.g. "[name] is a free or low-cost health clinic in [city], [stateAbbr]. This page covers the services it offers, who's eligible, what it costs, and how to visit." Don't over-claim — "free or low-cost", not "free".
+Visit & contact block — address, phone (tel: link), website (external link, only if present), hours. Include a "Get directions" link to Google Maps — use lat/long if present, otherwise the address string. Render each row only when the field has a value.
+Services offered — the full services list.
+Eligibility & cost — render the clinic's feeStructure and incomeEligibility (when present), then the <SlidingScaleExplainer /> component below them.
+Languages spoken, Insurance accepted, Service area — each rendered only when present.
+Last verified + editorial note — same pattern as the service+location page.
+
+Set <title>, meta description, and canonical (https://freeclinics.us/clinic/[slug]/) per clinic.
+3. JSON-LD: emit one MedicalClinic JSON-LD block with name, full PostalAddress, geo (when lat/long present), telephone (when present), sameAs: [website] (when present), and availableService from the services list. Conditionally include fields — never emit nulls.
+4. Cross-link the service pages: in the service+location template, make each clinic card's name link to that clinic's /clinic/[slug]/ page.
+After building, run astro build and show me: total page count and the clinic-page count (should be 301), build time, the full rendered dist/clinic/[one-slug]/index.html for a clinic that has all fields populated, the getStaticPaths block, and the SlidingScaleExplainer.astro component. Also confirm a clinic card on /oregon/portland/womens-health/ now links to a clinic page.

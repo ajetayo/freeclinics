@@ -1,24 +1,235 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.astro';
+import { getClinicBySlug } from '../../../lib/clinics';
+import { getState } from '../../../lib/constants';
+import type { Clinic } from '../../../lib/types';
+import phase1Slugs from '../../../data/phase1-clinic-slugs.json';
 
+// ---------------------------------------------------------------------------
+// Routes — Phase 1 clinic detail pages
+// ---------------------------------------------------------------------------
+// One static path per slug in phase1-clinic-slugs.json. We resolve each slug
+// to a full Clinic record at build time and pass it through as a prop. If a
+// slug doesn't resolve, fail loudly — we should never ship a clinic page
+// pointing at missing data.
 export function getStaticPaths() {
-  return [
-    { params: { slug: 'example-clinic' } },
-  ];
+  return (phase1Slugs as string[]).map((slug) => {
+    const clinic = getClinicBySlug(slug);
+    if (!clinic) {
+      throw new Error(
+        `clinic/[slug]: phase1-clinic-slugs.json references "${slug}" but ` +
+          `getClinicBySlug returned undefined. Either remove the slug from ` +
+          `phase1-clinic-slugs.json or add the clinic to clinics.json.`,
+      );
+    }
+    return {
+      params: { slug },
+      props: { clinic },
+    };
+  });
 }
 
-const { slug } = Astro.params;
+// ---------------------------------------------------------------------------
+// Page-level data
+// ---------------------------------------------------------------------------
+const { clinic } = Astro.props as { clinic: Clinic };
 
-function toTitleCase(s: string): string {
-  return s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const stateInfo  = getState(clinic.stateSlug);
+const stateName  = stateInfo?.name ?? clinic.stateAbbr;
+
+const pageTitle    = `${clinic.name} — Free or Low-Cost Clinic in ${clinic.city}, ${clinic.stateAbbr} | freeclinics.us`;
+const description  = `${clinic.name} is a free or low-cost health clinic in ${clinic.city}, ${clinic.stateAbbr}. Hours, services, eligibility, fees, and contact information.`;
+const canonicalUrl = `https://freeclinics.us/clinic/${clinic.slug}/`;
+const lastVerified = '2026-05-01';
+
+// Google Maps directions link — prefer lat/long when present (more accurate),
+// fall back to the address string otherwise.
+const directionsHref = (() => {
+  if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
+    return `https://www.google.com/maps/dir/?api=1&destination=${clinic.lat},${clinic.long}`;
+  }
+  const addressParts = [clinic.streetAddress, clinic.city, clinic.stateAbbr, clinic.postalCode].filter(Boolean);
+  if (addressParts.length === 0) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addressParts.join(', '))}`;
+})();
+
+const fullAddress = [clinic.streetAddress, clinic.city, clinic.stateAbbr]
+  .filter(Boolean)
+  .join(', ') + (clinic.postalCode ? ` ${clinic.postalCode}` : '');
+
+// ---------------------------------------------------------------------------
+// JSON-LD structured data — single MedicalClinic block
+// ---------------------------------------------------------------------------
+const medicalClinicJsonLd: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'MedicalClinic',
+  name: clinic.name,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: clinic.streetAddress ?? undefined,
+    addressLocality: clinic.city,
+    addressRegion: clinic.stateAbbr,
+    postalCode: clinic.postalCode ?? undefined,
+    addressCountry: 'US',
+  },
+  url: canonicalUrl,
+  priceRange: 'Free / Sliding scale',
+};
+if (clinic.phone) {
+  medicalClinicJsonLd.telephone = clinic.phone;
 }
-
-const clinicName   = toTitleCase(slug);
-const title        = `${clinicName} — Free Clinic | freeclinics.us`;
-const description  = `Get hours, address, services, and contact information for ${clinicName}, a free or low-cost health clinic.`;
-const canonicalUrl = `https://freeclinics.us/clinic/${slug}/`;
+if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
+  medicalClinicJsonLd.geo = {
+    '@type': 'GeoCoordinates',
+    latitude: clinic.lat,
+    longitude: clinic.long,
+  };
+}
+if (clinic.website) {
+  medicalClinicJsonLd.sameAs = [clinic.website];
+}
+if (clinic.services.length > 0) {
+  medicalClinicJsonLd.availableService = clinic.services.map((s) => ({
+    '@type': 'MedicalProcedure',
+    name: s,
+  }));
+}
+// Strip undefined fields from the address sub-object so we never emit "key": null/undefined.
+const addr = medicalClinicJsonLd.address as Record<string, unknown>;
+for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
 ---
-<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl}>
-  <h1>{clinicName}</h1>
-  <p>This is the clinic detail page for <strong>{clinicName}</strong>. Full clinic information — address, hours, services, and contact details — will appear here.</p>
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(medicalClinicJsonLd)} />
+  </Fragment>
+
+  <main>
+    <article>
+      <header>
+        <h1>{clinic.name}</h1>
+        <p class="intro">
+          {clinic.name} is a free or low-cost health clinic in {clinic.city},{' '}
+          {stateName}. This page covers the services it offers, who is
+          eligible, what it costs, and how to visit.
+        </p>
+      </header>
+
+      <section aria-labelledby="visit-contact">
+        <h2 id="visit-contact">Visit &amp; contact</h2>
+        <dl class="contact-details">
+          {(clinic.streetAddress || clinic.city) && (
+            <>
+              <dt>Address</dt>
+              <dd>
+                {fullAddress}
+                {directionsHref && (
+                  <>
+                    {' '}—{' '}
+                    <a href={directionsHref} rel="noopener" target="_blank">Get directions</a>
+                  </>
+                )}
+              </dd>
+            </>
+          )}
+
+          {clinic.phone && (
+            <>
+              <dt>Phone</dt>
+              <dd><a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`}>{clinic.phone}</a></dd>
+            </>
+          )}
+
+          {clinic.website && (
+            <>
+              <dt>Website</dt>
+              <dd><a href={clinic.website} rel="noopener" target="_blank">{clinic.website}</a></dd>
+            </>
+          )}
+
+          {clinic.hours && (
+            <>
+              <dt>Hours</dt>
+              <dd>{clinic.hours}</dd>
+            </>
+          )}
+        </dl>
+      </section>
+
+      {clinic.services.length > 0 && (
+        <section aria-labelledby="services">
+          <h2 id="services">Services offered</h2>
+          <ul class="services-list">
+            {clinic.services.map((s) => (<li>{s}</li>))}
+          </ul>
+        </section>
+      )}
+
+      <section aria-labelledby="eligibility-cost">
+        <h2 id="eligibility-cost">Eligibility &amp; cost</h2>
+        <dl class="eligibility-details">
+          {clinic.feeStructure && (
+            <>
+              <dt>Fee structure</dt>
+              <dd>{clinic.feeStructure}</dd>
+            </>
+          )}
+          {clinic.incomeEligibility && (
+            <>
+              <dt>Income eligibility</dt>
+              <dd>{clinic.incomeEligibility}</dd>
+            </>
+          )}
+        </dl>
+        <SlidingScaleExplainer />
+      </section>
+
+      {clinic.languages.length > 0 && (
+        <section aria-labelledby="languages">
+          <h2 id="languages">Languages spoken</h2>
+          <p>{clinic.languages.join(', ')}</p>
+        </section>
+      )}
+
+      {clinic.insuranceAccepted.length > 0 && (
+        <section aria-labelledby="insurance">
+          <h2 id="insurance">Insurance accepted</h2>
+          <p>{clinic.insuranceAccepted.join('; ')}</p>
+        </section>
+      )}
+
+      {clinic.serviceArea && (
+        <section aria-labelledby="service-area">
+          <h2 id="service-area">Service area</h2>
+          <p>{clinic.serviceArea}</p>
+        </section>
+      )}
+
+      <footer class="page-footer">
+        <p><strong>Listings last verified:</strong> {lastVerified}</p>
+        <p class="editorial-note">
+          Listings on freeclinics.us are reviewed and re-verified by our editorial team
+          on a rolling basis. We confirm hours, services, and fee structure directly with
+          each clinic. If you spot something out of date, please let us know.
+        </p>
+      </footer>
+    </article>
+  </main>
 </BaseLayout>
+
+<style>
+  main { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 4rem; line-height: 1.55; color: #1a1a1a; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
+  h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.75rem; }
+  h2 { font-size: 1.3rem; margin: 2rem 0 0.6rem; border-bottom: 1px solid #e5e5e5; padding-bottom: 0.25rem; }
+  p { margin: 0.55rem 0; }
+  .intro { font-size: 1.05rem; color: #333; }
+  .contact-details, .eligibility-details { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1rem; margin: 0; font-size: 0.97rem; }
+  .contact-details dt, .eligibility-details dt { font-weight: 600; color: #333; }
+  .contact-details dd, .eligibility-details dd { margin: 0; }
+  .services-list { margin: 0; padding-left: 1.2rem; }
+  .services-list li { margin: 0.15rem 0; }
+  .sliding-scale-explainer { margin-top: 1.25rem; }
+  .sliding-scale-explainer h2 { font-size: 1.1rem; border-bottom: none; padding-bottom: 0; margin-top: 1.25rem; }
+  .page-footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; font-size: 0.9rem; color: #555; }
+  .editorial-note { font-style: italic; }
+</style>

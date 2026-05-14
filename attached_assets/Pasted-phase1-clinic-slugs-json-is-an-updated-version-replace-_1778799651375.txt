@@ -1,0 +1,20 @@
+phase1-clinic-slugs.json is an updated version — replace the existing file in src/data/; the slug count goes 301 → 560. phase1-cities.json is new — the 12 metros, each with cityName, stateAbbr, clinicCount, and servicePages (which service slugs have a page in that city).
+One thing in that file to handle: Fort Lauderdale has servicePages: [] — none of the 20 service+location combos landed there, so its hub has no service pages to link. The template needs to handle an empty servicePages gracefully.
+Here's prompt 7 — the last template:
+
+I've updated src/data/phase1-clinic-slugs.json (now 560 slugs — every clinic in the 12 Phase 1 metros; rebuild the clinic pages against it) and added src/data/phase1-cities.json — an array of 12 cities, each with stateSlug, citySlug, cityName, stateAbbr, clinicCount, servicePages (an array of service slugs that have a page in that city).
+Build the city hub template at [state]/[city]/index.astro, replacing the placeholder. getStaticPaths reads phase1-cities.json, one path per city, passing the city object as props. Sections in order:
+
+H1 + intro — H1: "Free & Low-Cost Clinics in [cityName], [stateAbbr]". Intro line stating how many clinics the page covers and what's on it.
+Browse by service — for each slug in servicePages, a link to /[state]/[city]/[service]/ labelled with getServiceDisplayName(slug). If servicePages is empty, omit this section entirely (don't render an empty heading).
+All clinics in [cityName] — call getClinicsByCityState(stateSlug, citySlug), sort alphabetically by name, render each as a link to /clinic/[slug]/ with its address. Every clinic in these cities has a detail page, so every entry links.
+Other ways to find care — render the <SlidingScaleExplainer /> component, then one short paragraph pointing people to 211 (dial 2-1-1) and their county health department as other options. Keep it generic — no city-specific claims.
+Last verified + editorial note — same pattern as the other templates.
+
+Set <title>, meta description, and canonical (https://freeclinics.us/[state]/[city]/) per city. Emit a minimal BreadcrumbList JSON-LD: Home → [cityName] (two items; don't add a state level — there's no state page).
+Then complete the cross-linking — now that city hubs exist, both other templates should link back:
+
+On the service+location page, add a link back to its city hub (/[state]/[city]/).
+On the clinic page, add a link to the clinic's city hub. Every Phase 1 clinic is in one of the 12 metros, so this always resolves — but guard it anyway: only render the link if the clinic's stateSlug/citySlug matches a city in phase1-cities.json.
+
+After building, run astro build and show me: total page count (should now be ~593 — 1 home + 12 hubs + 20 service + 560 clinic), build time, the rendered dist/oregon/portland/index.html (Portland hub — service links + clinic links + explainer), the rendered dist/florida/fort-lauderdale/index.html (confirm the "Browse by service" section is cleanly absent), and confirm a service+location page and a clinic page now link back to their city hub.

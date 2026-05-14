@@ -5,6 +5,15 @@ import { getClinicBySlug } from '../../../lib/clinics';
 import { getState } from '../../../lib/constants';
 import type { Clinic } from '../../../lib/types';
 import phase1Slugs from '../../../data/phase1-clinic-slugs.json';
+import phase1Cities from '../../../data/phase1-cities.json';
+
+// Set of "stateSlug/citySlug" keys for the Phase 1 cities that have hub pages.
+// Used at render time to decide whether to show the "All clinics in <city>" backlink.
+const PHASE1_CITY_KEYS = new Set(
+  (phase1Cities as Array<{ stateSlug: string; citySlug: string }>).map(
+    (c) => `${c.stateSlug}/${c.citySlug}`,
+  ),
+);
 
 // ---------------------------------------------------------------------------
 // Routes — Phase 1 clinic detail pages
@@ -37,6 +46,11 @@ const { clinic } = Astro.props as { clinic: Clinic };
 
 const stateInfo  = getState(clinic.stateSlug);
 const stateName  = stateInfo?.name ?? clinic.stateAbbr;
+
+// Backlink to the city hub — only render if this clinic's city actually has a hub page.
+const cityHubHref = PHASE1_CITY_KEYS.has(`${clinic.stateSlug}/${clinic.citySlug}`)
+  ? `/${clinic.stateSlug}/${clinic.citySlug}/`
+  : null;
 
 const pageTitle    = `${clinic.name} — Free or Low-Cost Clinic in ${clinic.city}, ${clinic.stateAbbr} | freeclinics.us`;
 const description  = `${clinic.name} is a free or low-cost health clinic in ${clinic.city}, ${clinic.stateAbbr}. Hours, services, eligibility, fees, and contact information.`;
@@ -106,6 +120,12 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
 
   <main>
     <article>
+      {cityHubHref && (
+        <p class="breadcrumb">
+          <a href={cityHubHref}>← All free clinics in {clinic.city}, {clinic.stateAbbr}</a>
+        </p>
+      )}
+
       <header>
         <h1>{clinic.name}</h1>
         <p class="intro">
@@ -218,6 +238,9 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
 </BaseLayout>
 
 <style>
+  .breadcrumb { font-size: 0.9rem; margin: 0 0 0.5rem; }
+  .breadcrumb a { color: #1a4480; text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
   main { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 4rem; line-height: 1.55; color: #1a1a1a; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
   h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.75rem; }
   h2 { font-size: 1.3rem; margin: 2rem 0 0.6rem; border-bottom: 1px solid #e5e5e5; padding-bottom: 0.25rem; }

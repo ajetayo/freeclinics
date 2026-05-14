@@ -1,25 +1,143 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.astro';
+import { getServiceDisplayName } from '../../../lib/constants';
+import { getClinicsByCityState } from '../../../lib/clinics';
+import phase1Cities from '../../../data/phase1-cities.json';
+
+// ---------------------------------------------------------------------------
+// Routes — Phase 1 city hubs (12 metros)
+// ---------------------------------------------------------------------------
+type City = {
+  stateSlug: string;
+  citySlug: string;
+  cityName: string;
+  stateAbbr: string;
+  clinicCount: number;
+  servicePages: string[];
+};
 
 export function getStaticPaths() {
-  return [
-    { params: { state: 'georgia', city: 'atlanta' } },
-  ];
+  return (phase1Cities as City[]).map((city) => ({
+    params: { state: city.stateSlug, city: city.citySlug },
+    props: { city },
+  }));
 }
 
-const { state, city } = Astro.params;
+const { city } = Astro.props as { city: City };
 
-function toTitleCase(s: string): string {
-  return s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-}
+// Pull every clinic in this city/state and sort alphabetically by name. Every
+// Phase 1 clinic has a detail page, so we can link each one directly.
+const clinics = getClinicsByCityState(city.stateSlug, city.citySlug)
+  .slice()
+  .sort((a, b) => a.name.localeCompare(b.name));
 
-const titleState = toTitleCase(state);
-const titleCity  = toTitleCase(city);
-const title       = `Free Clinics in ${titleCity}, ${titleState} | freeclinics.us`;
-const description = `Find free and low-cost health clinics in ${titleCity}, ${titleState}. Browse by service type.`;
-const canonicalUrl = `https://freeclinics.us/${state}/${city}/`;
+const lastVerified = '2026-05-01';
+const canonicalUrl = `https://freeclinics.us/${city.stateSlug}/${city.citySlug}/`;
+const pageTitle    = `Free & Low-Cost Clinics in ${city.cityName}, ${city.stateAbbr} | freeclinics.us`;
+const description  = `Directory of ${city.clinicCount} free and low-cost health clinics in ${city.cityName}, ${city.stateAbbr}. Browse by service or by clinic, with verified hours, fees, and contact information.`;
+
+// ---------------------------------------------------------------------------
+// JSON-LD — minimal BreadcrumbList (Home → City). No state level: there are
+// no state pages, and adding a fake one would mislead crawlers.
+// ---------------------------------------------------------------------------
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',           item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: city.cityName,    item: canonicalUrl },
+  ],
+};
 ---
-<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl}>
-  <h1>Free Clinics in {titleCity}, {titleState}</h1>
-  <p>This is the city hub page for {titleCity}, {titleState}. A full directory of free and low-cost clinics will appear here.</p>
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main>
+    <article>
+      <header>
+        <h1>Free &amp; Low-Cost Clinics in {city.cityName}, {city.stateAbbr}</h1>
+        <p class="intro">
+          This page lists {city.clinicCount} free and low-cost health clinics in {city.cityName},{' '}
+          {city.stateAbbr} — with verified addresses, hours, accepted insurance, and links
+          to dedicated pages for the most-searched services in town.
+        </p>
+      </header>
+
+      {city.servicePages.length > 0 && (
+        <section aria-labelledby="browse-by-service">
+          <h2 id="browse-by-service">Browse by service</h2>
+          <ul class="service-links">
+            {city.servicePages.map((slug) => (
+              <li>
+                <a href={`/${city.stateSlug}/${city.citySlug}/${slug}/`}>
+                  {getServiceDisplayName(slug)} in {city.cityName}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section aria-labelledby="all-clinics">
+        <h2 id="all-clinics">All clinics in {city.cityName}</h2>
+        <ol class="clinic-list">
+          {clinics.map((clinic) => {
+            const addr = [clinic.streetAddress, clinic.city, clinic.stateAbbr]
+              .filter(Boolean)
+              .join(', ') + (clinic.postalCode ? ` ${clinic.postalCode}` : '');
+            return (
+              <li class="clinic-card">
+                <h3><a href={`/clinic/${clinic.slug}/`}>{clinic.name}</a></h3>
+                {addr && <p class="clinic-meta">{addr}</p>}
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      <section aria-labelledby="other-options">
+        <h2 id="other-options">Other ways to find care</h2>
+        <SlidingScaleExplainer />
+        <p>
+          If none of the clinics above fit your situation, two other places to try are
+          <strong> 211</strong> (dial 2-1-1 from any phone in the US for a referral to
+          local social services, including health clinics) and your <strong>county
+          health department</strong>, which often runs its own low-cost or sliding-scale
+          clinics in addition to the ones listed here.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><strong>Listings last verified:</strong> {lastVerified}</p>
+        <p class="editorial-note">
+          Listings on freeclinics.us are reviewed and re-verified by our editorial team
+          on a rolling basis. We confirm hours, services, and fee structure directly with
+          each clinic. If you spot something out of date, please let us know.
+        </p>
+      </footer>
+    </article>
+  </main>
 </BaseLayout>
+
+<style>
+  main { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 4rem; line-height: 1.55; color: #1a1a1a; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
+  h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.75rem; }
+  h2 { font-size: 1.3rem; margin: 2rem 0 0.6rem; border-bottom: 1px solid #e5e5e5; padding-bottom: 0.25rem; }
+  p  { margin: 0.55rem 0; }
+  .intro { font-size: 1.05rem; color: #333; }
+  .service-links { list-style: none; padding: 0; margin: 0.5rem 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .service-links li a { display: inline-block; padding: 0.4rem 0.8rem; background: #f4f6f9; border: 1px solid #d8dde5; border-radius: 4px; text-decoration: none; color: #1a4480; font-size: 0.95rem; }
+  .service-links li a:hover { background: #e8ecf2; }
+  .clinic-list { padding-left: 1.2rem; margin: 0.5rem 0; }
+  .clinic-card { margin: 0.6rem 0; }
+  .clinic-card h3 { font-size: 1.02rem; margin: 0; font-weight: 600; }
+  .clinic-card h3 a { color: #1a4480; text-decoration: none; }
+  .clinic-card h3 a:hover { text-decoration: underline; }
+  .clinic-meta { font-size: 0.9rem; color: #555; margin: 0.1rem 0; }
+  .sliding-scale-explainer h2 { font-size: 1.1rem; border-bottom: none; padding-bottom: 0; margin-top: 1rem; }
+  .page-footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; font-size: 0.9rem; color: #555; }
+  .editorial-note { font-style: italic; }
+</style>

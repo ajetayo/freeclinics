@@ -1,0 +1,129 @@
+[
+  {
+    "stateSlug": "oregon",
+    "citySlug": "portland",
+    "cityName": "Portland",
+    "stateAbbr": "OR",
+    "clinicCount": 40,
+    "servicePages": [
+      "womens-health",
+      "ob-gyn",
+      "blood-pressure-screening"
+    ]
+  },
+  {
+    "stateSlug": "idaho",
+    "citySlug": "boise",
+    "cityName": "Boise",
+    "stateAbbr": "ID",
+    "clinicCount": 19,
+    "servicePages": [
+      "ob-gyn",
+      "hepatitis-c-testing"
+    ]
+  },
+  {
+    "stateSlug": "texas",
+    "citySlug": "houston",
+    "cityName": "Houston",
+    "stateAbbr": "TX",
+    "clinicCount": 79,
+    "servicePages": [
+      "blood-pressure-screening",
+      "immunizations",
+      "x-ray"
+    ]
+  },
+  {
+    "stateSlug": "new-york",
+    "citySlug": "new-york",
+    "cityName": "New York",
+    "stateAbbr": "NY",
+    "clinicCount": 82,
+    "servicePages": [
+      "medical",
+      "family-planning"
+    ]
+  },
+  {
+    "stateSlug": "california",
+    "citySlug": "oakland",
+    "cityName": "Oakland",
+    "stateAbbr": "CA",
+    "clinicCount": 53,
+    "servicePages": [
+      "womens-health"
+    ]
+  },
+  {
+    "stateSlug": "illinois",
+    "citySlug": "chicago",
+    "cityName": "Chicago",
+    "stateAbbr": "IL",
+    "clinicCount": 161,
+    "servicePages": [
+      "pregnancy"
+    ]
+  },
+  {
+    "stateSlug": "tennessee",
+    "citySlug": "nashville",
+    "cityName": "Nashville",
+    "stateAbbr": "TN",
+    "clinicCount": 27,
+    "servicePages": [
+      "blood-pressure-screening"
+    ]
+  },
+  {
+    "stateSlug": "georgia",
+    "citySlug": "atlanta",
+    "cityName": "Atlanta",
+    "stateAbbr": "GA",
+    "clinicCount": 43,
+    "servicePages": [
+      "x-ray",
+      "hepatitis-c-testing",
+      "diabetes-screening",
+      "cholesterol-screening"
+    ]
+  },
+  {
+    "stateSlug": "louisiana",
+    "citySlug": "metairie",
+    "cityName": "Metairie",
+    "stateAbbr": "LA",
+    "clinicCount": 4,
+    "servicePages": [
+      "cholesterol-screening"
+    ]
+  },
+  {
+    "stateSlug": "florida",
+    "citySlug": "orlando",
+    "cityName": "Orlando",
+    "stateAbbr": "FL",
+    "clinicCount": 27,
+    "servicePages": [
+      "x-ray"
+    ]
+  },
+  {
+    "stateSlug": "texas",
+    "citySlug": "corpus-christi",
+    "cityName": "Corpus Christi",
+    "stateAbbr": "TX",
+    "clinicCount": 9,
+    "servicePages": [
+      "physical-therapy"
+    ]
+  },
+  {
+    "stateSlug": "florida",
+    "citySlug": "fort-lauderdale",
+    "cityName": "Fort Lauderdale",
+    "stateAbbr": "FL",
+    "clinicCount": 16,
+    "servicePages": []
+  }
+]

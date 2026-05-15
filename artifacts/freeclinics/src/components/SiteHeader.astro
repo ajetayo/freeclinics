@@ -1,0 +1,49 @@
+---
+// Site-wide header. Plain text wordmark + tagline, no nav (yet — we don't
+// have About/Contact/etc to link to). Subtle bottom border so the page body
+// has a visual anchor to start from.
+---
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="/" class="site-header__brand" aria-label="freeclinics.us — home">
+      <span class="site-header__wordmark">freeclinics.us</span>
+    </a>
+    <p class="site-header__tagline">Find free and low-cost clinics near you</p>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+  .site-header__inner {
+    max-width: var(--max-width-wide);
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-4);
+    min-height: 60px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+  }
+  .site-header__brand {
+    text-decoration: none;
+    color: var(--color-text);
+    font-weight: 700;
+    font-size: 1.125rem;
+    line-height: 1.4;
+  }
+  .site-header__brand:hover .site-header__wordmark {
+    color: var(--color-primary-dark);
+  }
+  .site-header__wordmark { color: var(--color-primary); }
+  .site-header__tagline {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+  @media (max-width: 480px) {
+    .site-header__tagline { font-size: 0.88rem; }
+  }
+</style>

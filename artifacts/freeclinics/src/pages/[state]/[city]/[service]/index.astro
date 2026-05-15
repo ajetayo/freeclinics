@@ -10,10 +10,6 @@ import phase1Combos from '../../../../data/phase1-service-locations.json';
 // ---------------------------------------------------------------------------
 // Routes — Phase 1
 // ---------------------------------------------------------------------------
-// One static path per (stateSlug, citySlug, serviceSlug) combo in
-// phase1-service-locations.json. Combos that resolve to zero clinics are
-// skipped with a warning — the build still succeeds, but we want to know
-// whenever the dataset stops covering a curated combo.
 export function getStaticPaths() {
   const paths: Array<{
     params: { state: string; city: string; service: string };
@@ -37,11 +33,7 @@ export function getStaticPaths() {
     }
 
     paths.push({
-      params: {
-        state: combo.stateSlug,
-        city: combo.citySlug,
-        service: combo.serviceSlug,
-      },
+      params: { state: combo.stateSlug, city: combo.citySlug, service: combo.serviceSlug },
       props: { clinics: matching },
     });
   }
@@ -49,13 +41,9 @@ export function getStaticPaths() {
   return paths;
 }
 
-// ---------------------------------------------------------------------------
-// Page-level data derived from params + props
-// ---------------------------------------------------------------------------
 const { state, city, service } = Astro.params;
 const { clinics: rawClinics } = Astro.props as { clinics: Clinic[] };
 
-// Sort alphabetically by name (locale-aware so "Élan" doesn't sort after "Z").
 const clinics = [...rawClinics].sort((a, b) => a.name.localeCompare(b.name));
 
 const stateInfo      = getState(state);
@@ -117,10 +105,7 @@ const faqJsonLd = hasFaqs
       mainEntity: faqs.map((faq) => ({
         '@type': 'Question',
         name: faq.question,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: faq.answer,
-        },
+        acceptedAnswer: { '@type': 'Answer', text: faq.answer },
       })),
     }
   : null;
@@ -135,15 +120,15 @@ const faqJsonLd = hasFaqs
     )}
   </Fragment>
 
-  <main>
+  <main class="site-main site-main--wide">
     <article>
       <p class="breadcrumb">
         <a href={`/${state}/${city}/`}>← All free clinics in {titleCity}, {stateAbbr}</a>
       </p>
 
-      <header>
+      <header class="page-intro">
         <h1>{h1}</h1>
-        <p>
+        <p class="lede">
           If you are uninsured or underinsured in {titleCity}, you can still get
           {' '}{displayService.toLowerCase()} care. The clinics listed below offer free
           or sliding-scale services — meaning what you pay is based on your income, not a
@@ -160,8 +145,10 @@ const faqJsonLd = hasFaqs
         <ol class="clinic-list">
           {clinics.map((clinic) => (
             <li class="clinic-card">
-              <h3><a href={`/clinic/${clinic.slug}/`}>{clinic.name}</a></h3>
-              <p class="clinic-meta">
+              <h3 class="clinic-card__name">
+                <a href={`/clinic/${clinic.slug}/`}>{clinic.name}</a>
+              </h3>
+              <p class="clinic-card__meta">
                 <span>
                   {[clinic.streetAddress, clinic.city, clinic.stateAbbr].filter(Boolean).join(', ')}
                   {clinic.postalCode ? ` ${clinic.postalCode}` : ''}
@@ -180,59 +167,14 @@ const faqJsonLd = hasFaqs
                 )}
               </p>
 
-              <dl class="clinic-details">
-                {clinic.services.length > 0 && (
-                  <>
-                    <dt>Services offered</dt>
-                    <dd>
-                      <ul>
-                        {clinic.services.map((s) => (<li>{s}</li>))}
-                      </ul>
-                    </dd>
-                  </>
-                )}
-
-                {clinic.languages.length > 0 && (
-                  <>
-                    <dt>Languages spoken</dt>
-                    <dd>{clinic.languages.join(', ')}</dd>
-                  </>
-                )}
-
-                {clinic.feeStructure && (
-                  <>
-                    <dt>Fee structure</dt>
-                    <dd>{clinic.feeStructure}</dd>
-                  </>
-                )}
-
-                {clinic.incomeEligibility && (
-                  <>
-                    <dt>Income eligibility</dt>
-                    <dd>{clinic.incomeEligibility}</dd>
-                  </>
-                )}
-
-                {clinic.insuranceAccepted.length > 0 && (
-                  <>
-                    <dt>Insurance accepted</dt>
-                    <dd>{clinic.insuranceAccepted.join('; ')}</dd>
-                  </>
-                )}
-
-                {clinic.hours && (
-                  <>
-                    <dt>Hours</dt>
-                    <dd>{clinic.hours}</dd>
-                  </>
-                )}
-
-                {clinic.serviceArea && (
-                  <>
-                    <dt>Service area</dt>
-                    <dd>{clinic.serviceArea}</dd>
-                  </>
-                )}
+              <dl class="clinic-card__details">
+                {clinic.services.length > 0 && (<><dt>Services offered</dt><dd><ul>{clinic.services.map((s) => (<li>{s}</li>))}</ul></dd></>)}
+                {clinic.languages.length > 0 && (<><dt>Languages spoken</dt><dd>{clinic.languages.join(', ')}</dd></>)}
+                {clinic.feeStructure && (<><dt>Fee structure</dt><dd>{clinic.feeStructure}</dd></>)}
+                {clinic.incomeEligibility && (<><dt>Income eligibility</dt><dd>{clinic.incomeEligibility}</dd></>)}
+                {clinic.insuranceAccepted.length > 0 && (<><dt>Insurance accepted</dt><dd>{clinic.insuranceAccepted.join('; ')}</dd></>)}
+                {clinic.hours && (<><dt>Hours</dt><dd>{clinic.hours}</dd></>)}
+                {clinic.serviceArea && (<><dt>Service area</dt><dd>{clinic.serviceArea}</dd></>)}
               </dl>
             </li>
           ))}
@@ -240,7 +182,7 @@ const faqJsonLd = hasFaqs
       </section>
 
       {hasFaqs && (
-        <section aria-labelledby="faq">
+        <section aria-labelledby="faq" class="faq-section">
           <h2 id="faq">Frequently asked questions</h2>
           <dl class="faq">
             {faqs.map((faq) => (
@@ -254,7 +196,7 @@ const faqJsonLd = hasFaqs
       )}
 
       <footer class="page-footer">
-        <p><strong>Listings last verified:</strong> {lastVerified}</p>
+        <p><span class="verified-line">Listings last verified:</span> {lastVerified}</p>
         <p class="editorial-note">
           Listings on freeclinics.us are reviewed and re-verified by our editorial team
           on a rolling basis. We confirm hours, services, and fee structure directly with
@@ -266,23 +208,57 @@ const faqJsonLd = hasFaqs
 </BaseLayout>
 
 <style>
-  .breadcrumb { font-size: 0.9rem; margin: 0 0 0.5rem; }
-  .breadcrumb a { color: #1a4480; text-decoration: none; }
-  .breadcrumb a:hover { text-decoration: underline; }
-  main { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 4rem; line-height: 1.55; color: #1a1a1a; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
-  h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.75rem; }
-  h2 { font-size: 1.3rem; margin: 2.25rem 0 0.75rem; border-bottom: 1px solid #e5e5e5; padding-bottom: 0.25rem; }
-  h3 { font-size: 1.1rem; margin: 0 0 0.25rem; }
-  p { margin: 0.6rem 0; }
-  .clinic-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 1.25rem; }
-  .clinic-card { border: 1px solid #d9d9d9; border-radius: 6px; padding: 1rem 1.1rem; background: #fff; }
-  .clinic-meta { color: #555; font-size: 0.95rem; margin: 0 0 0.6rem; }
-  .clinic-details { display: grid; grid-template-columns: max-content 1fr; gap: 0.35rem 1rem; margin: 0; font-size: 0.95rem; }
-  .clinic-details dt { font-weight: 600; color: #333; }
-  .clinic-details dd { margin: 0; }
-  .clinic-details ul { margin: 0; padding-left: 1.1rem; }
-  .faq dt { font-weight: 600; margin-top: 1rem; }
-  .faq dd { margin: 0.25rem 0 0; }
-  .page-footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; font-size: 0.9rem; color: #555; }
-  .editorial-note { font-style: italic; }
+  .page-intro { margin-bottom: var(--space-5); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  .clinic-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+  .clinic-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-4) var(--space-5);
+  }
+  .clinic-card__name { margin: 0 0 var(--space-1); }
+  .clinic-card__name a { text-decoration: none; }
+  .clinic-card__name a:hover { text-decoration: underline; }
+  .clinic-card__meta {
+    margin: 0 0 var(--space-3);
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+
+  .clinic-card__details {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--space-2) var(--space-4);
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .clinic-card__details dt {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .clinic-card__details dd { margin: 0; }
+  .clinic-card__details ul { margin: 0; padding-left: 1.1rem; }
+
+  /* On narrow screens, stack the dl rows so labels & values are full-width
+     instead of cramped into a 2-col grid. */
+  @media (max-width: 520px) {
+    .clinic-card { padding: var(--space-3) var(--space-4); }
+    .clinic-card__details {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+    .clinic-card__details dt { margin-top: var(--space-2); }
+  }
+
+  .faq-section { margin-top: var(--space-6); }
+  .faq dt { font-weight: 600; margin-top: var(--space-3); }
+  .faq dd { margin: var(--space-1) 0 0; }
 </style>

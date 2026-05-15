@@ -7,8 +7,6 @@ import type { Clinic } from '../../../lib/types';
 import phase1Slugs from '../../../data/phase1-clinic-slugs.json';
 import phase1Cities from '../../../data/phase1-cities.json';
 
-// Set of "stateSlug/citySlug" keys for the Phase 1 cities that have hub pages.
-// Used at render time to decide whether to show the "All clinics in <city>" backlink.
 const PHASE1_CITY_KEYS = new Set(
   (phase1Cities as Array<{ stateSlug: string; citySlug: string }>).map(
     (c) => `${c.stateSlug}/${c.citySlug}`,
@@ -18,10 +16,6 @@ const PHASE1_CITY_KEYS = new Set(
 // ---------------------------------------------------------------------------
 // Routes — Phase 1 clinic detail pages
 // ---------------------------------------------------------------------------
-// One static path per slug in phase1-clinic-slugs.json. We resolve each slug
-// to a full Clinic record at build time and pass it through as a prop. If a
-// slug doesn't resolve, fail loudly — we should never ship a clinic page
-// pointing at missing data.
 export function getStaticPaths() {
   return (phase1Slugs as string[]).map((slug) => {
     const clinic = getClinicBySlug(slug);
@@ -32,22 +26,15 @@ export function getStaticPaths() {
           `phase1-clinic-slugs.json or add the clinic to clinics.json.`,
       );
     }
-    return {
-      params: { slug },
-      props: { clinic },
-    };
+    return { params: { slug }, props: { clinic } };
   });
 }
 
-// ---------------------------------------------------------------------------
-// Page-level data
-// ---------------------------------------------------------------------------
 const { clinic } = Astro.props as { clinic: Clinic };
 
-const stateInfo  = getState(clinic.stateSlug);
-const stateName  = stateInfo?.name ?? clinic.stateAbbr;
+const stateInfo = getState(clinic.stateSlug);
+const stateName = stateInfo?.name ?? clinic.stateAbbr;
 
-// Backlink to the city hub — only render if this clinic's city actually has a hub page.
 const cityHubHref = PHASE1_CITY_KEYS.has(`${clinic.stateSlug}/${clinic.citySlug}`)
   ? `/${clinic.stateSlug}/${clinic.citySlug}/`
   : null;
@@ -57,8 +44,6 @@ const description  = `${clinic.name} is a free or low-cost health clinic in ${cl
 const canonicalUrl = `https://freeclinics.us/clinic/${clinic.slug}/`;
 const lastVerified = '2026-05-01';
 
-// Google Maps directions link — prefer lat/long when present (more accurate),
-// fall back to the address string otherwise.
 const directionsHref = (() => {
   if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
     return `https://www.google.com/maps/dir/?api=1&destination=${clinic.lat},${clinic.long}`;
@@ -89,12 +74,6 @@ const medicalClinicJsonLd: Record<string, unknown> = {
   },
   url: canonicalUrl,
 };
-// JSON-LD priceRange — only emit if the dataset gives us something concrete.
-// Previously hardcoded to "Free / Sliding scale" on every clinic, which lied
-// for any clinic whose feeStructure said otherwise. We map the known values
-// in the dataset (e.g. "Sliding scale", "Free", "Low cost") to short
-// schema.org-style ranges; anything else is omitted entirely (per Google,
-// an absent field is better than an inaccurate one).
 if (clinic.feeStructure) {
   const fs = clinic.feeStructure.toLowerCase();
   let priceRange: string | null = null;
@@ -104,9 +83,7 @@ if (clinic.feeStructure) {
   else if (fs.includes('low cost') || fs.includes('low-cost')) priceRange = 'Low cost';
   if (priceRange) medicalClinicJsonLd.priceRange = priceRange;
 }
-if (clinic.phone) {
-  medicalClinicJsonLd.telephone = clinic.phone;
-}
+if (clinic.phone) medicalClinicJsonLd.telephone = clinic.phone;
 if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
   medicalClinicJsonLd.geo = {
     '@type': 'GeoCoordinates',
@@ -114,16 +91,13 @@ if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
     longitude: clinic.long,
   };
 }
-if (clinic.website) {
-  medicalClinicJsonLd.sameAs = [clinic.website];
-}
+if (clinic.website) medicalClinicJsonLd.sameAs = [clinic.website];
 if (clinic.services.length > 0) {
   medicalClinicJsonLd.availableService = clinic.services.map((s) => ({
     '@type': 'MedicalProcedure',
     name: s,
   }));
 }
-// Strip undefined fields from the address sub-object so we never emit "key": null/undefined.
 const addr = medicalClinicJsonLd.address as Record<string, unknown>;
 for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
 ---
@@ -132,7 +106,7 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
     <script type="application/ld+json" set:html={JSON.stringify(medicalClinicJsonLd)} />
   </Fragment>
 
-  <main>
+  <main class="site-main">
     <article>
       {cityHubHref && (
         <p class="breadcrumb">
@@ -140,18 +114,20 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
         </p>
       )}
 
-      <header>
+      <header class="page-intro">
         <h1>{clinic.name}</h1>
-        <p class="intro">
+        <p class="lede">
           {clinic.name} is a free or low-cost health clinic in {clinic.city},{' '}
           {stateName}. This page covers the services it offers, who is
           eligible, what it costs, and how to visit.
         </p>
       </header>
 
-      <section aria-labelledby="visit-contact">
-        <h2 id="visit-contact">Visit &amp; contact</h2>
-        <dl class="contact-details">
+      {/* Visit & contact — emphasized callout box. This is the most actionable
+          info on the page, so it gets a bordered, slightly stronger treatment. */}
+      <section aria-labelledby="visit-contact" class="visit-contact">
+        <h2 id="visit-contact" class="visit-contact__title">Visit &amp; contact</h2>
+        <dl class="visit-contact__details">
           {(clinic.streetAddress || clinic.city) && (
             <>
               <dt>Address</dt>
@@ -166,21 +142,18 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
               </dd>
             </>
           )}
-
           {clinic.phone && (
             <>
               <dt>Phone</dt>
               <dd><a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`}>{clinic.phone}</a></dd>
             </>
           )}
-
           {clinic.website && (
             <>
               <dt>Website</dt>
               <dd><a href={clinic.website} rel="noopener" target="_blank">{clinic.website}</a></dd>
             </>
           )}
-
           {clinic.hours && (
             <>
               <dt>Hours</dt>
@@ -201,19 +174,9 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
 
       <section aria-labelledby="eligibility-cost">
         <h2 id="eligibility-cost">Eligibility &amp; cost</h2>
-        <dl class="eligibility-details">
-          {clinic.feeStructure && (
-            <>
-              <dt>Fee structure</dt>
-              <dd>{clinic.feeStructure}</dd>
-            </>
-          )}
-          {clinic.incomeEligibility && (
-            <>
-              <dt>Income eligibility</dt>
-              <dd>{clinic.incomeEligibility}</dd>
-            </>
-          )}
+        <dl class="info-details">
+          {clinic.feeStructure && (<><dt>Fee structure</dt><dd>{clinic.feeStructure}</dd></>)}
+          {clinic.incomeEligibility && (<><dt>Income eligibility</dt><dd>{clinic.incomeEligibility}</dd></>)}
         </dl>
         <SlidingScaleExplainer headingLevel={3} />
       </section>
@@ -240,7 +203,7 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
       )}
 
       <footer class="page-footer">
-        <p><strong>Listings last verified:</strong> {lastVerified}</p>
+        <p><span class="verified-line">Listings last verified:</span> {lastVerified}</p>
         <p class="editorial-note">
           Listings on freeclinics.us are reviewed and re-verified by our editorial team
           on a rolling basis. We confirm hours, services, and fee structure directly with
@@ -252,21 +215,57 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
 </BaseLayout>
 
 <style>
-  .breadcrumb { font-size: 0.9rem; margin: 0 0 0.5rem; }
-  .breadcrumb a { color: #1a4480; text-decoration: none; }
-  .breadcrumb a:hover { text-decoration: underline; }
-  main { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 4rem; line-height: 1.55; color: #1a1a1a; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
-  h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.75rem; }
-  h2 { font-size: 1.3rem; margin: 2rem 0 0.6rem; border-bottom: 1px solid #e5e5e5; padding-bottom: 0.25rem; }
-  p { margin: 0.55rem 0; }
-  .intro { font-size: 1.05rem; color: #333; }
-  .contact-details, .eligibility-details { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1rem; margin: 0; font-size: 0.97rem; }
-  .contact-details dt, .eligibility-details dt { font-weight: 600; color: #333; }
-  .contact-details dd, .eligibility-details dd { margin: 0; }
-  .services-list { margin: 0; padding-left: 1.2rem; }
-  .services-list li { margin: 0.15rem 0; }
-  .sliding-scale-explainer { margin-top: 1.25rem; }
-  .sliding-scale-explainer h2 { font-size: 1.1rem; border-bottom: none; padding-bottom: 0; margin-top: 1.25rem; }
-  .page-footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; font-size: 0.9rem; color: #555; }
-  .editorial-note { font-style: italic; }
+  .page-intro { margin-bottom: var(--space-5); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  /* Visit & contact callout — the most important block on the page. */
+  .visit-contact {
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-4) var(--space-5);
+    margin: var(--space-5) 0 var(--space-6);
+    box-shadow: 0 1px 0 var(--color-border);
+  }
+  .visit-contact__title {
+    margin: 0 0 var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-2);
+  }
+  .visit-contact__details {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--space-2) var(--space-4);
+    margin: 0;
+    font-size: 0.97rem;
+  }
+  .visit-contact__details dt {
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .visit-contact__details dd { margin: 0; }
+
+  .services-list { margin: 0 0 var(--space-4); padding-left: 1.2rem; }
+
+  .info-details {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--space-2) var(--space-4);
+    margin: 0 0 var(--space-3);
+    font-size: 0.97rem;
+  }
+  .info-details dt { font-weight: 600; }
+  .info-details dd { margin: 0; }
+
+  /* Stack the dl rows on small screens for readability on ~360px viewports. */
+  @media (max-width: 520px) {
+    .visit-contact { padding: var(--space-3) var(--space-4); }
+    .visit-contact__details,
+    .info-details {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+    .visit-contact__details dt,
+    .info-details dt { margin-top: var(--space-2); }
+  }
 </style>

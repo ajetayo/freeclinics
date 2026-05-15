@@ -14,8 +14,8 @@ export interface Props {
 const { headingLevel = 2 } = Astro.props as Props;
 const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
 ---
-<section class="sliding-scale-explainer" aria-labelledby="how-it-works">
-  <Heading id="how-it-works">How free and low-cost care works</Heading>
+<section class="sliding-scale" aria-labelledby="how-it-works">
+  <Heading id="how-it-works" class="sliding-scale__title">How free and low-cost care works</Heading>
   <p>
     A "sliding-scale fee" means the clinic adjusts what you pay based on your
     household income and family size. If you make very little, many visits and
@@ -42,3 +42,18 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
     income.
   </p>
 </section>
+
+<style>
+  .sliding-scale {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-4) var(--space-5);
+    margin: var(--space-5) 0;
+  }
+  .sliding-scale__title {
+    margin-top: 0;
+    margin-bottom: var(--space-3);
+  }
+  .sliding-scale p:last-child { margin-bottom: 0; }
+</style>

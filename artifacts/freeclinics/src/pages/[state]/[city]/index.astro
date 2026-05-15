@@ -19,9 +19,6 @@ type City = {
 };
 
 export function getStaticPaths() {
-  // Build a Set of "stateSlug/citySlug/serviceSlug" keys for every combo that
-  // actually has a service+location page. Used to validate each city's
-  // servicePages list — a typo would otherwise produce a hub link to a 404.
   const SERVICE_LOCATION_KEYS = new Set(
     (phase1ServiceLocations as Array<{ stateSlug: string; citySlug: string; serviceSlug: string }>).map(
       (combo) => `${combo.stateSlug}/${combo.citySlug}/${combo.serviceSlug}`,
@@ -29,9 +26,6 @@ export function getStaticPaths() {
   );
 
   return (phase1Cities as City[]).map((city) => {
-    // Assertion 1: clinicCount must match the live dataset. If the dataset
-    // is re-ingested without updating phase1-cities.json, this catches it
-    // before the wrong number ships in the meta description and intro line.
     const actualCount = getClinicsByCityState(city.stateSlug, city.citySlug).length;
     if (city.clinicCount !== actualCount) {
       throw new Error(
@@ -40,10 +34,6 @@ export function getStaticPaths() {
           `${actualCount} clinics. Update phase1-cities.json to match the dataset.`,
       );
     }
-
-    // Assertion 2: every servicePages slug must correspond to a built
-    // service+location page. A typo here would produce a broken hub link
-    // with no warning at build time.
     for (const slug of city.servicePages) {
       const key = `${city.stateSlug}/${city.citySlug}/${slug}`;
       if (!SERVICE_LOCATION_KEYS.has(key)) {
@@ -54,7 +44,6 @@ export function getStaticPaths() {
         );
       }
     }
-
     return {
       params: { state: city.stateSlug, city: city.citySlug },
       props: { city },
@@ -64,8 +53,6 @@ export function getStaticPaths() {
 
 const { city } = Astro.props as { city: City };
 
-// Pull every clinic in this city/state and sort alphabetically by name. Every
-// Phase 1 clinic has a detail page, so we can link each one directly.
 const clinics = getClinicsByCityState(city.stateSlug, city.citySlug)
   .slice()
   .sort((a, b) => a.name.localeCompare(b.name));
@@ -75,16 +62,12 @@ const canonicalUrl = `https://freeclinics.us/${city.stateSlug}/${city.citySlug}/
 const pageTitle    = `Free & Low-Cost Clinics in ${city.cityName}, ${city.stateAbbr} | freeclinics.us`;
 const description  = `Directory of ${city.clinicCount} free and low-cost health clinics in ${city.cityName}, ${city.stateAbbr}. Browse by service or by clinic, with verified hours, fees, and contact information.`;
 
-// ---------------------------------------------------------------------------
-// JSON-LD — minimal BreadcrumbList (Home → City). No state level: there are
-// no state pages, and adding a fake one would mislead crawlers.
-// ---------------------------------------------------------------------------
 const breadcrumbJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home',           item: 'https://freeclinics.us/' },
-    { '@type': 'ListItem', position: 2, name: city.cityName,    item: canonicalUrl },
+    { '@type': 'ListItem', position: 1, name: 'Home',        item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: city.cityName, item: canonicalUrl },
   ],
 };
 ---
@@ -93,11 +76,11 @@ const breadcrumbJsonLd = {
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
   </Fragment>
 
-  <main>
+  <main class="site-main site-main--wide">
     <article>
-      <header>
+      <header class="page-intro">
         <h1>Free &amp; Low-Cost Clinics in {city.cityName}, {city.stateAbbr}</h1>
-        <p class="intro">
+        <p class="lede">
           This page lists {city.clinicCount} free and low-cost health clinics in {city.cityName},{' '}
           {city.stateAbbr} — with verified addresses, hours, accepted insurance, and links
           to dedicated pages for the most-searched services in town.
@@ -107,10 +90,10 @@ const breadcrumbJsonLd = {
       {city.servicePages.length > 0 && (
         <section aria-labelledby="browse-by-service">
           <h2 id="browse-by-service">Browse by service</h2>
-          <ul class="service-links">
+          <ul class="service-chips">
             {city.servicePages.map((slug) => (
               <li>
-                <a href={`/${city.stateSlug}/${city.citySlug}/${slug}/`}>
+                <a href={`/${city.stateSlug}/${city.citySlug}/${slug}/`} class="service-chip tap-target">
                   {getServiceDisplayName(slug)} in {city.cityName}
                 </a>
               </li>
@@ -128,8 +111,10 @@ const breadcrumbJsonLd = {
               .join(', ') + (clinic.postalCode ? ` ${clinic.postalCode}` : '');
             return (
               <li class="clinic-card">
-                <h3><a href={`/clinic/${clinic.slug}/`}>{clinic.name}</a></h3>
-                {addr && <p class="clinic-meta">{addr}</p>}
+                <h3 class="clinic-card__name">
+                  <a href={`/clinic/${clinic.slug}/`}>{clinic.name}</a>
+                </h3>
+                {addr && <p class="clinic-card__meta">{addr}</p>}
               </li>
             );
           })}
@@ -149,7 +134,7 @@ const breadcrumbJsonLd = {
       </section>
 
       <footer class="page-footer">
-        <p><strong>Listings last verified:</strong> {lastVerified}</p>
+        <p><span class="verified-line">Listings last verified:</span> {lastVerified}</p>
         <p class="editorial-note">
           Listings on freeclinics.us are reviewed and re-verified by our editorial team
           on a rolling basis. We confirm hours, services, and fee structure directly with
@@ -161,21 +146,51 @@ const breadcrumbJsonLd = {
 </BaseLayout>
 
 <style>
-  main { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 4rem; line-height: 1.55; color: #1a1a1a; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
-  h1 { font-size: 1.85rem; line-height: 1.2; margin: 0 0 0.75rem; }
-  h2 { font-size: 1.3rem; margin: 2rem 0 0.6rem; border-bottom: 1px solid #e5e5e5; padding-bottom: 0.25rem; }
-  p  { margin: 0.55rem 0; }
-  .intro { font-size: 1.05rem; color: #333; }
-  .service-links { list-style: none; padding: 0; margin: 0.5rem 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .service-links li a { display: inline-block; padding: 0.4rem 0.8rem; background: #f4f6f9; border: 1px solid #d8dde5; border-radius: 4px; text-decoration: none; color: #1a4480; font-size: 0.95rem; }
-  .service-links li a:hover { background: #e8ecf2; }
-  .clinic-list { padding-left: 1.2rem; margin: 0.5rem 0; }
-  .clinic-card { margin: 0.6rem 0; }
-  .clinic-card h3 { font-size: 1.02rem; margin: 0; font-weight: 600; }
-  .clinic-card h3 a { color: #1a4480; text-decoration: none; }
-  .clinic-card h3 a:hover { text-decoration: underline; }
-  .clinic-meta { font-size: 0.9rem; color: #555; margin: 0.1rem 0; }
-  .sliding-scale-explainer h2 { font-size: 1.1rem; border-bottom: none; padding-bottom: 0; margin-top: 1rem; }
-  .page-footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; font-size: 0.9rem; color: #555; }
-  .editorial-note { font-style: italic; }
+  .page-intro { margin-bottom: var(--space-5); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  .service-chips {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-5);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .service-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .service-chip:hover {
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
+
+  .clinic-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .clinic-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-3) var(--space-4);
+  }
+  .clinic-card__name { margin: 0 0 var(--space-1); font-size: 1.02rem; }
+  .clinic-card__name a { text-decoration: none; }
+  .clinic-card__name a:hover { text-decoration: underline; }
+  .clinic-card__meta { margin: 0; color: var(--color-text-muted); font-size: 0.9rem; }
 </style>

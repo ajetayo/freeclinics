@@ -1,0 +1,32 @@
+This is the design pass. Goal: a clean, trustworthy, fast, highly legible site. Constraints that override everything: no web fonts (system stack only), no JavaScript, no hero/decorative images, no heavy shadows or gradients. This is a styling pass — don't change page structure, JSON-LD, or routing except to add a shared header and footer.
+1. Create src/styles/global.css with design tokens as CSS custom properties and base element styles. Import it once in BaseLayout.astro.
+Tokens:
+--color-text: #1a1a1a;
+--color-text-muted: #4a4a4a;
+--color-bg: #ffffff;
+--color-surface: #f5f7fa;
+--color-border: #d8dee4;
+--color-primary: #1a5fb4;
+--color-primary-dark: #154a8c;
+--color-verified: #15703f;
+--max-width-text: 720px;
+--max-width-wide: 880px;
+Base styles: body uses a system font stack (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif), base font-size 17px, line-height 1.6, --color-text on --color-bg. Type scale: h1 ~30px, h2 ~22px, h3 ~18px — modest, weight 600. Links: --color-primary, underlined, --color-primary-dark on hover. Visible focus ring on all links/buttons (2px --color-primary outline). All tap targets ≥44px on mobile. Respect prefers-reduced-motion.
+2. Add a shared header and footer as components, used in BaseLayout.astro:
+
+Header: a simple text wordmark "freeclinics.us" linking to /, with a short tagline ("Find free and low-cost clinics near you"). No nav menu. Minimal, ~60px tall, subtle bottom border.
+Footer: the site name, a one-line mission statement, and a plain-text trust line ("Listings are reviewed and verified by our editorial team."). A copyright line. No links to pages that don't exist yet (no About/Contact links). This is separate from the per-page "last verified" note — leave those where they are.
+
+3. Restyle these components, all referencing the tokens — no hardcoded colors:
+
+Content width: text-heavy pages (clinic detail, service+location intro/explainer/FAQ) constrained to --max-width-text, centered. The clinic-list sections can use --max-width-wide.
+Clinic cards (on service+location pages and city hubs): --color-surface background, --color-border 1px border, comfortable padding, rounded corners (6px). Clinic name link prominent. The dl detail rows: clear label/value alignment, readable on mobile (stack if needed).
+Clinic detail page "Visit & contact" block: make this visually prominent — it's the most important info on the page. A bordered box, slightly emphasized.
+"Browse by service" links on city hubs: styled as clear button/chip links — bordered, --color-primary text, ≥44px tall, obvious tap targets.
+SlidingScaleExplainer: give the section a subtle --color-surface background box treatment so it reads as a helpful callout.
+Breadcrumb/back-link: muted, small, clearly secondary.
+FAQ: clear question/answer separation, questions in --color-text weight 600.
+"Last verified" + editorial note: small, --color-text-muted, set off with a top border.
+
+4. Mobile-first: single column on small screens, the max-widths above kick in on larger viewports. Test that clinic cards and the dl rows are legible and not cramped on a ~360px-wide screen.
+After building, run astro build (confirm still 593 pages, no structural changes) and show me: src/styles/global.css, the Header and Footer components, and the rendered dist/oregon/portland/womens-health/index.html and dist/clinic/a-balanced-life-health-center/index.html so I can see the full styled markup. Also tell me the page weight of those two files.

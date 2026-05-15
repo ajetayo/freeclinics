@@ -1,0 +1,157 @@
+/* ===========================================================================
+   freeclinics.us — global stylesheet
+   ---------------------------------------------------------------------------
+   System-font-only, no JS, no decorative imagery. The whole design rests on
+   a small set of CSS custom properties (tokens) declared on :root so every
+   component can reference them — no hardcoded colors anywhere.
+   =========================================================================== */
+
+:root {
+  /* color */
+  --color-text:         #1a1a1a;
+  --color-text-muted:   #4a4a4a;
+  --color-bg:           #ffffff;
+  --color-surface:      #f5f7fa;
+  --color-border:       #d8dee4;
+  --color-primary:      #1a5fb4;
+  --color-primary-dark: #154a8c;
+  --color-verified:     #15703f;
+
+  /* layout */
+  --max-width-text: 720px;
+  --max-width-wide: 880px;
+
+  /* spacing scale (rem-based, 17px root → 1rem = 17px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  /* radius */
+  --radius-sm: 4px;
+  --radius:    6px;
+}
+
+/* ---------- reset-ish base ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  /* 17px base — set on html so 1rem = 17px everywhere */
+  font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- type scale ---------- */
+
+h1, h2, h3, h4 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-text);
+  margin: 0 0 var(--space-3);
+}
+h1 { font-size: 1.765rem; } /* ~30px */
+h2 { font-size: 1.294rem; } /* ~22px */
+h3 { font-size: 1.059rem; } /* ~18px */
+h4 { font-size: 1rem;     }
+
+p, ul, ol, dl { margin: 0 0 var(--space-4); }
+
+ul, ol { padding-left: 1.25rem; }
+li     { margin: 0.15rem 0; }
+
+dd { margin: 0; }
+
+strong { font-weight: 600; }
+
+/* ---------- links ---------- */
+
+a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a:hover { color: var(--color-primary-dark); }
+
+/* ---------- focus ring (keyboard + mouse, consistent) ---------- */
+
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- shared layout containers ---------- */
+
+.site-main {
+  /* Default content width is the readable text column. Wider sections
+     (clinic lists) opt in via .container-wide on an inner wrapper. */
+  max-width: var(--max-width-text);
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-7);
+}
+.site-main--wide {
+  max-width: var(--max-width-wide);
+}
+
+/* ---------- breadcrumb / back-link ---------- */
+
+.breadcrumb {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+.breadcrumb a {
+  color: var(--color-text-muted);
+}
+.breadcrumb a:hover { color: var(--color-primary-dark); }
+
+/* ---------- "last verified" + editorial note (used by every page) ---------- */
+
+.page-footer {
+  margin-top: var(--space-7);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+.page-footer .verified-line { color: var(--color-verified); font-weight: 600; }
+.page-footer .editorial-note { font-style: italic; margin-bottom: 0; }
+
+/* ---------- accessibility: tap-target floor on small screens ---------- */
+
+@media (max-width: 600px) {
+  a, button, [role="button"] {
+    /* Don't force every inline link to 44px tall — that would wreck flowing
+       prose. But interactive controls that opt in (chip links, primary CTAs)
+       can claim min-height via .tap-target. */
+  }
+  .tap-target { min-height: 44px; display: inline-flex; align-items: center; }
+}
+
+/* ---------- prefers-reduced-motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const canonicalUrl = 'https://freeclinics.us/contact/';
+const pageTitle    = 'Contact Us | freeclinics.us';
+const description  = 'Report an outdated clinic listing or get in touch with the freeclinics.us team. We verify hours, fees, and services — your corrections help keep the directory accurate.';
+const contactEmail = 'hello@freeclinics.us';
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <main class="site-main">
+    <article class="contact-page">
+      <p class="breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">›</span> Contact
+      </p>
+
+      <header class="page-intro">
+        <h1>Contact us</h1>
+        <p class="lede">
+          We want the directory to be as accurate as possible. If you spot
+          something wrong — or just want to get in touch — email us below.
+        </p>
+      </header>
+
+      <section class="contact-section" aria-labelledby="report-listing">
+        <h2 id="report-listing">Report a clinic listing</h2>
+        <p>
+          If a clinic's hours, services, fees, or phone number have changed, or
+          if a clinic has permanently closed, please let us know. We review
+          every report and update or remove the listing as quickly as we can.
+        </p>
+        <p>
+          Email us at{' '}
+          <a href={`mailto:${contactEmail}`} class="contact-link">{contactEmail}</a>{' '}
+          with the clinic name, what's changed, and any source you have (the
+          clinic's website, a recent visit, etc.).
+        </p>
+      </section>
+
+      <section class="contact-section" aria-labelledby="general-contact">
+        <h2 id="general-contact">General contact</h2>
+        <p>
+          For anything else — press inquiries, partnership questions, or
+          feedback about the site — reach us at the same address:
+        </p>
+        <p>
+          <a href={`mailto:${contactEmail}`} class="contact-link">{contactEmail}</a>
+        </p>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .contact-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  .contact-section {
+    margin-bottom: var(--space-7);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .contact-section:last-child {
+    border-bottom: none;
+  }
+  .contact-section h2 {
+    margin-bottom: var(--space-3);
+  }
+  .contact-section p {
+    margin-bottom: var(--space-3);
+    line-height: 1.7;
+  }
+  .contact-link {
+    color: var(--color-primary);
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .contact-link:hover { color: var(--color-primary-dark); }
+</style>

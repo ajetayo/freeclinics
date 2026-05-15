@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const canonicalUrl = 'https://freeclinics.us/404/';
+const pageTitle    = 'Page Not Found | freeclinics.us';
+const description  = 'The page you were looking for doesn\'t exist or may have moved. Browse free and low-cost health clinics by state at freeclinics.us.';
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <main class="site-main">
+    <article class="error-page">
+      <h1>Page not found</h1>
+      <p class="lede">
+        Sorry — the page you were looking for doesn't exist or may have moved.
+        This sometimes happens when a clinic listing is updated, a city name
+        changes, or you followed a stale link from another site.
+      </p>
+      <p>Here are some places to get back on track:</p>
+      <ul class="nav-links">
+        <li><a href="/">Homepage — search by state</a></li>
+        <li><a href="/#browse-by-state">Browse all states and territories</a></li>
+      </ul>
+      <p class="help-note">
+        If you believe this is an error in our directory, you're welcome to
+        <a href="/contact/">let us know</a>.
+      </p>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .error-page {
+    max-width: 560px;
+    margin: var(--space-8) auto;
+    padding: 0 var(--space-4);
+  }
+  .error-page h1 {
+    font-size: 2rem;
+    margin-bottom: var(--space-3);
+  }
+  .lede {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-4);
+  }
+  .nav-links {
+    margin: var(--space-3) 0 var(--space-5);
+    padding-left: var(--space-4);
+    line-height: 2;
+  }
+  .nav-links a {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  .nav-links a:hover { color: var(--color-primary-dark); }
+  .help-note {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-4);
+  }
+</style>

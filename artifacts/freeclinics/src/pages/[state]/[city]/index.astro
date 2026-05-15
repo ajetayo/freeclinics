@@ -70,10 +70,25 @@ const breadcrumbJsonLd = {
     { '@type': 'ListItem', position: 2, name: city.cityName, item: canonicalUrl },
   ],
 };
+
+// Lightweight ItemList alongside the breadcrumb — one ListItem per clinic
+// shown on the page, in render order. The full MedicalClinic schema lives on
+// each clinic's own detail page; we don't repeat it here.
+const itemListJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement: clinics.map((clinic, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: clinic.name,
+    url: `https://freeclinics.us/clinic/${clinic.slug}/`,
+  })),
+};
 ---
 <BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)} />
   </Fragment>
 
   <main class="site-main site-main--wide">

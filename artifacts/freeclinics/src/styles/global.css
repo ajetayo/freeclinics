@@ -40,8 +40,10 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
-  /* 17px base — set on html so 1rem = 17px everywhere */
-  font-size: 17px;
+  /* ~17px base on a default-16px browser, but expressed as a percentage so
+     it scales with the user's browser font-size preference instead of
+     overriding it. 16px * 1.0625 = 17px. */
+  font-size: 106.25%;
   -webkit-text-size-adjust: 100%;
 }
 

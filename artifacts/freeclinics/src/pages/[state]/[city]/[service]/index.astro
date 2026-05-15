@@ -64,39 +64,21 @@ const hasFaqs = faqs.length > 0;
 // ---------------------------------------------------------------------------
 // JSON-LD structured data
 // ---------------------------------------------------------------------------
-const medicalBusinessJsonLd = clinics.map((clinic) => {
-  const data: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': 'MedicalBusiness',
+// We deliberately emit only a lightweight ItemList here (one ListItem per
+// clinic, in render order) rather than a full MedicalBusiness block per
+// clinic. The canonical structured data for each clinic lives on its own
+// /clinic/<slug>/ page; this list page just tells search engines the order
+// and identity of the items shown.
+const itemListJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  itemListElement: clinics.map((clinic, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
     name: clinic.name,
-    telephone: clinic.phone,
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: clinic.streetAddress,
-      addressLocality: clinic.city,
-      addressRegion: clinic.stateAbbr,
-      postalCode: clinic.postalCode,
-      addressCountry: 'US',
-    },
-    availableService: clinic.services.map((s) => ({
-      '@type': 'MedicalProcedure',
-      name: s,
-    })),
     url: `https://freeclinics.us/clinic/${clinic.slug}/`,
-    priceRange: 'Free / Sliding scale',
-  };
-  if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
-    data.geo = {
-      '@type': 'GeoCoordinates',
-      latitude: clinic.lat,
-      longitude: clinic.long,
-    };
-  }
-  if (clinic.website) {
-    data.sameAs = [clinic.website];
-  }
-  return data;
-});
+  })),
+};
 
 const faqJsonLd = hasFaqs
   ? {
@@ -112,9 +94,7 @@ const faqJsonLd = hasFaqs
 ---
 <BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
   <Fragment slot="head">
-    {medicalBusinessJsonLd.map((data) => (
-      <script type="application/ld+json" set:html={JSON.stringify(data)} />
-    ))}
+    <script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)} />
     {faqJsonLd && (
       <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
     )}

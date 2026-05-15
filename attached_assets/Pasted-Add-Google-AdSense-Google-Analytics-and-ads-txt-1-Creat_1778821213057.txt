@@ -1,0 +1,35 @@
+Add Google AdSense, Google Analytics, and ads.txt.
+1. Create public/ads.txt with exactly this single line (no extra whitespace):
+google.com, pub-4183031888320028, DIRECT, f08c47fec0942fa0
+Astro copies public/ to dist root, so it'll serve at /ads.txt.
+2. Create src/components/AdUnit.astro — wraps one AdSense responsive ad. Contents:
+html<ins class="adsbygoogle"
+     style="display:block; margin: var(--space-6) auto;"
+     data-ad-client="ca-pub-4183031888320028"
+     data-ad-slot="7063973314"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+Reserve some vertical space via the surrounding margin so layout shift is at least partially absorbed.
+3. Modify BaseLayout.astro:
+
+Add a noAds?: boolean prop (default false).
+In <head> (sitewide, regardless of noAds):
+
+AdSense loader: <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183031888320028" crossorigin="anonymous"></script>
+GA loader: <script async src="https://www.googletagmanager.com/gtag/js?id=G-5SW6JT3KD3"></script>
+GA config (inline, after the loader):
+
+
+
+html    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5SW6JT3KD3');
+    </script>
+
+In the body, above <SiteFooter />, render <AdUnit /> only when !noAds.
+
+4. Opt the utility pages out of ads. In src/pages/404.astro and src/pages/contact.astro, pass noAds={true} to BaseLayout. All other pages (homepage, state, city, service+location, clinic) get the ad.
+After building, run astro build and confirm: page count still 26,332, dist/ads.txt exists with the exact one-line content, dist/404.html and dist/contact/index.html contain no adsbygoogle markup, and a sample clinic page (dist/clinic/a-balanced-life-health-center/index.html) contains both the AdSense loader in <head>, the GA snippet in <head>, and one <ins class="adsbygoogle"> block above the site footer. Also report the new page weight of one representative page (Portland women's health) so I can quantify the JS impact.

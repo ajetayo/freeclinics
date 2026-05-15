@@ -2,14 +2,16 @@
 import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import AdUnit from '../components/AdUnit.astro';
 
 export interface Props {
   title: string;
   description: string;
   canonicalUrl: string;
+  noAds?: boolean;
 }
 
-const { title, description, canonicalUrl } = Astro.props;
+const { title, description, canonicalUrl, noAds = false } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -19,11 +21,20 @@ const { title, description, canonicalUrl } = Astro.props;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183031888320028" crossorigin="anonymous"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5SW6JT3KD3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-5SW6JT3KD3');
+    </script>
     <slot name="head" />
   </head>
   <body>
     <SiteHeader />
     <slot />
+    {!noAds && <AdUnit />}
     <SiteFooter />
   </body>
 </html>

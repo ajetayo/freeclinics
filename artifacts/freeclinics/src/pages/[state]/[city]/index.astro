@@ -1,13 +1,13 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.astro';
-import { getServiceDisplayName } from '../../../lib/constants';
+import { US_STATES, getServiceDisplayName, getState } from '../../../lib/constants';
 import { getClinicsByCityState } from '../../../lib/clinics';
-import phase1Cities from '../../../data/phase1-cities.json';
+import cities from '../../../data/cities.json';
 import phase1ServiceLocations from '../../../data/phase1-service-locations.json';
 
 // ---------------------------------------------------------------------------
-// Routes — Phase 1 city hubs (12 metros)
+// Routes — one page per city in cities.json (~7,400)
 // ---------------------------------------------------------------------------
 type City = {
   stateSlug: string;
@@ -25,20 +25,41 @@ export function getStaticPaths() {
     ),
   );
 
-  return (phase1Cities as City[]).map((city) => {
+  // Skip rows with an empty citySlug/cityName — they'd produce a route with a
+  // missing param and crash the build. Surface them so we can clean up the
+  // data file later, but don't block the build over them.
+  const validCities = (cities as City[]).filter((c) => {
+    if (!c.citySlug || !c.cityName) {
+      console.warn(
+        `[freeclinics] skipping malformed city row in cities.json: ` +
+          `${JSON.stringify(c)}`,
+      );
+      return false;
+    }
+    if (!(c.stateSlug in US_STATES)) {
+      console.warn(
+        `[freeclinics] skipping city with unknown state slug in cities.json: ` +
+          `"${c.stateSlug}/${c.citySlug}"`,
+      );
+      return false;
+    }
+    return true;
+  });
+
+  return validCities.map((city) => {
     const actualCount = getClinicsByCityState(city.stateSlug, city.citySlug).length;
     if (city.clinicCount !== actualCount) {
       throw new Error(
-        `phase1-cities.json: "${city.stateSlug}/${city.citySlug}" declares ` +
+        `cities.json: "${city.stateSlug}/${city.citySlug}" declares ` +
           `clinicCount=${city.clinicCount}, but getClinicsByCityState returned ` +
-          `${actualCount} clinics. Update phase1-cities.json to match the dataset.`,
+          `${actualCount} clinics. Update cities.json to match the dataset.`,
       );
     }
     for (const slug of city.servicePages) {
       const key = `${city.stateSlug}/${city.citySlug}/${slug}`;
       if (!SERVICE_LOCATION_KEYS.has(key)) {
         throw new Error(
-          `phase1-cities.json: "${city.stateSlug}/${city.citySlug}" lists ` +
+          `cities.json: "${city.stateSlug}/${city.citySlug}" lists ` +
             `servicePages entry "${slug}", but no matching combo exists in ` +
             `phase1-service-locations.json. Add the combo or fix the slug.`,
         );
@@ -53,27 +74,33 @@ export function getStaticPaths() {
 
 const { city } = Astro.props as { city: City };
 
+const stateInfo = getState(city.stateSlug);
+const stateName = stateInfo?.name ?? city.stateAbbr;
+
 const clinics = getClinicsByCityState(city.stateSlug, city.citySlug)
   .slice()
   .sort((a, b) => a.name.localeCompare(b.name));
 
 const lastVerified = '2026-05-01';
+const stateUrl     = `https://freeclinics.us/${city.stateSlug}/`;
 const canonicalUrl = `https://freeclinics.us/${city.stateSlug}/${city.citySlug}/`;
 const pageTitle    = `Free & Low-Cost Clinics in ${city.cityName}, ${city.stateAbbr} | freeclinics.us`;
 const description  = `Directory of ${city.clinicCount} free and low-cost health clinics in ${city.cityName}, ${city.stateAbbr}. Browse by service or by clinic, with verified hours, fees, and contact information.`;
 
+// Full breadcrumb chain: Home → State → City.
 const breadcrumbJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home',        item: 'https://freeclinics.us/' },
-    { '@type': 'ListItem', position: 2, name: city.cityName, item: canonicalUrl },
+    { '@type': 'ListItem', position: 1, name: 'Home',         item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: stateName,      item: stateUrl },
+    { '@type': 'ListItem', position: 3, name: city.cityName,  item: canonicalUrl },
   ],
 };
 
 // Lightweight ItemList alongside the breadcrumb — one ListItem per clinic
-// shown on the page, in render order. The full MedicalClinic schema lives on
-// each clinic's own detail page; we don't repeat it here.
+// shown on the page. The full MedicalClinic schema lives on each clinic's
+// own detail page; we don't repeat it here.
 const itemListJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
@@ -93,10 +120,19 @@ const itemListJsonLd = {
 
   <main class="site-main site-main--wide">
     <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true">›</span>
+        <a href={`/${city.stateSlug}/`}>{stateName}</a>
+        <span aria-hidden="true">›</span>
+        {city.cityName}
+      </p>
+
       <header class="page-intro">
         <h1>Free &amp; Low-Cost Clinics in {city.cityName}, {city.stateAbbr}</h1>
         <p class="lede">
-          This page lists {city.clinicCount} free and low-cost health clinics in {city.cityName},{' '}
+          This page lists {city.clinicCount} free and low-cost health{' '}
+          {city.clinicCount === 1 ? 'clinic' : 'clinics'} in {city.cityName},{' '}
           {city.stateAbbr} — with verified addresses, hours, accepted insurance, and links
           to dedicated pages for the most-searched services in town.
         </p>
@@ -163,6 +199,9 @@ const itemListJsonLd = {
 <style>
   .page-intro { margin-bottom: var(--space-5); }
   .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  .breadcrumb a { color: var(--color-text-muted); }
+  .breadcrumb a:hover { color: var(--color-primary-dark); }
 
   .service-chips {
     list-style: none;

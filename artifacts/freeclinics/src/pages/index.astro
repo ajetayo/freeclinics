@@ -1,21 +1,90 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SlidingScaleExplainer from '../components/SlidingScaleExplainer.astro';
+import { US_STATES } from '../lib/constants';
+import cities from '../data/cities.json';
+
+// Count cities per state so we can show "(N cities)" on each state link.
+// We iterate over every entry in US_STATES (50 states + DC + 5 territories =
+// 56) so the homepage's "Browse by state" grid always has full national
+// coverage, even for states whose city list is currently empty.
+const cityCountByState = (() => {
+  const counts = new Map<string, number>();
+  for (const c of cities as Array<{ stateSlug: string; citySlug: string }>) {
+    if (!c.citySlug) continue;
+    if (!(c.stateSlug in US_STATES)) continue;
+    counts.set(c.stateSlug, (counts.get(c.stateSlug) ?? 0) + 1);
+  }
+  return counts;
+})();
+
+const ALL_STATES = Object.entries(US_STATES)
+  .map(([slug, info]) => ({ slug, name: info.name, cityCount: cityCountByState.get(slug) ?? 0 }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
+const totalCities = Array.from(cityCountByState.values()).reduce((a, b) => a + b, 0);
+
+const canonicalUrl = 'https://freeclinics.us/';
+const pageTitle    = 'Free Clinics US — Find Free and Low-Cost Clinics Near You';
+const description  = `freeclinics.us is a directory of free and low-cost health clinics across the United States. Browse ${totalCities.toLocaleString()} cities in ${ALL_STATES.length} states and territories.`;
 ---
-<BaseLayout
-  title="Free Clinics US — Find Free and Low-Cost Clinics Near You"
-  description="freeclinics.us is a directory of free and low-cost health clinics across the United States. Search by state, city, and service."
-  canonicalUrl="https://freeclinics.us/"
->
-  <main class="site-main">
-    <h1>Free &amp; low-cost clinics across the United States</h1>
-    <p class="lede">
-      A directory of free and sliding-scale health clinics, with verified
-      addresses, hours, services, and fee information for uninsured and
-      underinsured patients.
-    </p>
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <main class="site-main site-main--wide">
+    <header class="page-intro">
+      <h1>Free &amp; low-cost clinics across the United States</h1>
+      <p class="lede">
+        freeclinics.us is a directory of free and sliding-scale health clinics
+        in {totalCities.toLocaleString()} cities across {ALL_STATES.length}{' '}
+        states and territories. Each listing has a verified address, phone
+        number, hours, accepted insurance, and fee structure — built for
+        uninsured and underinsured patients who need to know what a visit will
+        actually cost before walking in the door.
+      </p>
+    </header>
+
+    <section aria-labelledby="browse-by-state">
+      <h2 id="browse-by-state">Browse by state</h2>
+      <ul class="state-grid">
+        {ALL_STATES.map((s) => (
+          <li>
+            <a href={`/${s.slug}/`} class="state-link tap-target">{s.name}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <SlidingScaleExplainer />
   </main>
 </BaseLayout>
 
 <style>
-  .lede { font-size: 1.06rem; color: var(--color-text-muted); }
+  .page-intro { margin-bottom: var(--space-5); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  .state-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-6);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-2);
+  }
+  .state-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .state-link:hover {
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
+  }
 </style>

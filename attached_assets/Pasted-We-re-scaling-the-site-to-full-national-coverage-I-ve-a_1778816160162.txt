@@ -1,0 +1,23 @@
+We're scaling the site to full national coverage. I've added src/data/clinic-slugs.json (18,841 clinic slugs) and src/data/cities.json (7,417 cities, same object shape as the old phase1-cities.json) — these replace phase1-clinic-slugs.json and phase1-cities.json; delete those two old files. phase1-service-locations.json and service-taxonomy.json are unchanged.
+1. Repoint the existing routes to the new files:
+
+clinic/[slug]/index.astro — getStaticPaths now reads clinic-slugs.json (all 18,841). No other logic change.
+[state]/[city]/index.astro — getStaticPaths now reads cities.json (all 7,417). The existing build-time assertions stay; they'll still pass. Update any import of phase1-cities.json (e.g. the clinic-page backlink guard) to cities.json.
+
+2. New route — state index page at [state]/index.astro. getStaticPaths reads cities.json, groups by stateSlug, emits one page per state (56 total). Each page:
+
+H1: "Free & Low-Cost Clinics in [State Name]" (get the name from the US_STATES constant via stateSlug).
+Intro line with the count of cities and clinics in that state.
+A list of every city in the state, alphabetical, each linking to /[state]/[city]/, with its clinic count shown.
+Breadcrumb back to home; BreadcrumbList JSON-LD (Home → State).
+Title, meta description, canonical (https://freeclinics.us/[state]/).
+
+3. Real homepage — replace the placeholder index.astro. It should have: an H1 and a real intro explaining what freeclinics.us is and who it's for; a "Browse by state" section linking all 56 state pages; the <SlidingScaleExplainer />; and the standard header/footer. Keep it within the existing design system — clean, no new patterns.
+4. Now that state pages exist, fix the breadcrumbs site-wide to the full chain, both the visible breadcrumb and the BreadcrumbList JSON-LD:
+
+City hub: Home → [State] → [City] (currently Home → City)
+Service+location page: Home → [State] → [City] → [Service]
+Clinic page: Home → [State] → [City] → [Clinic name]
+The clinic and service pages already have a city-hub backlink — fold it into a proper breadcrumb trail rather than a lone link. Every clinic and city is in cities.json, so the state/city links always resolve.
+
+This is a big build — ~26,300 pages. Expect it to take a few minutes rather than seconds. After astro build, show me: total page count (should be ~26,335), build time, peak memory if it's reported, confirmation the build-time assertions still pass, and the rendered dist/oregon/index.html (state page) and dist/index.html (homepage). Flag immediately if the build runs out of memory or gets pathologically slow — we'll optimize if so.

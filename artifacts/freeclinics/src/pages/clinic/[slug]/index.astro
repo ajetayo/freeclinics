@@ -2,32 +2,47 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.astro';
 import { getClinicBySlug } from '../../../lib/clinics';
-import { getState } from '../../../lib/constants';
+import { US_STATES, getState } from '../../../lib/constants';
 import type { Clinic } from '../../../lib/types';
-import phase1Slugs from '../../../data/phase1-clinic-slugs.json';
-import phase1Cities from '../../../data/phase1-cities.json';
+import clinicSlugs from '../../../data/clinic-slugs.json';
+import cities from '../../../data/cities.json';
 
-const PHASE1_CITY_KEYS = new Set(
-  (phase1Cities as Array<{ stateSlug: string; citySlug: string }>).map(
+// Set of known "state/city" keys from cities.json. Every clinic's
+// (stateSlug, citySlug) should resolve to a real city hub now that we have
+// full national coverage — this guard surfaces any data drift instead of
+// silently emitting a broken backlink.
+const CITY_KEYS = new Set(
+  (cities as Array<{ stateSlug: string; citySlug: string }>).map(
     (c) => `${c.stateSlug}/${c.citySlug}`,
   ),
 );
 
 // ---------------------------------------------------------------------------
-// Routes — Phase 1 clinic detail pages
+// Routes — one page per slug in clinic-slugs.json (~18,800)
 // ---------------------------------------------------------------------------
 export function getStaticPaths() {
-  return (phase1Slugs as string[]).map((slug) => {
+  const routes: Array<{ params: { slug: string }; props: { clinic: Clinic } }> = [];
+  for (const slug of clinicSlugs as string[]) {
     const clinic = getClinicBySlug(slug);
     if (!clinic) {
       throw new Error(
-        `clinic/[slug]: phase1-clinic-slugs.json references "${slug}" but ` +
+        `clinic/[slug]: clinic-slugs.json references "${slug}" but ` +
           `getClinicBySlug returned undefined. Either remove the slug from ` +
-          `phase1-clinic-slugs.json or add the clinic to clinics.json.`,
+          `clinic-slugs.json or add the clinic to clinics.json.`,
       );
     }
-    return { params: { slug }, props: { clinic } };
-  });
+    // Skip clinics in non-US-state jurisdictions (e.g. Palau). They aren't in
+    // scope for this US directory and would dead-end on a missing state hub.
+    if (!(clinic.stateSlug in US_STATES)) {
+      console.warn(
+        `[freeclinics] skipping clinic with unknown state slug: ` +
+          `"${slug}" (state="${clinic.stateSlug}")`,
+      );
+      continue;
+    }
+    routes.push({ params: { slug }, props: { clinic } });
+  }
+  return routes;
 }
 
 const { clinic } = Astro.props as { clinic: Clinic };
@@ -35,9 +50,13 @@ const { clinic } = Astro.props as { clinic: Clinic };
 const stateInfo = getState(clinic.stateSlug);
 const stateName = stateInfo?.name ?? clinic.stateAbbr;
 
-const cityHubHref = PHASE1_CITY_KEYS.has(`${clinic.stateSlug}/${clinic.citySlug}`)
+// City hub URL — only emitted if the (state, city) pair is actually in
+// cities.json. With full national coverage this should always be true; the
+// fallback keeps us safe if a single clinic ever has a mismatched citySlug.
+const cityHubHref  = CITY_KEYS.has(`${clinic.stateSlug}/${clinic.citySlug}`)
   ? `/${clinic.stateSlug}/${clinic.citySlug}/`
   : null;
+const stateHref    = `/${clinic.stateSlug}/`;
 
 const pageTitle    = `${clinic.name} — Free or Low-Cost Clinic in ${clinic.city}, ${clinic.stateAbbr} | freeclinics.us`;
 const description  = `${clinic.name} is a free or low-cost health clinic in ${clinic.city}, ${clinic.stateAbbr}. Hours, services, eligibility, fees, and contact information.`;
@@ -58,7 +77,7 @@ const fullAddress = [clinic.streetAddress, clinic.city, clinic.stateAbbr]
   .join(', ') + (clinic.postalCode ? ` ${clinic.postalCode}` : '');
 
 // ---------------------------------------------------------------------------
-// JSON-LD structured data — single MedicalClinic block
+// JSON-LD: MedicalClinic + BreadcrumbList
 // ---------------------------------------------------------------------------
 const medicalClinicJsonLd: Record<string, unknown> = {
   '@context': 'https://schema.org',
@@ -100,19 +119,42 @@ if (clinic.services.length > 0) {
 }
 const addr = medicalClinicJsonLd.address as Record<string, unknown>;
 for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
+
+// Full breadcrumb chain: Home → State → City → Clinic name.
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: stateName,   item: `https://freeclinics.us${stateHref}` },
+    ...(cityHubHref
+      ? [{ '@type': 'ListItem', position: 3, name: clinic.city, item: `https://freeclinics.us${cityHubHref}` }]
+      : []),
+    { '@type': 'ListItem', position: cityHubHref ? 4 : 3, name: clinic.name, item: canonicalUrl },
+  ],
+};
 ---
 <BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(medicalClinicJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
   </Fragment>
 
   <main class="site-main">
     <article>
-      {cityHubHref && (
-        <p class="breadcrumb">
-          <a href={cityHubHref}>← All free clinics in {clinic.city}, {clinic.stateAbbr}</a>
-        </p>
-      )}
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true">›</span>
+        <a href={stateHref}>{stateName}</a>
+        {cityHubHref && (
+          <>
+            <span aria-hidden="true">›</span>
+            <a href={cityHubHref}>{clinic.city}</a>
+          </>
+        )}
+        <span aria-hidden="true">›</span>
+        {clinic.name}
+      </p>
 
       <header class="page-intro">
         <h1>{clinic.name}</h1>
@@ -123,8 +165,8 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
         </p>
       </header>
 
-      {/* Visit & contact — emphasized callout box. This is the most actionable
-          info on the page, so it gets a bordered, slightly stronger treatment. */}
+      {/* Visit & contact — emphasized callout box. The most actionable info on
+          the page, so it gets a bordered, slightly stronger treatment. */}
       <section aria-labelledby="visit-contact" class="visit-contact">
         <h2 id="visit-contact" class="visit-contact__title">Visit &amp; contact</h2>
         <dl class="visit-contact__details">
@@ -218,7 +260,9 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
   .page-intro { margin-bottom: var(--space-5); }
   .lede { font-size: 1.05rem; color: var(--color-text-muted); }
 
-  /* Visit & contact callout — the most important block on the page. */
+  .breadcrumb a { color: var(--color-text-muted); }
+  .breadcrumb a:hover { color: var(--color-primary-dark); }
+
   .visit-contact {
     background: var(--color-bg);
     border: 2px solid var(--color-border);
@@ -239,10 +283,7 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
     margin: 0;
     font-size: 0.97rem;
   }
-  .visit-contact__details dt {
-    font-weight: 600;
-    color: var(--color-text);
-  }
+  .visit-contact__details dt { font-weight: 600; color: var(--color-text); }
   .visit-contact__details dd { margin: 0; }
 
   .services-list { margin: 0 0 var(--space-4); padding-left: 1.2rem; }
@@ -257,7 +298,6 @@ for (const k of Object.keys(addr)) if (addr[k] === undefined) delete addr[k];
   .info-details dt { font-weight: 600; }
   .info-details dd { margin: 0; }
 
-  /* Stack the dl rows on small screens for readability on ~360px viewports. */
   @media (max-width: 520px) {
     .visit-contact { padding: var(--space-3) var(--space-4); }
     .visit-contact__details,

@@ -80,6 +80,20 @@ const itemListJsonLd = {
   })),
 };
 
+// Full breadcrumb chain: Home → State → City → Service.
+const stateUrl = `https://freeclinics.us/${state}/`;
+const cityUrl  = `https://freeclinics.us/${state}/${city}/`;
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',         item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: stateName,      item: stateUrl },
+    { '@type': 'ListItem', position: 3, name: titleCity,      item: cityUrl },
+    { '@type': 'ListItem', position: 4, name: displayService, item: canonicalUrl },
+  ],
+};
+
 const faqJsonLd = hasFaqs
   ? {
       '@context': 'https://schema.org',
@@ -94,6 +108,7 @@ const faqJsonLd = hasFaqs
 ---
 <BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
   <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(itemListJsonLd)} />
     {faqJsonLd && (
       <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
@@ -103,7 +118,13 @@ const faqJsonLd = hasFaqs
   <main class="site-main site-main--wide">
     <article>
       <p class="breadcrumb">
-        <a href={`/${state}/${city}/`}>← All free clinics in {titleCity}, {stateAbbr}</a>
+        <a href="/">Home</a>
+        <span aria-hidden="true">›</span>
+        <a href={`/${state}/`}>{stateName}</a>
+        <span aria-hidden="true">›</span>
+        <a href={`/${state}/${city}/`}>{titleCity}</a>
+        <span aria-hidden="true">›</span>
+        {displayService}
       </p>
 
       <header class="page-intro">

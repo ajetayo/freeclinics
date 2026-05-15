@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { US_STATES, getState } from '../../lib/constants';
+import cities from '../../data/cities.json';
+
+// ---------------------------------------------------------------------------
+// Routes — one page per state with at least one city in the dataset
+// ---------------------------------------------------------------------------
+type CityRow = {
+  stateSlug: string;
+  citySlug: string;
+  cityName: string;
+  stateAbbr: string;
+  clinicCount: number;
+  servicePages: string[];
+};
+
+export function getStaticPaths() {
+  // Group cities by stateSlug. We emit one page for EVERY entry in US_STATES
+  // (50 states + DC + 5 territories = 56) even if it currently has no city
+  // rows in cities.json — a state hub with "no clinics yet" is still a valid
+  // SEO landing page and keeps the directory's coverage promise.
+  const byState = new Map<string, CityRow[]>();
+  for (const slug of Object.keys(US_STATES)) byState.set(slug, []);
+
+  for (const c of cities as CityRow[]) {
+    // Skip malformed rows (empty citySlug/cityName) — they'd render a broken
+    // link in the state's city list. The city hub route applies the same
+    // filter and warns once on its own.
+    if (!c.citySlug || !c.cityName) continue;
+    // Skip cities whose state isn't in US_STATES (e.g. Palau, a US-associated
+    // nation but not a US state/territory). Warn so the row is visible, but
+    // don't block the build — these aren't part of the US directory scope.
+    if (!(c.stateSlug in US_STATES)) {
+      console.warn(
+        `[freeclinics] skipping city with unknown state slug in cities.json: ` +
+          `"${c.stateSlug}/${c.citySlug}"`,
+      );
+      continue;
+    }
+    byState.get(c.stateSlug)!.push(c);
+  }
+
+  return Array.from(byState.entries()).map(([stateSlug, stateCities]) => ({
+    params: { state: stateSlug },
+    props: { stateSlug, stateCities },
+  }));
+}
+
+const { stateSlug, stateCities } = Astro.props as {
+  stateSlug: string;
+  stateCities: CityRow[];
+};
+
+const stateInfo = getState(stateSlug)!; // assertion in getStaticPaths guarantees this
+const stateName = stateInfo.name;
+const stateAbbr = stateInfo.abbr;
+
+// Sort cities alphabetically and tally clinics for the intro line.
+const sortedCities = [...stateCities].sort((a, b) => a.cityName.localeCompare(b.cityName));
+const totalClinics = sortedCities.reduce((sum, c) => sum + c.clinicCount, 0);
+
+const canonicalUrl = `https://freeclinics.us/${stateSlug}/`;
+const pageTitle    = `Free & Low-Cost Clinics in ${stateName} | freeclinics.us`;
+// Description gracefully handles the no-data case (e.g. a state we cover but
+// haven't sourced clinics for yet) so the page still has a unique meta tag.
+const description  = sortedCities.length === 0
+  ? `Free and low-cost health clinic directory for ${stateName} (${stateAbbr}). Verified listings are being added — check back soon for clinics with hours, fees, and contact information.`
+  : `Directory of ${totalClinics.toLocaleString()} free and low-cost health clinics in ${stateName} across ${sortedCities.length.toLocaleString()} cities. Browse by city to find verified hours, fees, and contact information.`;
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',    item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: stateName, item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main site-main--wide">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">›</span> {stateName}
+      </p>
+
+      <header class="page-intro">
+        <h1>Free &amp; Low-Cost Clinics in {stateName}</h1>
+        {sortedCities.length === 0 ? (
+          <p class="lede">
+            We don't yet have verified clinic listings for {stateName} ({stateAbbr}).
+            New cities are being added as we verify hours, fees, and contact
+            information. In the meantime, browse another state from the
+            <a href="/"> homepage</a>.
+          </p>
+        ) : (
+          <p class="lede">
+            {totalClinics.toLocaleString()} free and low-cost health clinics
+            across {sortedCities.length.toLocaleString()}{' '}
+            {sortedCities.length === 1 ? 'city' : 'cities'} in {stateName} ({stateAbbr}).
+            Pick a city below to see verified addresses, phone numbers, hours,
+            and fee structures.
+          </p>
+        )}
+      </header>
+
+      {sortedCities.length > 0 && (
+        <section aria-labelledby="cities-list">
+          <h2 id="cities-list">Cities in {stateName}</h2>
+          <ul class="city-list">
+            {sortedCities.map((c) => (
+              <li class="city-row">
+                <a href={`/${c.stateSlug}/${c.citySlug}/`} class="city-row__link">{c.cityName}</a>
+                <span class="city-row__count">
+                  {c.clinicCount} {c.clinicCount === 1 ? 'clinic' : 'clinics'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .page-intro { margin-bottom: var(--space-5); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  .city-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    /* Two/three columns on wider viewports — the rows are short so this packs
+       cleanly without becoming hard to scan. */
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--space-1) var(--space-4);
+  }
+  .city-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .city-row__link {
+    text-decoration: none;
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  .city-row__link:hover { text-decoration: underline; color: var(--color-primary-dark); }
+  .city-row__count {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+</style>

@@ -1,0 +1,268 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/mental-health/';
+const pageTitle     = 'Affordable Mental Health Care | freeclinics.us';
+const description   = 'Free and low-cost mental health options — crisis lines, community mental health centers, sliding-scale therapy, and medication assistance.';
+const datePublished = '2026-05-18';
+const dateModified  = '2026-05-18';
+const headline      = 'Affordable Mental Health Care';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: 'https://freeclinics.us/resources/' },
+    { '@type': 'ListItem', position: 3, name: headline,    item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        <a href="/resources/">Resources</a>
+        <span aria-hidden="true"> › </span>
+        {headline}
+      </p>
+
+      <header class="page-intro">
+        <h1>{headline}</h1>
+        <p class="lede">
+          If you're in crisis right now, call or text <strong>988</strong> — the Suicide and
+          Crisis Lifeline. It's free, confidential, and available 24/7 in English and
+          Spanish. You can also chat at 988lifeline.org.
+        </p>
+        <p class="lede">
+          For everything else — therapy you can't afford, medication you can't fill, a child
+          or family member in distress, ongoing mental health needs you've been putting off
+          — this page covers the main options for affordable mental health care.
+        </p>
+      </header>
+
+      <section aria-labelledby="in-crisis">
+        <h2 id="in-crisis">In a crisis</h2>
+        <p>Several free, confidential resources are available immediately:</p>
+        <ul>
+          <li><strong>988 Suicide and Crisis Lifeline</strong> — call or text 988</li>
+          <li><strong>Crisis Text Line</strong> — text HOME to 741741</li>
+          <li><strong>Veterans Crisis Line</strong> — call 988 and press 1, or text 838255</li>
+          <li><strong>The Trevor Project</strong> (LGBTQ+ youth) — call 1-866-488-7386 or text START to 678-678</li>
+          <li><strong>National Domestic Violence Hotline</strong> — call 1-800-799-7233 or text START to 88788</li>
+        </ul>
+        <p>
+          These lines are answered by trained counselors. They don't replace ongoing care,
+          but they can help in the moment and connect you to local resources.
+        </p>
+        <p>
+          If someone is in immediate danger of harming themselves or others, call 911. Many
+          cities now have <strong>mobile crisis teams</strong> — mental health professionals
+          who can respond to crisis situations instead of police. Ask the 988 counselor
+          whether one is available in your area.
+        </p>
+      </section>
+
+      <section aria-labelledby="cmhcs">
+        <h2 id="cmhcs">Community Mental Health Centers</h2>
+        <p>
+          Every state has a network of{' '}
+          <strong>Community Mental Health Centers (CMHCs)</strong> — nonprofit clinics that
+          receive federal and state funding to provide mental health and substance use
+          treatment on a sliding-scale basis. CMHCs offer:
+        </p>
+        <ul>
+          <li>Individual therapy</li>
+          <li>Group therapy</li>
+          <li>Psychiatric care (medication management)</li>
+          <li>Substance use treatment</li>
+          <li>Crisis services</li>
+          <li>Case management</li>
+        </ul>
+        <p>
+          To find a CMHC near you, use{' '}
+          <strong>SAMHSA's Behavioral Health Treatment Services Locator</strong> at
+          findtreatment.gov. Filter for "low or no cost" and your insurance status.
+        </p>
+        <p>
+          CMHCs typically prioritize people with serious mental illness, low income, or no
+          insurance. Wait times can be long for non-urgent therapy, but they generally cannot
+          turn away people in crisis.
+        </p>
+      </section>
+
+      <section aria-labelledby="fqhc-mh">
+        <h2 id="fqhc-mh">FQHC mental health services</h2>
+        <p>
+          Many <strong>Federally Qualified Health Centers</strong> include behavioral health
+          services on the same sliding-scale fees as their medical care. If you're already a
+          patient at an FQHC for primary care, ask whether they have an in-house therapist
+          or psychiatrist. Many do.
+        </p>
+        <p>
+          The advantage: one chart, one set of records, one team. Your therapist and your
+          primary care doctor can coordinate, which matters especially for medication
+          management.
+        </p>
+        <p>
+          To find FQHCs with mental health: search findahealthcenter.hrsa.gov and filter for
+          "Mental Health Services."
+        </p>
+      </section>
+
+      <section aria-labelledby="sliding-scale-therapy">
+        <h2 id="sliding-scale-therapy">Sliding-scale therapy</h2>
+        <p>
+          For ongoing therapy outside of CMHCs and FQHCs, several networks connect people to
+          therapists who offer reduced fees:
+        </p>
+        <ul>
+          <li>
+            <strong>Open Path Psychotherapy Collective</strong> (openpathcollective.org) — a
+            nonprofit network where therapists offer sessions at $40–$80 to anyone uninsured
+            or underinsured. One-time membership fee.
+          </li>
+          <li>
+            <strong>Psychology Today</strong> (psychologytoday.com/us/therapists) — search and
+            filter for "sliding scale" and "self-pay." Many therapists list their reduced fees
+            here.
+          </li>
+          <li>
+            <strong>Inclusive Therapists</strong> (inclusivetherapists.com) — directory of
+            therapists specializing in marginalized communities, with sliding-scale options.
+          </li>
+        </ul>
+        <p>
+          Many private-practice therapists offer reduced fees to a few clients but don't
+          advertise it. It's worth asking directly.
+        </p>
+      </section>
+
+      <section aria-labelledby="specific-groups">
+        <h2 id="specific-groups">Help for specific groups</h2>
+        <p>
+          <strong>Veterans:</strong> VA Mental Health offers free or low-cost care for
+          enrolled veterans. <strong>Vet Centers</strong> provide free counseling for combat
+          veterans and their families without VA enrollment. Call 1-800-905-4675.
+        </p>
+        <p>
+          <strong>College and university students:</strong> most colleges have counseling
+          centers offering free or very low-cost sessions to enrolled students. Use them —
+          they're typically included in tuition.
+        </p>
+        <p>
+          <strong>Children:</strong> Medicaid and CHIP cover comprehensive mental health care
+          for children. Many schools have on-site counselors.{' '}
+          <strong>National Federation of Families</strong> supports families navigating
+          children's mental health.
+        </p>
+        <p>
+          <strong>Older adults:</strong>{' '}
+          <strong>Eldercare Locator</strong> (1-800-677-1116) can connect you to local
+          programs. Medicare covers mental health visits.
+        </p>
+        <p>
+          <strong>LGBTQ+:</strong> <strong>The Trevor Project</strong> (youth crisis),{' '}
+          <strong>Trans Lifeline</strong> (1-877-565-8860), and{' '}
+          <strong>LGBT National Hotline</strong> (1-888-843-4564) offer specific support.
+        </p>
+      </section>
+
+      <section aria-labelledby="mh-medication">
+        <h2 id="mh-medication">Medication for mental health</h2>
+        <p>
+          Psychiatric medications can be expensive, especially newer ones. Your options:
+        </p>
+        <ul>
+          <li><strong>Patient assistance programs</strong> for psychiatric medications are common — see our <a href="/resources/medications/">medications guide</a> for how to find them.</li>
+          <li><strong>Generic medications</strong> are widely available for most psychiatric conditions and cost a fraction of brand-name. Ask your prescriber if there's a generic option.</li>
+          <li><strong>Discount cards</strong> (GoodRx, SingleCare, RxSaver) can substantially reduce out-of-pocket cost at the pharmacy.</li>
+          <li><strong>The NAMI HelpLine</strong> (1-800-950-NAMI) can help connect you to medication assistance specifically for psychiatric drugs.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="online-apps">
+        <h2 id="online-apps">Online and app-based options</h2>
+        <p>Some affordable options that work for some people:</p>
+        <ul>
+          <li><strong>BetterHelp</strong> and <strong>Talkspace</strong> offer paid online therapy without insurance. Costs vary; sometimes cheaper than in-person, sometimes not.</li>
+          <li><strong>7 Cups</strong> offers free emotional support from trained volunteers (not licensed therapists) plus paid therapy.</li>
+          <li><strong>NAMI Connection</strong> and <strong>Depression and Bipolar Support Alliance</strong> run free peer support groups, online and in person.</li>
+          <li><strong>Therapy Aid Coalition</strong> offers free short-term therapy for healthcare workers and others affected by traumatic events.</li>
+        </ul>
+        <p>
+          These work best as a supplement or for moderate concerns. For serious illness,
+          crisis, or medication needs, in-person care is usually better.
+        </p>
+      </section>
+
+      <section aria-labelledby="inpatient">
+        <h2 id="inpatient">Inpatient and emergency care</h2>
+        <p>
+          If you're in danger of harming yourself or someone else, or you can't keep yourself
+          safe:
+        </p>
+        <ul>
+          <li>Go to a hospital emergency room. EMTALA requires them to evaluate and stabilize you regardless of insurance.</li>
+          <li>Some hospitals have <strong>psychiatric emergency rooms</strong> — separate facilities specifically for mental health crises. They're calmer and faster than a general ER. Call ahead to find out.</li>
+          <li><strong>Mobile crisis teams</strong> can come to you in many cities.</li>
+        </ul>
+        <p>
+          Inpatient psychiatric care is expensive, but financial assistance programs apply —
+          see our <a href="/resources/uninsured-rights/">uninsured rights guide</a>.
+        </p>
+      </section>
+
+      <section aria-labelledby="note-mh">
+        <h2 id="note-mh">A note on this guide</h2>
+        <p>
+          Mental health care is often hardest to access for the people who need it most. The
+          systems above are imperfect — wait times, paperwork, narrow networks, stigma — but
+          they exist, and they help. If the first thing you try doesn't work, try the next
+          one. Don't give up on yourself.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); margin-bottom: var(--space-3); }
+  article section { margin-bottom: var(--space-6); }
+  article section h2 { margin-bottom: var(--space-3); }
+  article ul, article ol { margin: var(--space-3) 0 var(--space-4); }
+  article li { margin-bottom: var(--space-1); line-height: 1.65; }
+</style>

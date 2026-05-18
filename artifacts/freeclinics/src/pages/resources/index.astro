@@ -1,0 +1,157 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const canonicalUrl = 'https://freeclinics.us/resources/';
+const pageTitle    = 'Health Resources | freeclinics.us';
+const description  = 'Practical guides to free and low-cost healthcare in the U.S. — prescriptions, dental, mental health, ER costs, Medicaid, and your rights as an uninsured patient.';
+
+const collectionPageJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Health Resources',
+  description,
+  url: canonicalUrl,
+  inLanguage: 'en-US',
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  hasPart: [
+    { '@type': 'Article', name: 'Affording Your Medications: A Guide to Free and Low-Cost Prescription Help', url: 'https://freeclinics.us/resources/medications/' },
+    { '@type': 'Article', name: 'Your Rights as an Uninsured Patient',                                        url: 'https://freeclinics.us/resources/uninsured-rights/' },
+    { '@type': 'Article', name: 'Affordable Dental Care Without Insurance',                                    url: 'https://freeclinics.us/resources/dental-care/' },
+    { '@type': 'Article', name: 'Affordable Mental Health Care',                                               url: 'https://freeclinics.us/resources/mental-health/' },
+    { '@type': 'Article', name: 'What to Expect at Your First Free Clinic Visit',                             url: 'https://freeclinics.us/resources/first-visit/' },
+    { '@type': 'Article', name: 'How to Apply for Medicaid',                                                  url: 'https://freeclinics.us/resources/medicaid-application/' },
+    { '@type': 'Article', name: 'When to Use the Emergency Room (and What It Costs Uninsured)',               url: 'https://freeclinics.us/resources/emergency-room/' },
+  ],
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: canonicalUrl },
+  ],
+};
+
+const resources = [
+  {
+    href:        '/resources/medications/',
+    title:       'Affording Your Medications',
+    description: 'Patient assistance programs, discount cards, 340B pricing, and program databases — how to pay for prescriptions without insurance.',
+  },
+  {
+    href:        '/resources/uninsured-rights/',
+    title:       'Your Rights as an Uninsured Patient',
+    description: 'Federal protections under EMTALA, hospital financial assistance obligations, the No Surprises Act, and how to dispute a medical bill.',
+  },
+  {
+    href:        '/resources/dental-care/',
+    title:       'Affordable Dental Care Without Insurance',
+    description: 'FQHCs with dental, dental schools, national charity programs, Medicaid dental coverage by state, and what to do in a dental emergency.',
+  },
+  {
+    href:        '/resources/mental-health/',
+    title:       'Affordable Mental Health Care',
+    description: 'Crisis lines, community mental health centers, sliding-scale therapy networks, and how to get psychiatric medications at lower cost.',
+  },
+  {
+    href:        '/resources/first-visit/',
+    title:       'Your First Free Clinic Visit: What to Expect',
+    description: 'What to bring, how check-in and intake work, what questions to ask, and how the sliding-scale fee structure applies to you.',
+  },
+  {
+    href:        '/resources/medicaid-application/',
+    title:       'How to Apply for Medicaid',
+    description: 'Eligibility categories, the three application paths, documents you\'ll need, immigration rules, and what to do if you\'re denied.',
+  },
+  {
+    href:        '/resources/emergency-room/',
+    title:       'When to Use the ER (and What It Costs Uninsured)',
+    description: 'EMTALA rights, which symptoms require the ER vs. urgent care, typical uninsured cost ranges, and a step-by-step bill negotiation guide.',
+  },
+];
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(collectionPageJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resources-main">
+    <p class="breadcrumb">
+      <a href="/">Home</a>
+      <span aria-hidden="true"> › </span>
+      Resources
+    </p>
+
+    <header class="page-intro">
+      <h1>Health Resources</h1>
+      <p class="lede">
+        Practical guides for navigating free and low-cost healthcare in the United States —
+        what your rights are, where to find help, and how to handle the parts the clinic
+        visit itself doesn't cover.
+      </p>
+    </header>
+
+    <ul class="resource-list" role="list">
+      {resources.map((r) => (
+        <li class="resource-card">
+          <h2 class="resource-card__title">
+            <a href={r.href}>{r.title}</a>
+          </h2>
+          <p class="resource-card__desc">{r.description}</p>
+        </li>
+      ))}
+    </ul>
+
+    <footer class="page-footer">
+      <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+      <p class="editorial-note">
+        If you spot something out of date, <a href="/contact/">please let us know</a>.
+      </p>
+    </footer>
+  </main>
+</BaseLayout>
+
+<style>
+  .resources-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  .resource-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-7);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .resource-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-surface);
+  }
+  .resource-card__title {
+    font-size: 1.05rem;
+    margin: 0 0 var(--space-2);
+  }
+  .resource-card__title a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+  .resource-card__title a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+  }
+  .resource-card__desc {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+</style>

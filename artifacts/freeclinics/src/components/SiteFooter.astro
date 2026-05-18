@@ -1,9 +1,15 @@
 ---
-// Site-wide footer. No links (we have no About/Contact pages yet). The
-// per-page "last verified" date and editorial note live on each page's own
-// .page-footer — this is just the trust + copyright strip at the bottom of
-// every layout.
 const currentYear = new Date().getFullYear();
+
+const resources = [
+  { href: '/resources/medications/',         label: 'Affording Your Medications' },
+  { href: '/resources/uninsured-rights/',    label: 'Your Rights as an Uninsured Patient' },
+  { href: '/resources/dental-care/',         label: 'Affordable Dental Care' },
+  { href: '/resources/mental-health/',       label: 'Affordable Mental Health Care' },
+  { href: '/resources/first-visit/',         label: 'Your First Clinic Visit' },
+  { href: '/resources/medicaid-application/', label: 'How to Apply for Medicaid' },
+  { href: '/resources/emergency-room/',      label: 'When to Use the ER' },
+];
 ---
 <footer class="site-footer">
   <div class="site-footer__inner">
@@ -14,6 +20,18 @@ const currentYear = new Date().getFullYear();
     <p class="site-footer__trust">
       Listings are reviewed and verified by our editorial team.
     </p>
+
+    <nav class="site-footer__resources" aria-label="Health resources">
+      <p class="site-footer__resources-label">
+        <a href="/resources/">Health Resources</a>
+      </p>
+      <ul>
+        {resources.map((r) => (
+          <li><a href={r.href}>{r.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
     <p class="site-footer__copyright">© {currentYear} freeclinics.us</p>
   </div>
 </footer>
@@ -38,6 +56,42 @@ const currentYear = new Date().getFullYear();
   }
   .site-footer__mission,
   .site-footer__trust { margin: 0 0 var(--space-1); }
+
+  .site-footer__resources {
+    margin: var(--space-4) 0 0;
+    font-size: 0.85rem;
+  }
+  .site-footer__resources-label {
+    margin: 0 0 var(--space-1);
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .site-footer__resources-label a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .site-footer__resources-label a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+  }
+  .site-footer__resources ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+  }
+  .site-footer__resources a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+  }
+  .site-footer__resources a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+  }
+
   .site-footer__copyright {
     margin: var(--space-3) 0 0;
     font-size: 0.85rem;

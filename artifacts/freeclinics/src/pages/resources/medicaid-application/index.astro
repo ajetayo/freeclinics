@@ -1,0 +1,262 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/medicaid-application/';
+const pageTitle     = 'How to Apply for Medicaid | freeclinics.us';
+const description   = 'A plain-language guide to Medicaid eligibility, how to apply, what documents you need, and what to do if you\'re denied.';
+const datePublished = '2026-05-18';
+const dateModified  = '2026-05-18';
+const headline      = 'How to Apply for Medicaid';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: 'https://freeclinics.us/resources/' },
+    { '@type': 'ListItem', position: 3, name: headline,    item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        <a href="/resources/">Resources</a>
+        <span aria-hidden="true"> › </span>
+        {headline}
+      </p>
+
+      <header class="page-intro">
+        <h1>{headline}</h1>
+        <p class="lede">
+          Medicaid is the largest source of health coverage in the United States. It's free
+          or very low cost, covers comprehensive care including prescription medications, and
+          can be applied retroactively in many states. If you're uninsured, applying for
+          Medicaid is almost always worth the effort — even if you're not sure you'll
+          qualify, even if you've been denied before. This page covers who qualifies, how to
+          apply, and what to do if you're denied.
+        </p>
+      </header>
+
+      <section aria-labelledby="who-qualifies">
+        <h2 id="who-qualifies">Who qualifies</h2>
+        <p>
+          Medicaid eligibility is a function of three things: where you live, what your
+          household looks like, and what category you fall into. The basic categories are:
+        </p>
+        <p>
+          <strong>Children.</strong> Every state covers children below a relatively high
+          income threshold — typically 200% or higher of the federal poverty level.{' '}
+          <strong>CHIP</strong> (the Children's Health Insurance Program) covers children
+          whose families earn slightly too much for Medicaid. Together, Medicaid and CHIP
+          cover most low- and moderate-income children in the U.S.
+        </p>
+        <p>
+          <strong>Pregnant people.</strong> Coverage is broad in every state, with income
+          thresholds often higher than for other adults. Pregnancy-related Medicaid covers
+          prenatal care, delivery, and a postpartum period.
+        </p>
+        <p>
+          <strong>Adults under 65.</strong> This is where state-by-state differences matter
+          most. States that <strong>expanded Medicaid under the Affordable Care Act</strong>{' '}
+          (more than 40 states plus DC as of 2026) cover adults up to 138% of the federal
+          poverty level — about $20,000/year for a single person. States that didn't expand
+          have much narrower eligibility, usually limited to parents of dependent children at
+          very low income.
+        </p>
+        <p>
+          <strong>Aged, blind, and disabled.</strong> People over 65 or with qualifying
+          disabilities have separate pathways, often connected to SSI (Supplemental Security
+          Income).
+        </p>
+        <p>
+          <strong>Special categories.</strong> Foster youth, breast and cervical cancer
+          patients, some former inmates, and certain other groups have specific eligibility.
+        </p>
+        <p>
+          To check eligibility quickly, use the <strong>HealthCare.gov</strong> screener. It
+          takes a few minutes and tells you whether you likely qualify in your state.
+        </p>
+      </section>
+
+      <section aria-labelledby="how-to-apply">
+        <h2 id="how-to-apply">How to apply</h2>
+        <p>There are three main paths to apply:</p>
+        <p>
+          <strong>Through HealthCare.gov.</strong> Apply at HealthCare.gov or call
+          1-800-318-2596. If you're potentially Medicaid-eligible, the system will route
+          your application to your state agency. This is the easiest way if you're not sure
+          whether you qualify for Medicaid or for an ACA Marketplace plan.
+        </p>
+        <p>
+          <strong>Through your state Medicaid agency.</strong> Every state has its own
+          Medicaid application portal. This is often the better path if you're confident
+          you'll qualify, since state portals tend to handle state-specific questions more
+          cleanly. Search "[your state] Medicaid apply" to find it.
+        </p>
+        <p>
+          <strong>In person.</strong> Many county social services offices, FQHCs, and
+          hospitals have <strong>enrollment counselors</strong> who can sit with you and walk
+          through the application. They know your state's quirks. Ask any clinic or health
+          center if they have one.
+        </p>
+      </section>
+
+      <section aria-labelledby="what-youll-need">
+        <h2 id="what-youll-need">What you'll need</h2>
+        <p>The application typically asks for:</p>
+        <ul>
+          <li><strong>Names, dates of birth, and Social Security Numbers</strong> for everyone in your household</li>
+          <li><strong>Citizenship or immigration status</strong> documents (see below)</li>
+          <li><strong>Income proof</strong> — pay stubs, tax returns, unemployment letters</li>
+          <li><strong>Employer information</strong> if anyone in the household has insurance available through work</li>
+          <li><strong>Resource information</strong> in some states for certain categories (less common after the ACA simplified rules)</li>
+          <li><strong>Pregnancy verification</strong> if applicable</li>
+        </ul>
+        <p>
+          If you don't have everything immediately,{' '}
+          <strong>start the application anyway</strong>. States must give you a reasonable
+          opportunity to provide documents after submission.
+        </p>
+      </section>
+
+      <section aria-labelledby="immigration-status">
+        <h2 id="immigration-status">A note on immigration status</h2>
+        <p>This is a sensitive area. The basic rules:</p>
+        <ul>
+          <li><strong>U.S. citizens</strong> qualify based on the other criteria above.</li>
+          <li><strong>Lawful permanent residents</strong> (green card holders) generally qualify after a <strong>5-year waiting period</strong>, though some states cover children and pregnant people without the waiting period.</li>
+          <li><strong>Refugees, asylees, and certain humanitarian categories</strong> generally qualify immediately.</li>
+          <li><strong>Undocumented immigrants</strong> are not eligible for federal Medicaid (with the exception of <strong>emergency Medicaid</strong>, which covers emergency care regardless of immigration status).</li>
+        </ul>
+        <p>
+          Applying for Medicaid does not, by itself, affect immigration status or trigger a
+          "public charge" review for most categories. For specific situations, talk to a free
+          immigration legal aid organization. The{' '}
+          <strong>Protecting Immigrant Families</strong> coalition has up-to-date guidance.
+        </p>
+      </section>
+
+      <section aria-labelledby="how-long">
+        <h2 id="how-long">How long it takes</h2>
+        <p>Federal rules require states to process Medicaid applications within:</p>
+        <ul>
+          <li><strong>45 days</strong> for most categories</li>
+          <li><strong>90 days</strong> for disability-related applications</li>
+          <li><strong>Faster</strong> for pregnancy and emergency situations</li>
+        </ul>
+        <p>
+          Coverage can start the month you apply, and{' '}
+          <strong>many states offer retroactive coverage up to 3 months before the
+          application</strong> — which means if you have medical bills from the recent past,
+          those bills may be covered if you qualify. Always ask about retroactive eligibility.
+        </p>
+      </section>
+
+      <section aria-labelledby="if-denied">
+        <h2 id="if-denied">If you're denied</h2>
+        <p>
+          Denials are common and frequently reversed on appeal. If you receive a denial
+          letter:
+        </p>
+        <ol>
+          <li><strong>Read it carefully.</strong> It will state the reason — income too high, missing documents, ineligible category. Often the reason is fixable.</li>
+          <li><strong>Ask for an appeal.</strong> Every state has a Medicaid appeal process and a deadline (usually 30–90 days from the denial letter). You have the right to a hearing.</li>
+          <li><strong>Get help.</strong> Free legal aid organizations handle Medicaid appeals all the time. Search <strong>LawHelp.org</strong> by state. State ombudsman offices can also intervene.</li>
+          <li><strong>Check for category errors.</strong> Sometimes the state has applied the wrong category — for example, processing you as a parent when you have a disability that would qualify you in a different pathway with different rules.</li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="after-enrollment">
+        <h2 id="after-enrollment">After enrollment</h2>
+        <p>Once you're on Medicaid:</p>
+        <ul>
+          <li>You'll get a Medicaid ID card. Bring it to every appointment.</li>
+          <li>You can choose a managed care plan in many states. Pick one whose network includes the providers you want to see.</li>
+          <li>You must <strong>report changes</strong> — income, household size, address — typically within 10 days.</li>
+          <li>You'll have an <strong>annual renewal</strong>, often automated, but watch your mail. People sometimes lose coverage simply because they missed the renewal notice.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="medicaid-vs-other">
+        <h2 id="medicaid-vs-other">Medicaid versus other programs</h2>
+        <p>Quick clarification of related programs:</p>
+        <ul>
+          <li><strong>Medicaid</strong> — income-based, jointly federal and state, free or very low cost</li>
+          <li><strong>CHIP</strong> — Children's Health Insurance Program, for kids in families earning too much for Medicaid</li>
+          <li><strong>Medicare</strong> — age- or disability-based, federal, has premiums and copays. Some people have both Medicare and Medicaid ("dual-eligible") and Medicaid picks up Medicare's out-of-pocket costs.</li>
+          <li><strong>ACA Marketplace plans</strong> — for people earning too much for Medicaid; subsidies can make them affordable.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="while-you-wait">
+        <h2 id="while-you-wait">While you wait</h2>
+        <p>
+          Don't put off care because your application is pending.{' '}
+          <strong>FQHCs and free clinics will see you regardless of Medicaid status</strong>,
+          on the same sliding scale. Many providers will hold a bill while a Medicaid
+          application is processing, then bill Medicaid retroactively if you're approved.
+          Always ask up front.
+        </p>
+      </section>
+
+      <section aria-labelledby="help-with-application">
+        <h2 id="help-with-application">Help with the application</h2>
+        <p>Free assistance is available:</p>
+        <ul>
+          <li><strong>HealthCare.gov assisters</strong> — find a navigator at localhelp.healthcare.gov</li>
+          <li><strong>FQHCs</strong> — most have on-site enrollment counselors</li>
+          <li><strong>Hospital social workers</strong> — many will help patients enroll, especially in connection with care</li>
+          <li><strong>Legal aid organizations</strong> — for complex cases, denials, and appeals</li>
+        </ul>
+        <p>
+          You're not on your own with this paperwork. Many people who would qualify never
+          apply because the process feels overwhelming. Start the application, get help where
+          you need it, and don't be discouraged by a first denial.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+  article section { margin-bottom: var(--space-6); }
+  article section h2 { margin-bottom: var(--space-3); }
+  article ul, article ol { margin: var(--space-3) 0 var(--space-4); }
+  article li { margin-bottom: var(--space-1); line-height: 1.65; }
+</style>

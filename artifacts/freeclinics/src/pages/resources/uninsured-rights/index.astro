@@ -1,0 +1,252 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/uninsured-rights/';
+const pageTitle     = 'Your Rights as an Uninsured Patient | freeclinics.us';
+const description   = 'Federal protections for uninsured patients — EMTALA, hospital financial assistance, the No Surprises Act, and how to dispute medical bills.';
+const datePublished = '2026-05-18';
+const dateModified  = '2026-05-18';
+const headline      = 'Your Rights as an Uninsured Patient';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: 'https://freeclinics.us/resources/' },
+    { '@type': 'ListItem', position: 3, name: headline,    item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        <a href="/resources/">Resources</a>
+        <span aria-hidden="true"> › </span>
+        {headline}
+      </p>
+
+      <header class="page-intro">
+        <h1>{headline}</h1>
+        <p class="lede">
+          Being uninsured doesn't mean you have no rights when you seek medical care. Federal
+          and state laws give you specific protections — about who must treat you, what you
+          can be charged, what notice you must receive, and how you can dispute bills you
+          can't pay. This page covers the rights that matter most in practice.
+        </p>
+      </header>
+
+      <section aria-labelledby="emtala">
+        <h2 id="emtala">You have a right to emergency care</h2>
+        <p>
+          The <strong>Emergency Medical Treatment and Active Labor Act (EMTALA)</strong> is a
+          federal law that requires nearly every hospital with an emergency room to:
+        </p>
+        <ol>
+          <li>Screen anyone who comes in for an emergency medical condition, regardless of insurance, immigration status, or ability to pay.</li>
+          <li>Stabilize the patient before discharge or transfer, if an emergency condition exists.</li>
+        </ol>
+        <p>
+          This means an ER cannot refuse to evaluate you because you can't pay. It cannot
+          wait to treat a heart attack while it verifies your insurance. It cannot transfer
+          you to another hospital before you're stable just because you're uninsured. Active
+          labor counts as an emergency under the law.
+        </p>
+        <p>
+          What EMTALA does <strong>not</strong> do: it doesn't mean care is free. You will
+          still be billed. But you cannot be turned away in the moment.
+        </p>
+        <p>
+          If you believe a hospital violated EMTALA, you can file a complaint with the{' '}
+          <strong>Centers for Medicare &amp; Medicaid Services (CMS)</strong>. EMTALA
+          violations are taken seriously.
+        </p>
+      </section>
+
+      <section aria-labelledby="financial-assistance">
+        <h2 id="financial-assistance">Nonprofit hospitals must offer financial assistance</h2>
+        <p>
+          Under federal tax law (<strong>Section 501(r)</strong> of the Internal Revenue
+          Code), every nonprofit hospital — which is most U.S. hospitals — must have a
+          written <strong>financial assistance policy</strong> and make it publicly available.
+          The policy must explain:
+        </p>
+        <ul>
+          <li>Who is eligible for free or discounted care</li>
+          <li>How to apply</li>
+          <li>What documents you need</li>
+        </ul>
+        <p>
+          Income limits vary by hospital but typically offer free care up to 200–300% of the
+          federal poverty level and sliding-scale discounts up to 400% FPL or higher. Some
+          hospitals go further.
+        </p>
+        <p>Crucially, nonprofit hospitals are required to:</p>
+        <ul>
+          <li>Notify you that financial assistance exists before sending you to collections</li>
+          <li>Use limited collections methods if you're presumptively eligible</li>
+          <li>Limit what they charge you to no more than what they charge insured patients</li>
+        </ul>
+        <p>
+          <strong>Always apply for financial assistance before paying a hospital bill.</strong>{' '}
+          Many people who would qualify never apply because no one tells them. Ask at
+          registration, ask before discharge, ask when the bill arrives. The application is
+          usually one or two pages plus income proof.
+        </p>
+      </section>
+
+      <section aria-labelledby="no-surprises">
+        <h2 id="no-surprises">You have a right to know costs in advance</h2>
+        <p>
+          The <strong>No Surprises Act</strong> (2022) added several important protections,
+          especially for uninsured patients:
+        </p>
+        <ul>
+          <li>For scheduled care, providers must give you a <strong>Good Faith Estimate</strong> of what services will cost.</li>
+          <li>If your final bill is <strong>$400 or more higher</strong> than the Good Faith Estimate, you can dispute it through a federal process.</li>
+          <li>The Good Faith Estimate must be in writing and given before the appointment.</li>
+        </ul>
+        <p>
+          If your provider didn't give you a Good Faith Estimate, ask for one. If the bill
+          arrives much higher than the estimate, you have a right to dispute it through the
+          CMS dispute resolution process.
+        </p>
+        <p>
+          The Act also protects you from surprise out-of-network billing in emergency
+          situations, even if you have insurance — and protects against surprise air ambulance
+          bills (ground ambulance protections vary by state).
+        </p>
+      </section>
+
+      <section aria-labelledby="dispute-bills">
+        <h2 id="dispute-bills">You have a right to dispute bills</h2>
+        <p>
+          Medical bills are notoriously error-prone. Studies have found that most hospital
+          bills contain at least one error. You have a right to:
+        </p>
+        <ul>
+          <li><strong>An itemized bill</strong> — line by line, with billing codes. Always request one before paying.</li>
+          <li><strong>A medical billing review</strong> through the hospital or insurer.</li>
+          <li><strong>A formal dispute</strong> if you believe charges are wrong.</li>
+        </ul>
+        <p>
+          Common problems to look for: duplicate charges, services you didn't receive,
+          generic services billed as specialty, supplies and equipment marked up enormously.
+        </p>
+        <p>
+          If you can't pay even after financial assistance, you can usually{' '}
+          <strong>negotiate</strong>. Uninsured patients often successfully negotiate hospital
+          bills down to 30–50% of the original amount, especially if paying in a lump sum.
+          Ask for the financial counselor and be direct.
+        </p>
+      </section>
+
+      <section aria-labelledby="hipaa">
+        <h2 id="hipaa">You have a right to medical privacy</h2>
+        <p>
+          The <strong>Health Insurance Portability and Accountability Act (HIPAA)</strong>{' '}
+          gives you the right to:
+        </p>
+        <ul>
+          <li>Access your own medical records</li>
+          <li>Request corrections to inaccurate information</li>
+          <li>Know who your records have been shared with</li>
+          <li>Limit who can be told about your care</li>
+        </ul>
+        <p>
+          Providers cannot share your health information with employers, family members, or
+          anyone else without your authorization, except in narrow circumstances.
+        </p>
+        <p>
+          You can request your records in writing from any provider. They must provide them
+          within 30 days and can charge only a reasonable copying fee.
+        </p>
+      </section>
+
+      <section aria-labelledby="language-access">
+        <h2 id="language-access">You have a right to language access</h2>
+        <p>
+          Health programs that receive federal funding — which is most hospitals, all FQHCs,
+          all Medicaid providers — are required to provide{' '}
+          <strong>free language interpretation</strong> for patients with limited English
+          proficiency. This includes spoken interpretation and translation of key documents.
+        </p>
+        <p>
+          You should not be billed for an interpreter. You should not be expected to bring
+          your own. If interpretation is denied, you can file a complaint with the{' '}
+          <strong>HHS Office for Civil Rights</strong>.
+        </p>
+      </section>
+
+      <section aria-labelledby="bill-arrives">
+        <h2 id="bill-arrives">What to do when a bill arrives</h2>
+        <p>A practical order of operations when you receive a hospital or medical bill:</p>
+        <ol>
+          <li><strong>Don't pay it right away.</strong> Don't sign payment agreements under pressure.</li>
+          <li><strong>Request an itemized bill</strong> if you didn't get one.</li>
+          <li><strong>Apply for financial assistance.</strong> Every nonprofit hospital has a policy; ask for the application.</li>
+          <li><strong>Check for errors.</strong> Compare the itemized bill to what actually happened.</li>
+          <li><strong>Negotiate.</strong> Ask for the uninsured rate or self-pay discount, and ask for a payment plan with no interest.</li>
+          <li><strong>Look into retroactive Medicaid.</strong> If you qualify and the care happened within the past 90 days (varies by state), Medicaid may cover it.</li>
+          <li><strong>If sent to collections,</strong> you still have rights under the <strong>Fair Debt Collection Practices Act</strong> — collectors cannot harass you, lie, or threaten things they can't legally do.</li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="need-help">
+        <h2 id="need-help">When you need help</h2>
+        <ul>
+          <li><strong>State Attorney General offices</strong> investigate hospital billing complaints</li>
+          <li><strong>State consumer protection offices</strong> can intervene on billing disputes</li>
+          <li><strong>Free or low-cost legal aid</strong> can help with collections, debt, and disputes — search <strong>LawHelp.org</strong> by state</li>
+          <li><strong>The Patient Advocate Foundation</strong> offers free case management for serious illnesses and billing crises</li>
+        </ul>
+        <p>
+          You have more leverage than the medical system often makes it feel like. Use these
+          protections.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+  article section { margin-bottom: var(--space-6); }
+  article section h2 { margin-bottom: var(--space-3); }
+  article ul, article ol { margin: var(--space-3) 0 var(--space-4); }
+  article li { margin-bottom: var(--space-1); line-height: 1.65; }
+</style>

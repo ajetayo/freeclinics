@@ -1,0 +1,28 @@
+Drop all six into src/data/ alongside the medications markdown. Here's the prompt — it's the same template as the medications page applied seven times, plus a small hub:
+
+I've added six more resource content files to src/data/:
+
+uninsured-rights-content.md → /resources/uninsured-rights/
+dental-care-content.md → /resources/dental-care/
+mental-health-content.md → /resources/mental-health/
+first-visit-content.md → /resources/first-visit/
+medicaid-application-content.md → /resources/medicaid-application/
+emergency-room-content.md → /resources/emergency-room/
+
+1. Build the six resource pages, each at src/pages/resources/[slug]/index.astro. Use the same exact template you built for /resources/medications/: same layout, breadcrumb pattern, content sections rendered from the markdown (h2 from ##, bold-inline labels from **foo.**, <ul><li> from bullet lists, --max-width-text constraint), same "Last updated" line with today's date and the contact link, same head treatment (per-page title/meta/canonical), and the same Article JSON-LD shape with BreadcrumbList. Each page renders AdSense and GA (do not pass noAds={true}).
+Each page's specific head metadata:
+SlugTitleMeta descriptionuninsured-rights"Your Rights as an Uninsured Patient | freeclinics.us""Federal protections for uninsured patients — EMTALA, hospital financial assistance, the No Surprises Act, and how to dispute medical bills."dental-care"Affordable Dental Care Without Insurance | freeclinics.us""How to get dental care without insurance — FQHCs with dental, dental schools, charity programs, and what to do in a dental emergency."mental-health"Affordable Mental Health Care | freeclinics.us""How to get free or low-cost mental health care — 988, Community Mental Health Centers, sliding-scale therapy, and crisis resources."first-visit"What to Expect at Your First Free Clinic Visit | freeclinics.us""A practical guide to your first free clinic visit — what to bring, what happens, what it costs, and what questions to ask."medicaid-application"How to Apply for Medicaid | freeclinics.us""Who qualifies for Medicaid, how to apply through your state or HealthCare.gov, what documents you need, and what to do if you're denied."emergency-room"When to Use the Emergency Room (and What It Costs Uninsured) | freeclinics.us""When you should go to the ER versus urgent care or a clinic, what an ER visit really costs uninsured, and how to handle the bill afterward."
+2. Build a resources hub at src/pages/resources/index.astro. Same layout. Sections:
+
+H1: "Health Resources"
+One-paragraph intro: "Practical guides for navigating free and low-cost healthcare in the United States — what your rights are, where to find help, and how to handle the parts the clinic visit itself doesn't cover."
+A list (or simple grid using existing design tokens) of all seven resource pages, each item showing the page's title as a link plus a one-line description. Order: medications, uninsured-rights, dental-care, mental-health, first-visit, medicaid-application, emergency-room.
+Standard editorial footer with last-updated date and contact link.
+Title: "Health Resources | freeclinics.us"
+Meta description: "Practical guides to free and low-cost healthcare in the U.S. — prescriptions, dental, mental health, ER costs, Medicaid, and your rights as an uninsured patient."
+Canonical: https://freeclinics.us/resources/
+JSON-LD: BreadcrumbList (Home → Resources) and a CollectionPage with hasPart listing the seven resource pages as Article references.
+
+3. Update the existing /resources/medications/ page: change the middle breadcrumb item ("Resources") from plain text to a real link to /resources/. Same on the six new pages — their breadcrumbs link to the hub.
+4. Add cross-links in BaseLayout's footer area (or SiteFooter if cleaner): a small "Resources" section with links to all seven resource pages. This is the internal-linking layer that pulls these out of being orphans. Keep the visual treatment subtle — small text, muted color, fits the existing footer style.
+After building, run astro build and confirm: total page count is now ~26,340 (was 26,333 with just medications; +6 new pages +1 hub = +7), all seven resource pages render with their markdown content properly converted to HTML, the medications page's breadcrumb now links to /resources/, the hub page lists all seven, and the footer cross-links appear on a sample page. Report any build warnings.

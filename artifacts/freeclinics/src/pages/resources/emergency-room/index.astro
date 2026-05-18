@@ -1,0 +1,259 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/emergency-room/';
+const pageTitle     = 'When to Use the ER (and What It Costs Uninsured) | freeclinics.us';
+const description   = 'EMTALA rights, when to go to the ER vs. urgent care, ER cost ranges for uninsured patients, and how to handle the bill.';
+const datePublished = '2026-05-18';
+const dateModified  = '2026-05-18';
+const headline      = 'When to Use the Emergency Room (and What It Costs Uninsured)';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: 'https://freeclinics.us/resources/' },
+    { '@type': 'ListItem', position: 3, name: headline,    item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        <a href="/resources/">Resources</a>
+        <span aria-hidden="true"> › </span>
+        {headline}
+      </p>
+
+      <header class="page-intro">
+        <h1>{headline}</h1>
+        <p class="lede">
+          The ER is the most expensive place in the U.S. healthcare system, and it's also
+          the one place that legally cannot turn you away in a true emergency. This page
+          covers both sides of that: when you actually need the ER, and what to do about
+          the bill afterward.
+        </p>
+      </header>
+
+      <section aria-labelledby="right-to-be-seen">
+        <h2 id="right-to-be-seen">You have a right to be seen</h2>
+        <p>
+          Under federal law — the{' '}
+          <strong>Emergency Medical Treatment and Active Labor Act (EMTALA)</strong> — almost
+          every hospital with an emergency room must:
+        </p>
+        <ul>
+          <li>Screen you for an emergency medical condition, regardless of insurance, immigration status, or ability to pay.</li>
+          <li>Stabilize you before discharge or transfer if an emergency condition exists.</li>
+        </ul>
+        <p>
+          This applies whether you have insurance or not, whether you can pay or not,
+          whether you're documented or not. The ER cannot make you produce a credit card
+          before evaluating you. It cannot delay treatment for a heart attack while it
+          verifies your insurance.
+        </p>
+        <p>
+          What EMTALA does <strong>not</strong> do: make care free. You will be billed. But
+          you cannot be turned away.
+        </p>
+      </section>
+
+      <section aria-labelledby="when-to-go">
+        <h2 id="when-to-go">When you should go to the ER</h2>
+        <p>True emergencies — go to the ER without hesitation:</p>
+        <ul>
+          <li><strong>Chest pain</strong> that's severe, persistent, or accompanied by sweating, nausea, or shortness of breath</li>
+          <li><strong>Stroke symptoms</strong> — face drooping, arm weakness, slurred speech (the FAST mnemonic: Face, Arm, Speech, Time)</li>
+          <li><strong>Difficulty breathing</strong> that's new or severe</li>
+          <li><strong>Severe bleeding</strong> that won't stop with pressure</li>
+          <li><strong>Head injury</strong> with loss of consciousness, confusion, or persistent vomiting</li>
+          <li><strong>Severe abdominal pain</strong> that's new or worsening, especially with fever or vomiting</li>
+          <li><strong>Severe burns</strong>, especially to face, hands, feet, genitals, or large areas</li>
+          <li><strong>Major trauma</strong> — falls from height, motor vehicle accidents, anything causing severe pain or possible broken bones</li>
+          <li><strong>Severe allergic reactions</strong> — swelling of face/throat, difficulty breathing</li>
+          <li><strong>Suicidal thoughts with a plan</strong>, or any safety crisis</li>
+          <li><strong>Active labor</strong> or significant pregnancy complications</li>
+          <li><strong>Poisoning or overdose</strong> — also call <strong>Poison Control at 1-800-222-1222</strong></li>
+        </ul>
+        <p>
+          Don't second-guess yourself on these. EMTALA exists because the alternative —
+          people dying outside hospitals because of inability to pay — was unacceptable.
+        </p>
+      </section>
+
+      <section aria-labelledby="something-else">
+        <h2 id="something-else">When something else might be better</h2>
+        <p>
+          For non-emergencies, the ER is the most expensive way to get care and often not
+          the fastest:
+        </p>
+        <ul>
+          <li><strong>Minor cuts</strong> that may need stitches but aren't bleeding heavily → urgent care</li>
+          <li><strong>Sprains and strains</strong> → urgent care or a primary care clinic</li>
+          <li><strong>Mild flu, cold, sore throat, ear infection</strong> → primary care, telehealth, or a clinic</li>
+          <li><strong>Routine prescription refills</strong> → primary care or your usual prescriber</li>
+          <li><strong>Mild allergic reactions</strong> without breathing involvement → urgent care or telehealth</li>
+          <li><strong>Most dental pain</strong> → a dentist, an FQHC, or a dental school. The ER can only prescribe antibiotics and painkillers; they can't fix the underlying tooth.</li>
+          <li><strong>Non-acute mental health</strong> → a Community Mental Health Center, the 988 line, or a sliding-scale therapist (see our <a href="/resources/mental-health/">mental health guide</a>)</li>
+        </ul>
+        <p>
+          <strong>Urgent care</strong> typically costs $100–$300 for an uninsured visit,
+          versus $1,000+ for an ER visit. <strong>Telehealth</strong> visits are often
+          $50–$100. <strong>FQHC</strong> sliding-scale visits can be under $50.
+        </p>
+      </section>
+
+      <section aria-labelledby="what-it-costs">
+        <h2 id="what-it-costs">What it costs uninsured</h2>
+        <p>
+          Hospital ER pricing is opaque and frequently absurd. Some rough ranges for
+          uninsured patients:
+        </p>
+        <ul>
+          <li><strong>A simple ER visit</strong> (basic evaluation, no major tests): $1,000–$2,500</li>
+          <li><strong>An ER visit with significant tests or imaging</strong> (CT scan, ultrasound, multiple labs): $3,000–$10,000+</li>
+          <li><strong>An ER visit leading to admission</strong>: $10,000–$50,000+ depending on length of stay and severity</li>
+        </ul>
+        <p>
+          These are the "chargemaster" prices — the prices on the official price list, which
+          are inflated for everyone and which almost no insurer ever actually pays.{' '}
+          <strong>As an uninsured patient, you should never pay the chargemaster price.</strong>
+        </p>
+      </section>
+
+      <section aria-labelledby="what-to-do-at-er">
+        <h2 id="what-to-do-at-er">What to do at the ER</h2>
+        <p>
+          Get the care you need first. Money concerns come second. But there are a few things
+          to keep in mind:
+        </p>
+        <ul>
+          <li><strong>You have a right to be evaluated and stabilized regardless of insurance.</strong> Don't let anyone tell you otherwise.</li>
+          <li><strong>Ask to speak with a hospital social worker or financial counselor</strong> during your visit or before discharge. They can start your application for financial assistance / charity care right then.</li>
+          <li><strong>Don't sign payment plans or applications for medical credit cards under duress.</strong> Take paperwork home; you can return signed documents later.</li>
+          <li><strong>Ask about Medicaid retroactive enrollment.</strong> If you might qualify for Medicaid, applying immediately (or even the same day) can have your ER visit covered retroactively.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="after-the-visit">
+        <h2 id="after-the-visit">After the visit</h2>
+        <p>The bills will come. Here's the order of operations:</p>
+        <p>
+          <strong>1. Request an itemized bill.</strong> The initial "amount due" letter is
+          not an itemized bill. Call billing and ask for a fully itemized bill with billing
+          codes. Don't pay anything until you have it.
+        </p>
+        <p>
+          <strong>2. Apply for financial assistance.</strong> Every nonprofit hospital — which
+          is most hospitals — must offer financial assistance under Section 501(r) of the IRS
+          code. The application is usually one to two pages plus income proof. Income limits
+          are typically generous — many hospitals offer free care up to 200–300% of the
+          federal poverty level and sliding-scale discounts up to 400% or higher.
+        </p>
+        <p>
+          <strong>Apply even if you're not sure you qualify.</strong> Many people who would
+          qualify never apply because no one told them. The hospital is required to notify
+          you that financial assistance exists, but the notification is often buried.
+        </p>
+        <p>
+          <strong>3. Check the bill for errors.</strong> Hospital bills are wrong an alarming
+          portion of the time. Look for:
+        </p>
+        <ul>
+          <li>Services or tests you don't remember receiving</li>
+          <li>Duplicate charges</li>
+          <li>Incorrect billing codes (a code change can shift a charge by hundreds or thousands of dollars)</li>
+          <li>Inflated supply charges</li>
+        </ul>
+        <p>If something looks wrong, dispute it in writing.</p>
+        <p>
+          <strong>4. Negotiate.</strong> Uninsured patients can almost always negotiate
+          hospital bills down. A typical successful negotiation gets the bill to{' '}
+          <strong>30–50% of the original amount</strong>, especially if you can offer a
+          lump-sum payment. Ask for "the rate you charge insurance companies" — sometimes
+          called the "self-pay rate" or "prompt-pay discount." Be direct. Be persistent. Get
+          any agreement in writing.
+        </p>
+        <p>
+          <strong>5. Set up a payment plan.</strong> Hospitals are required by 501(r) to
+          offer reasonable payment plans without interest in many cases. Ask for the lowest
+          monthly payment they offer. Don't take out a high-interest medical credit card to
+          pay a hospital bill that the hospital would accept in installments.
+        </p>
+        <p>
+          <strong>6. Apply for retroactive Medicaid.</strong> In many states, Medicaid can
+          cover bills up to 90 days before your application date. If your ER visit was recent
+          and you might qualify for Medicaid, apply now — see our{' '}
+          <a href="/resources/medicaid-application/">Medicaid application guide</a>.
+        </p>
+      </section>
+
+      <section aria-labelledby="what-to-avoid">
+        <h2 id="what-to-avoid">What to avoid</h2>
+        <p>A few things that make a bad situation worse:</p>
+        <ul>
+          <li><strong>Don't ignore the bill.</strong> Unanswered bills go to collections, where they're harder to negotiate and can damage your credit.</li>
+          <li><strong>Don't sign up for high-interest medical credit cards</strong> (like CareCredit) without understanding the terms. Deferred-interest promotions can backfire enormously.</li>
+          <li><strong>Don't pay the chargemaster price.</strong> It's the asking price, not the real price. Almost everyone — insurance, Medicaid, Medicare — pays a fraction of it.</li>
+          <li><strong>Don't give up.</strong> Hospital billing departments process thousands of disputes and applications. They expect people to push back. The squeaky wheel really does get the discount.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="note-er">
+        <h2 id="note-er">A note on this guide</h2>
+        <p>
+          The U.S. emergency care system is functional but expensive and inequitable. EMTALA
+          ensures everyone gets emergency care; financial assistance laws ensure most people
+          don't have to pay full price. But you have to know the laws exist and exercise the
+          rights they create. The information above is a starting point; for complex
+          situations, free legal aid (search <strong>LawHelp.org</strong>) and patient
+          advocates (the <strong>Patient Advocate Foundation</strong>) can help with specific
+          cases.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+  article section { margin-bottom: var(--space-6); }
+  article section h2 { margin-bottom: var(--space-3); }
+  article ul, article ol { margin: var(--space-3) 0 var(--space-4); }
+  article li { margin-bottom: var(--space-1); line-height: 1.65; }
+</style>

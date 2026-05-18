@@ -1,0 +1,231 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/first-visit/';
+const pageTitle     = 'Your First Free Clinic Visit: What to Expect | freeclinics.us';
+const description   = 'What to bring, what to expect, and what to ask at your first free or low-cost clinic visit — a step-by-step guide.';
+const datePublished = '2026-05-18';
+const dateModified  = '2026-05-18';
+const headline      = 'What to Expect at Your First Free Clinic Visit';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: 'https://freeclinics.us/resources/' },
+    { '@type': 'ListItem', position: 3, name: headline,    item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        <a href="/resources/">Resources</a>
+        <span aria-hidden="true"> › </span>
+        {headline}
+      </p>
+
+      <header class="page-intro">
+        <h1>{headline}</h1>
+        <p class="lede">
+          The first visit to a free or low-cost clinic can feel uncertain — what do you
+          bring, how does the pricing work, will you be turned away, how long will it take?
+          This page walks through it step by step so you arrive prepared.
+        </p>
+      </header>
+
+      <section aria-labelledby="before-you-go">
+        <h2 id="before-you-go">Before you go</h2>
+        <p>
+          <strong>Call ahead, if you can.</strong> A short phone call answers most of the
+          things you'd otherwise have to figure out on arrival:
+        </p>
+        <ul>
+          <li><strong>Do they take walk-ins, or do you need an appointment?</strong> Some free clinics are walk-in only; many are appointment-based; some are mixed.</li>
+          <li><strong>What services do they offer?</strong> Not every clinic has every service. Some specialize (women's health, dental, mental health). Some offer only adult primary care; some only pediatrics.</li>
+          <li><strong>What languages do they speak?</strong> Most receive federal funding and must provide free interpretation, but availability varies.</li>
+          <li><strong>What documents should you bring?</strong> Asking up front avoids being sent away to get something.</li>
+          <li><strong>What is the fee structure?</strong> Get a sense in advance — "free for income below X, sliding scale above" or similar.</li>
+        </ul>
+        <p>
+          If you can't reach them by phone, most clinics will see you anyway as long as you
+          can pay something. But the call is worth it.
+        </p>
+      </section>
+
+      <section aria-labelledby="what-to-bring">
+        <h2 id="what-to-bring">What to bring</h2>
+        <p>The standard list for sliding-scale clinics:</p>
+        <ul>
+          <li><strong>Photo ID</strong> — any government-issued ID (driver's license, state ID, passport). Some clinics accept a school ID or matricula consular.</li>
+          <li><strong>Proof of income</strong> — a recent pay stub is best. An unemployment award letter, Social Security letter, or tax return also work. If you're paid in cash and have no paperwork, ask whether the clinic accepts a <strong>self-attestation form</strong> — most do.</li>
+          <li><strong>Proof of address</strong> — a utility bill, lease, or any piece of mail with your name and address.</li>
+          <li><strong>Insurance card</strong>, if you have any coverage (including Medicaid).</li>
+          <li><strong>List of current medications</strong> — names, doses, and how often you take them. Bringing the actual bottles is even better.</li>
+          <li><strong>List of allergies</strong> — medications, foods, anything significant.</li>
+          <li><strong>Brief medical history</strong> — past surgeries, chronic conditions, hospitalizations.</li>
+        </ul>
+        <p>
+          If you don't have all of these, most clinics will still see you. You may be charged
+          at the standard sliding-scale rate until you can verify income, then refunded or
+          credited.
+        </p>
+      </section>
+
+      <section aria-labelledby="when-you-arrive">
+        <h2 id="when-you-arrive">When you arrive</h2>
+        <p>A typical free clinic visit goes through three stages.</p>
+        <p>
+          <strong>Check-in and intake.</strong> You'll fill out paperwork: registration form,
+          brief medical history, financial assessment for the sliding scale. Someone —
+          sometimes a financial counselor, sometimes a nurse — will review your income
+          documents and tell you what your fee tier is. Ask for the fee structure in writing
+          if it isn't offered.
+        </p>
+        <p>
+          <strong>Triage or initial assessment.</strong> A nurse or medical assistant takes
+          your blood pressure, weight, and a brief history of why you're there. They prepare
+          your chart for the provider.
+        </p>
+        <p>
+          <strong>Provider visit.</strong> A doctor, nurse practitioner, or physician's
+          assistant sees you. The visit may be shorter than at a private practice — clinics
+          are often busy and the provider may have many patients to see. Bring a list of what
+          you want to discuss so you don't forget. Don't be afraid to ask questions, and ask
+          for explanations to be repeated if you didn't understand.
+        </p>
+        <p>
+          After the visit, you may go to an on-site lab, pharmacy, or counseling office for
+          follow-up. You may get a referral to a specialist, with information about how to
+          access that referral on a sliding scale.
+        </p>
+        <p>
+          <strong>Total time:</strong> plan for two to three hours for a first visit,
+          especially walk-in. Bring something to read. Bring snacks if your blood sugar is
+          finicky.
+        </p>
+      </section>
+
+      <section aria-labelledby="questions-to-ask">
+        <h2 id="questions-to-ask">Questions worth asking</h2>
+        <p>A few things that pay off if you ask:</p>
+        <ul>
+          <li><strong>"Are you a Federally Qualified Health Center (FQHC) or Ryan White clinic?"</strong> FQHCs access 340B drug pricing, which makes some medications dramatically cheaper. They also generally have more services, broader funding, and more support staff.</li>
+          <li><strong>"What does it take to become an established patient?"</strong> Once you're established, getting appointments is usually easier and care is more continuous.</li>
+          <li><strong>"Do you have social workers or care coordinators?"</strong> They can help with Medicaid applications, prescription assistance, food and housing referrals, and benefits enrollment.</li>
+          <li><strong>"What labs and imaging can you do here, and what gets referred out?"</strong> Referrals out can be expensive — knowing in advance helps you plan.</li>
+          <li><strong>"How do I get the medications you prescribe? Do you have a pharmacy or partner with one?"</strong> If they offer 340B pricing on prescriptions, the difference can be huge.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="what-it-costs">
+        <h2 id="what-it-costs">What it costs</h2>
+        <p>
+          By federal rule, FQHCs and Ryan White clinics must charge on a sliding scale and
+          cannot deny you for inability to pay. Many free clinics that aren't FQHCs follow
+          similar policies voluntarily.
+        </p>
+        <p>Typical fee structures (this varies):</p>
+        <ul>
+          <li>Below ~100% of federal poverty level: nominal fee or free</li>
+          <li>100–200% FPL: sliding scale, often $10–$50 per visit</li>
+          <li>200–400% FPL: higher sliding-scale rates</li>
+          <li>Above ~400% FPL: full self-pay rate</li>
+        </ul>
+        <p>
+          Don't be afraid to ask what something will cost before you agree to it. If a test
+          or procedure is going to be expensive, ask whether there's a less expensive way to
+          get the same information.
+        </p>
+      </section>
+
+      <section aria-labelledby="language-access">
+        <h2 id="language-access">Language access</h2>
+        <p>
+          If English isn't your strongest language, you're entitled to free interpretation.
+          Federal law requires it at any clinic receiving federal funding — which is most
+          clinics that serve low-income patients. Don't bring your child as an interpreter,
+          and don't accept being told you have to bring your own. If the clinic refuses to
+          provide interpretation, that's a complaint you can file with HHS.
+        </p>
+      </section>
+
+      <section aria-labelledby="follow-up">
+        <h2 id="follow-up">Follow-up</h2>
+        <p>After your visit, the clinic should give you:</p>
+        <ul>
+          <li>A visit summary or after-visit summary</li>
+          <li>A list of any new medications and how to take them</li>
+          <li>Any referrals, with the contact information for those services</li>
+          <li>Information about your next appointment, if needed</li>
+        </ul>
+        <p>
+          Keep these papers in a folder. Bring them to your next visit. Continuity helps
+          your providers help you.
+        </p>
+      </section>
+
+      <section aria-labelledby="if-something-goes-wrong">
+        <h2 id="if-something-goes-wrong">If something goes wrong</h2>
+        <p>
+          If you have a concern about the care you received — billing, treatment, language
+          access, or anything else — most clinics have a patient relations contact. The first
+          step is asking to speak with them. If that doesn't resolve the issue, every clinic
+          should have a complaint process; ask for the policy in writing.
+        </p>
+        <p>
+          For more serious concerns (suspected EMTALA violations, financial assistance denied
+          without reason), state Medicaid agencies and the HHS Office for Civil Rights have
+          complaint processes.
+        </p>
+        <p>
+          The first visit is the hardest. After that, you're in the system, and getting care
+          gets significantly easier.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+  article section { margin-bottom: var(--space-6); }
+  article section h2 { margin-bottom: var(--space-3); }
+  article ul, article ol { margin: var(--space-3) 0 var(--space-4); }
+  article li { margin-bottom: var(--space-1); line-height: 1.65; }
+</style>

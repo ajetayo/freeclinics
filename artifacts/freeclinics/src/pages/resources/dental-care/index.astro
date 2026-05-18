@@ -1,0 +1,263 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/dental-care/';
+const pageTitle     = 'Affordable Dental Care Without Insurance | freeclinics.us';
+const description   = 'How to get dental care without insurance — FQHCs with dental, dental schools, charity programs, and what to do in a dental emergency.';
+const datePublished = '2026-05-18';
+const dateModified  = '2026-05-18';
+const headline      = 'Affordable Dental Care Without Insurance';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: 'https://freeclinics.us/resources/' },
+    { '@type': 'ListItem', position: 3, name: headline,    item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        <a href="/resources/">Resources</a>
+        <span aria-hidden="true"> › </span>
+        {headline}
+      </p>
+
+      <header class="page-intro">
+        <h1>{headline}</h1>
+        <p class="lede">
+          Dental care is the hardest gap in U.S. healthcare. Most private health insurance
+          doesn't include dental. Medicare doesn't cover routine dental. Medicaid covers
+          dental in some states for adults and not in others. The result: tens of millions of
+          Americans go without dental care because of cost — even when they have other health
+          coverage. This page covers the main options: where the genuinely low-cost programs
+          are, what they cover, who qualifies, and what to do when there's no good option in
+          your area.
+        </p>
+      </header>
+
+      <section aria-labelledby="fqhc-dental">
+        <h2 id="fqhc-dental">Federally Qualified Health Centers (FQHCs) with dental</h2>
+        <p>
+          Many <strong>FQHCs</strong> include dental services on a sliding-scale basis. If
+          you're seeing an FQHC for primary care, ask whether they also offer dental — or
+          whether they partner with a dental clinic that accepts the same sliding scale.
+        </p>
+        <p>FQHC dental typically covers:</p>
+        <ul>
+          <li>Cleanings and exams</li>
+          <li>Fillings</li>
+          <li>Extractions</li>
+          <li>Some restorative work (crowns, dentures) — coverage varies</li>
+          <li>Emergency care</li>
+        </ul>
+        <p>
+          To find an FQHC near you with dental, use the federal{' '}
+          <strong>Find a Health Center</strong> tool at findahealthcenter.hrsa.gov and filter
+          for "Dental Services."
+        </p>
+      </section>
+
+      <section aria-labelledby="dental-schools">
+        <h2 id="dental-schools">Dental schools</h2>
+        <p>
+          <strong>Dental schools</strong> at universities provide reduced-cost dental care
+          delivered by students under direct supervision of licensed faculty. Costs are
+          typically 30–50% lower than private practice. The tradeoff: appointments take
+          longer, and care is delivered more slowly because of the teaching environment.
+        </p>
+        <p>
+          Most U.S. dental schools accept patients for cleanings, fillings, extractions, root
+          canals, crowns, dentures, and orthodontics. Some have specific student-clinic days;
+          some operate full clinics open to the public.
+        </p>
+        <p>
+          To find a dental school near you, search "[your state] dental school clinic" or
+          visit the <strong>American Dental Education Association (ADEA)</strong> directory.
+        </p>
+        <p>
+          <strong>Dental hygiene schools</strong> also operate clinics — usually only for
+          cleanings and basic preventive care, at very low cost.
+        </p>
+      </section>
+
+      <section aria-labelledby="charity-dental">
+        <h2 id="charity-dental">Charity dental programs</h2>
+        <p>
+          A few national programs provide free dental care to specific populations:
+        </p>
+        <ul>
+          <li>
+            <strong>Dental Lifeline Network</strong> runs the Donated Dental Services program,
+            which provides free comprehensive dental care to people who are elderly, permanently
+            disabled, or medically fragile. Application takes time; waitlists can be long.
+          </li>
+          <li>
+            <strong>Mission of Mercy</strong> events: large-scale free dental clinics held in
+            different states throughout the year. First-come, first-served, often with long
+            lines. Check the <strong>America's Dentists Care Foundation</strong> website for
+            upcoming events.
+          </li>
+          <li>
+            <strong>Give Kids A Smile</strong>: an American Dental Association program offering
+            free dental care to children one weekend each year, usually in February.
+          </li>
+          <li>
+            <strong>Remote Area Medical (RAM)</strong>: free clinics held in different locations
+            that include dental services. Originally founded for remote areas but now operates
+            in cities too.
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="state-local">
+        <h2 id="state-local">State and local programs</h2>
+        <p>Some states and counties have additional dental assistance:</p>
+        <ul>
+          <li>
+            <strong>Medicaid dental coverage for adults</strong> varies dramatically by state.
+            Some states (such as New York, California, and Oregon) cover comprehensive adult
+            dental through Medicaid. Others cover only emergency extractions. Check your
+            state's Medicaid website.
+          </li>
+          <li>
+            <strong>All states must cover comprehensive dental care for children</strong> under
+            Medicaid and CHIP, as part of the EPSDT benefit. If you have kids on Medicaid or
+            CHIP, they're entitled to regular dental care.
+          </li>
+          <li>
+            <strong>Veterans</strong> with VA health benefits may be eligible for VA dental care
+            if they have a service-connected condition or fall into related benefit categories.
+            Check with VA enrollment.
+          </li>
+          <li>
+            <strong>State health departments</strong> sometimes maintain lists of low-cost
+            dental providers. The state Oral Health Program is usually a good starting point.
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="dental-emergencies">
+        <h2 id="dental-emergencies">Dental emergencies</h2>
+        <p>
+          If you have severe dental pain, swelling, an infection, or a knocked-out tooth,
+          your options depend on severity:
+        </p>
+        <p>
+          <strong>Severe infection</strong> (face swelling, fever, trouble swallowing or
+          breathing): go to the ER. Dental infections can become life-threatening when they
+          spread. The ER will give antibiotics and pain relief and refer you to a dentist for
+          the actual repair, but they can stabilize you.
+        </p>
+        <p>
+          <strong>Severe pain or abscess:</strong> the ER will prescribe antibiotics and pain
+          medication but generally cannot do dental procedures. This is a temporary fix, not
+          a solution. Try to see a dentist within a few days.
+        </p>
+        <p>
+          <strong>Knocked-out tooth:</strong> if it's a permanent tooth, time matters —
+          ideally within an hour. Rinse the tooth gently (don't scrub), keep it moist (in
+          milk, saliva, or a tooth-preservation product), and go to a dentist or ER
+          immediately.
+        </p>
+        <p>
+          <strong>No money, no insurance, urgent pain:</strong> call your local FQHC. Many
+          have same-day emergency slots. Many dental schools also accept emergencies.
+        </p>
+      </section>
+
+      <section aria-labelledby="practical-tips">
+        <h2 id="practical-tips">Practical tips</h2>
+        <p>
+          <strong>Discount dental plans</strong> (different from insurance) charge an annual
+          fee — usually $100–$200 — for membership in a network that offers reduced rates.
+          These can save money if you need regular care. <strong>DentalPlans.com</strong>{' '}
+          brokers many such networks.
+        </p>
+        <p>
+          <strong>CareCredit and other medical credit cards</strong> are sometimes offered at
+          the dentist's counter. Read the terms carefully — interest can be very high if not
+          paid off in the promotional period.
+        </p>
+        <p>
+          <strong>Don't put off small problems.</strong> A cavity caught early might cost
+          $100–$300. The same cavity left for a year can become a root canal and crown
+          costing $2,000–$4,000. If you have any dental coverage at all, use it for
+          preventive care.
+        </p>
+        <p>
+          <strong>Cleanings are the cheapest dental care.</strong> A cleaning at a dental
+          hygiene school can be $20–$50 and prevents most of the expensive problems.
+        </p>
+      </section>
+
+      <section aria-labelledby="no-option">
+        <h2 id="no-option">When there's truly no option</h2>
+        <p>
+          If you've exhausted FQHCs, dental schools, and charity events in your area and
+          still can't get care, two more paths:
+        </p>
+        <ul>
+          <li>
+            <strong>Your state's dental society</strong> maintains a list of dentists who do
+            pro bono or reduced-fee work. Call and ask.
+          </li>
+          <li>
+            <strong>Apply for hospital financial assistance</strong> for emergency dental care
+            delivered through an ER.
+          </li>
+        </ul>
+        <p>
+          Dental care is a real and ongoing gap. Most people in this situation aren't
+          choosing well — they're choosing between bad options. The above are the least-bad
+          ones we know of.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+  article section { margin-bottom: var(--space-6); }
+  article section h2 { margin-bottom: var(--space-3); }
+  article ul, article ol { margin: var(--space-3) 0 var(--space-4); }
+  article li { margin-bottom: var(--space-1); line-height: 1.65; }
+</style>

@@ -1,0 +1,325 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/payment/';
+const pageTitle     = 'How to Handle Medical Bills You Can\'t Afford | freeclinics.us';
+const description   = 'What to do when you can\'t pay a medical bill — financial assistance, negotiation, payment plans, medical debt and your credit, and when to consider bankruptcy.';
+const datePublished = '2026-05-18';
+const dateModified  = '2026-05-18';
+const headline      = 'How to Handle Medical Bills You Can\'t Afford';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: 'https://freeclinics.us/resources/' },
+    { '@type': 'ListItem', position: 3, name: headline,    item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        <a href="/resources/">Resources</a>
+        <span aria-hidden="true"> › </span>
+        {headline}
+      </p>
+
+      <header class="page-intro">
+        <h1>{headline}</h1>
+        <p class="lede">
+          A medical bill you can't pay isn't the end of the road. Federal and state laws give
+          you specific tools, hospitals are usually willing to negotiate, and several programs
+          exist to help you bridge the gap. This page is a practical guide for what to do
+          when a bill arrives and you don't know how you'll pay it.
+        </p>
+        <p class="lede">
+          For specific situations, follow the links to our other guides — emergency room
+          bills, prescription costs, and your underlying rights as an uninsured patient are
+          each covered in detail elsewhere.
+        </p>
+      </header>
+
+      <section aria-labelledby="first-30-days">
+        <h2 id="first-30-days">The first 30 days</h2>
+        <p>
+          The first month after a bill arrives is when you have the most options. Don't
+          ignore it, don't pay it immediately, and don't sign anything under pressure.
+        </p>
+        <p>
+          <strong>Step 1. Request an itemized bill.</strong> The first letter from a hospital
+          or provider usually shows only a total. Call billing and request the full itemized
+          bill with billing codes. Don't pay until you have it.
+        </p>
+        <p>
+          <strong>Step 2. Apply for financial assistance.</strong> Most U.S. hospitals are
+          nonprofits and must offer financial assistance under Section 501(r) of the IRS
+          code. Income limits are usually 200–400% of the federal poverty level. The
+          application is one or two pages plus income proof. Apply even if you're not sure
+          you qualify — see our{' '}
+          <a href="/resources/uninsured-rights/">uninsured rights guide</a> for details.
+        </p>
+        <p>
+          <strong>Step 3. Check for errors.</strong> A large share of hospital bills contain
+          mistakes. Look for duplicate charges, services you didn't receive, incorrect
+          billing codes, and inflated supply costs. Dispute anything wrong in writing.
+        </p>
+        <p>
+          <strong>Step 4. Negotiate.</strong> Even after financial assistance, you can almost
+          always negotiate further. Uninsured and self-pay patients commonly get bills
+          reduced 30–50% by directly asking. Ask for "the rate you charge insurance
+          companies" or the "self-pay discount." Get any agreement in writing before paying.
+        </p>
+        <p>
+          <strong>Step 5. Set up a payment plan.</strong> Nonprofit hospitals must offer
+          reasonable payment plans, often without interest. Ask for the lowest monthly
+          payment they'll accept. Don't take a high-interest medical credit card to pay a
+          bill the hospital would accept in installments.
+        </p>
+      </section>
+
+      <section aria-labelledby="retroactive-medicaid">
+        <h2 id="retroactive-medicaid">Retroactive Medicaid</h2>
+        <p>
+          If the care happened within the past three months and you qualify for Medicaid,{' '}
+          <strong>retroactive Medicaid coverage</strong> can pay for it. Most states cover
+          bills up to 90 days before your application date. This is one of the most underused
+          tools for handling medical bills.
+        </p>
+        <p>
+          If you have any chance of qualifying for Medicaid — or if your income has dropped
+          recently — apply today, even if the care was weeks ago. See our{' '}
+          <a href="/resources/medicaid-application/">Medicaid application guide</a> for who
+          qualifies and how.
+        </p>
+      </section>
+
+      <section aria-labelledby="patient-advocates">
+        <h2 id="patient-advocates">Patient advocates and financial counselors</h2>
+        <p>
+          Most hospitals have <strong>financial counselors</strong> or{' '}
+          <strong>patient advocates</strong> on staff. Their job is to walk you through your
+          options. Many people never ask for them. They can:
+        </p>
+        <ul>
+          <li>Start your financial assistance application</li>
+          <li>Apply for Medicaid on your behalf</li>
+          <li>Identify external programs (state assistance, disease-specific charities)</li>
+          <li>Negotiate with the hospital billing department for you</li>
+        </ul>
+        <p>
+          For complex situations — serious illness, multiple providers, large balances — the{' '}
+          <strong>Patient Advocate Foundation</strong> (patientadvocate.org) provides free
+          case management. They can negotiate, dispute, and apply for assistance on your
+          behalf.
+        </p>
+        <p>
+          For broader debt and consumer-protection issues,{' '}
+          <strong>free legal aid</strong> organizations handle medical debt cases. Search{' '}
+          <strong>LawHelp.org</strong> by state.
+        </p>
+      </section>
+
+      <section aria-labelledby="medical-debt-credit">
+        <h2 id="medical-debt-credit">Medical debt and your credit</h2>
+        <p>
+          A recent federal rule <strong>removes medical debt from credit reports under most
+          circumstances</strong>, and credit bureaus have already stopped reporting most
+          medical debt below $500. This means a medical bill in collections is significantly
+          less damaging to your credit than other kinds of debt.
+        </p>
+        <p>
+          That said, debt collectors can still call. Under the{' '}
+          <strong>Fair Debt Collection Practices Act (FDCPA)</strong>:
+        </p>
+        <ul>
+          <li>Collectors cannot harass you, lie, or threaten things they can't legally do.</li>
+          <li>They cannot call before 8 AM or after 9 PM in your local time.</li>
+          <li>They cannot contact you at work if you've told them not to.</li>
+          <li>You can request in writing that they stop contacting you.</li>
+        </ul>
+        <p>
+          If a collector is violating these rules, you can sue them — and you can use the
+          threat of an FDCPA complaint as leverage in negotiation.
+        </p>
+      </section>
+
+      <section aria-labelledby="medical-credit-cards">
+        <h2 id="medical-credit-cards">Medical credit cards — read the fine print</h2>
+        <p>
+          Cards like <strong>CareCredit</strong> are often offered at the medical office
+          counter. They can be useful — but only if you read the terms.
+        </p>
+        <p>
+          The trap: many of these cards offer a "deferred interest" promotional period. If
+          you pay off the balance within the promo window (usually 6–24 months), there's no
+          interest. <strong>If you don't pay it off by the deadline, you're charged
+          retroactive interest</strong> on the original balance from day one — often at 25%
+          or higher.
+        </p>
+        <p>
+          If you take one, treat it like a strict payment plan with a deadline. If you can't
+          be sure you'll pay it off in the promo period, the hospital's no-interest payment
+          plan is almost always a better choice.
+        </p>
+      </section>
+
+      <section aria-labelledby="crowdfunding">
+        <h2 id="crowdfunding">Crowdfunding</h2>
+        <p>
+          <strong>GoFundMe</strong> has become the de facto medical crowdfunding platform. It
+          works for some people — primarily those with strong social networks, compelling
+          stories, and the time and energy to run a campaign. It's a real option but a
+          limited one. Most medical crowdfunding campaigns raise far less than their stated
+          goals.
+        </p>
+        <p>
+          If you're going to try it, the campaigns that succeed tend to have a clear specific
+          ask, regular updates, a personal video, and active sharing across multiple channels.
+        </p>
+      </section>
+
+      <section aria-labelledby="tax-deductions">
+        <h2 id="tax-deductions">Tax deductions for medical expenses</h2>
+        <p>
+          If you itemize deductions on your federal taxes, you can deduct{' '}
+          <strong>medical expenses that exceed 7.5% of your adjusted gross income</strong>.
+          This includes payments to doctors, hospitals, prescriptions, mental health care,
+          dental, and transportation to appointments.
+        </p>
+        <p>
+          Keep all your medical receipts and records throughout the year. For lower-income
+          people who don't itemize (the standard deduction is higher), this doesn't help —
+          but for those with large medical expenses relative to income, it's worth
+          considering.
+        </p>
+        <p>
+          <strong>Free tax help</strong> is available through the{' '}
+          <strong>VITA program</strong> (Volunteer Income Tax Assistance, run by the IRS)
+          for households below roughly $60,000/year. They can help you decide whether
+          itemizing makes sense.
+        </p>
+      </section>
+
+      <section aria-labelledby="hsas-fsas">
+        <h2 id="hsas-fsas">HSAs and FSAs</h2>
+        <p>
+          If you have access to a <strong>Health Savings Account (HSA)</strong> through a
+          high-deductible health plan, or a{' '}
+          <strong>Flexible Spending Account (FSA)</strong> through your employer, money you
+          contribute is pre-tax — which makes everything you spend it on roughly 20–30%
+          cheaper depending on your tax bracket. You can use HSA/FSA money for:
+        </p>
+        <ul>
+          <li>Doctor visits</li>
+          <li>Prescription medications (including some over-the-counter)</li>
+          <li>Dental and vision</li>
+          <li>Mental health care</li>
+          <li>Medical equipment</li>
+        </ul>
+        <p>
+          If you have one and aren't using it, look up what's eligible. If you're employed
+          and don't have one, check whether your employer offers either during open
+          enrollment.
+        </p>
+      </section>
+
+      <section aria-labelledby="bankruptcy">
+        <h2 id="bankruptcy">Medical bankruptcy</h2>
+        <p>
+          For overwhelming medical debt, <strong>bankruptcy</strong> is a legitimate option
+          of last resort. Medical bills are dischargeable in both Chapter 7 and Chapter 13
+          bankruptcy. <strong>Chapter 7</strong> wipes out most unsecured debt entirely;{' '}
+          <strong>Chapter 13</strong> restructures it into a 3–5 year payment plan.
+        </p>
+        <p>
+          The downside: bankruptcy stays on your credit report for 7–10 years and affects
+          your ability to get loans, rent in some places, and occasionally even employment
+          in certain fields.
+        </p>
+        <p>
+          Before filing, talk to a free legal aid bankruptcy attorney. Some jurisdictions
+          have specific bankruptcy clinics; <strong>LawHelp.org</strong> can connect you.
+          Filing on your own without legal help is technically possible but risky.
+        </p>
+      </section>
+
+      <section aria-labelledby="deceased-family">
+        <h2 id="deceased-family">When the bill is for a deceased family member</h2>
+        <p>
+          If you've received a bill for a family member who has died: in most cases,{' '}
+          <strong>you are not personally responsible for their medical debt</strong> unless
+          you co-signed for the care, you're a spouse in a community property state, or you
+          serve as the executor of their estate. The debt is paid (if possible) from the
+          estate, not from you.
+        </p>
+        <p>
+          If a collector tells you that you owe your relative's medical bills, push back.
+          This is one of the most common deceptive collections tactics.
+        </p>
+      </section>
+
+      <section aria-labelledby="when-all-else-fails">
+        <h2 id="when-all-else-fails">When everything has failed</h2>
+        <p>
+          If you've genuinely exhausted financial assistance, negotiation, payment plans, and
+          other options, and the bill is still unpayable:
+        </p>
+        <ul>
+          <li><strong>Don't ignore it.</strong> Unanswered bills go to collections. Engaged disputes don't.</li>
+          <li><strong>Send a written hardship letter</strong> to the billing office. State that you cannot pay and explain why. Many hospitals will write off small balances rather than continue collections.</li>
+          <li><strong>Wait it out.</strong> Statutes of limitations on medical debt vary by state (typically 3–6 years). After the limit, the debt is unenforceable in court — though collectors may still call.</li>
+          <li><strong>Consider bankruptcy</strong> if the debt is large enough to warrant it.</li>
+        </ul>
+        <p>
+          You're not alone in this. Medical debt affects more than 40% of U.S. adults. The
+          system is designed around the assumption that you'll push back, ask questions, and
+          negotiate. Doing so isn't rude — it's how the system actually works.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); margin-bottom: var(--space-3); }
+  article section { margin-bottom: var(--space-6); }
+  article section h2 { margin-bottom: var(--space-3); }
+  article ul, article ol { margin: var(--space-3) 0 var(--space-4); }
+  article li { margin-bottom: var(--space-1); line-height: 1.65; }
+</style>

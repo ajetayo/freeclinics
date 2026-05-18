@@ -1,0 +1,18 @@
+Build a new long-form resource page at src/pages/resources/medications/index.astro. The content lives at src/data/medications-resource-content.md (or paste it inline) — use it verbatim as the source copy.
+Page structure:
+
+Standard BaseLayout, all existing design tokens, <SiteHeader /> and <SiteFooter /> as usual. AdSense and GA fire as on every other page (do not pass noAds={true} — this page should monetize).
+Breadcrumb at the top: Home → Resources → Affording Your Medications. Note: /resources/ doesn't exist yet as a page; the middle breadcrumb item should render as plain text (not a link), with a comment in the source explaining that when a future /resources/ hub is built, this becomes a link. Match the breadcrumb visual style on the other pages.
+H1: "Affording Your Medications: A Guide to Free and Low-Cost Prescription Help"
+Render the markdown's section headings as <h2> elements. Within sections, the bolded short labels (e.g. "How they work.", "Insulin.") should render as <strong> inline at the start of the paragraph — not as their own headings. The bulleted lists in the manufacturer programs and database sections render as actual <ul><li> lists. Constrain content to --max-width-text so it reads at a comfortable measure.
+Below the main content, a "Last updated" line in the same style as the per-page editorial footer used on clinic pages. Use today's date. Add the standard "If you spot something out of date, please let us know" line.
+
+Head / SEO:
+
+<title>: "Affording Your Medications: Free & Low-Cost Prescription Help | freeclinics.us"
+meta description: "How to afford prescriptions without insurance — patient assistance programs, discount cards, 340B pricing, and program databases. Free guide."
+canonical: https://freeclinics.us/resources/medications/
+
+JSON-LD: emit one Article block with headline, description, datePublished and dateModified (today), author and publisher both as { "@type": "Organization", "name": "freeclinics.us" }, mainEntityOfPage pointing at the canonical URL, and an inLanguage of en-US. Plus the existing BreadcrumbList pattern (Home → this page; the middle "Resources" item is a plain text name with no item URL since the hub doesn't exist yet).
+Build:
+After build, page count should be 26,333. Confirm: dist/resources/medications/index.html exists and is well-formed, the page is included in sitemap-0.xml, the AdSense <ins> block is present above the site footer, and the Article JSON-LD parses cleanly. Show me the head section and the first ~30 lines of body markup so I can verify the breadcrumb and intro render correctly.

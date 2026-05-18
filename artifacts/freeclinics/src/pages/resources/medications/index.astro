@@ -1,0 +1,312 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/medications/';
+const pageTitle     = 'Affording Your Medications: Free & Low-Cost Prescription Help | freeclinics.us';
+const description   = 'How to afford prescriptions without insurance — patient assistance programs, discount cards, 340B pricing, and program databases. Free guide.';
+const datePublished = '2026-05-18';
+const dateModified  = '2026-05-18';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: 'Affording Your Medications: A Guide to Free and Low-Cost Prescription Help',
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+// BreadcrumbList: the middle "Resources" item has no URL because /resources/
+// doesn't exist as a page yet. When a future /resources/ hub is built, add
+// an `item` property pointing at https://freeclinics.us/resources/.
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',                        item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources' },
+    { '@type': 'ListItem', position: 3, name: 'Affording Your Medications',  item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        {/* "Resources" is plain text, not a link — no /resources/ hub exists yet.
+            When that hub is built, replace this span with:
+            <a href="/resources/">Resources</a>                                  */}
+        <span>Resources</span>
+        <span aria-hidden="true"> › </span>
+        Affording Your Medications
+      </p>
+
+      <header class="page-intro">
+        <h1>Affording Your Medications: A Guide to Free and Low-Cost Prescription Help</h1>
+        <p class="lede">
+          If you've found a free clinic, you may still face another problem: paying for the
+          medications you're prescribed. The good news is that there's a substantial network
+          of programs — many of them genuinely free — built for people without insurance or
+          with high deductibles. This page explains the main options, what each is for, and
+          how to use them together.
+        </p>
+      </header>
+
+      <section aria-labelledby="start-with-the-clinic">
+        <h2 id="start-with-the-clinic">Start with the clinic itself</h2>
+        <p>
+          If you're a patient at a free or low-cost clinic, ask whether the clinic is a{' '}
+          <strong>Federally Qualified Health Center (FQHC)</strong> or a{' '}
+          <strong>Ryan White HIV/AIDS Program clinic</strong>. These clinics can access the
+          federal <strong>340B drug pricing program</strong>, which lets them sell certain
+          medications to patients at deeply discounted prices — often $4 to $15 for common
+          prescriptions. Many FQHCs have on-site pharmacies; others partner with retail
+          pharmacies for 340B-priced dispensing.
+        </p>
+        <p>
+          Many free clinics also keep <strong>medication samples</strong> from drug company
+          representatives. If you can't immediately pay for a new prescription, ask whether
+          they have samples to bridge you while you sort out longer-term help.
+        </p>
+        <p>
+          Most clinics also have <strong>social workers or patient navigators</strong> whose
+          job is exactly this — helping you find prescription assistance. If you're starting a
+          new medication and worried about cost, raise it before you leave the appointment.
+          They can often start the application paperwork that same day.
+        </p>
+      </section>
+
+      <section aria-labelledby="pap-heading">
+        <h2 id="pap-heading">Patient Assistance Programs (PAPs)</h2>
+        <p>
+          Most major brand-name medications have a <strong>Patient Assistance Program</strong>{' '}
+          run by the drug's manufacturer. PAPs give qualifying patients the drug for free or
+          at very low cost, usually for a set period (typically 3 to 12 months) with renewal
+          applications.
+        </p>
+        <p>
+          <strong>How they work.</strong> You and your doctor each fill out a one-page
+          application. The manufacturer reviews your income, insurance status, and
+          prescription. If approved, they ship the medication directly to your doctor's
+          office or a designated pharmacy, or send you a card to use at retail.
+        </p>
+        <p>
+          <strong>Who qualifies.</strong> Income limits vary by program but most fall in the
+          range of 200–400% of the federal poverty line. Most require you to be uninsured,
+          or to demonstrate financial hardship even with insurance. U.S. residency is
+          generally required; citizenship usually is not.
+        </p>
+        <p>
+          <strong>Where to find them.</strong> The two best free databases are:
+        </p>
+        <ul>
+          <li>
+            <strong>NeedyMeds.org</strong> — searchable by drug name, with application forms
+            and contact details for each program
+          </li>
+          <li>
+            <strong>RxAssist.org</strong> — a similar database, sometimes with programs the
+            other doesn't list
+          </li>
+        </ul>
+        <p>
+          Search either by the drug name your doctor prescribed. If a PAP exists, the listing
+          tells you the eligibility rules and links straight to the application.
+        </p>
+      </section>
+
+      <section aria-labelledby="manufacturer-programs">
+        <h2 id="manufacturer-programs">Manufacturer programs</h2>
+        <p>
+          Most major pharmaceutical companies run umbrella programs that cover many of their
+          drugs. A few of the largest:
+        </p>
+        <ul>
+          <li><strong>Pfizer</strong> — Pfizer RxPathways</li>
+          <li><strong>Eli Lilly</strong> — Lilly Cares (especially relevant for insulin and diabetes medications)</li>
+          <li><strong>Novo Nordisk</strong> — Patient Assistance Program (insulin and GLP-1 medications)</li>
+          <li><strong>Sanofi</strong> — Sanofi Patient Connection (insulin, multiple sclerosis drugs)</li>
+          <li><strong>AstraZeneca</strong> — AZ&amp;Me Prescription Savings Program</li>
+          <li><strong>GSK</strong> — GSK Patient Assistance Program</li>
+          <li><strong>Merck</strong> — Merck Helps</li>
+          <li><strong>Bristol Myers Squibb</strong> — BMS Patient Assistance Foundation</li>
+        </ul>
+        <p>
+          Each company has its own application form on its website. Searching for the drug
+          name plus "patient assistance" will usually take you straight to the right page.
+        </p>
+      </section>
+
+      <section aria-labelledby="discount-cards">
+        <h2 id="discount-cards">Prescription discount cards</h2>
+        <p>
+          For people who don't qualify for a PAP but still can't afford their meds at the
+          pharmacy counter, <strong>prescription discount cards</strong> can dramatically
+          lower the price. The most widely accepted are:
+        </p>
+        <ul>
+          <li><strong>GoodRx</strong> — coupon-based, no signup needed; price varies by pharmacy</li>
+          <li><strong>SingleCare</strong> — similar model, sometimes cheaper than GoodRx</li>
+          <li><strong>RxSaver</strong> — another no-signup discount network</li>
+        </ul>
+        <p>
+          <strong>How to use them.</strong> Search for your medication on the website or app.
+          It shows you the cash price at pharmacies near you. Print the coupon or show your
+          phone at the pharmacy counter. The pharmacy bills the discount network instead of
+          your insurance.
+        </p>
+        <p>
+          <strong>A few important caveats.</strong> You can't combine a discount card with
+          insurance — you pick one — so always ask the pharmacist for both prices and use
+          whichever is cheaper. Discount card spending counts toward what you actually pay,
+          but <strong>not</strong> toward your insurance deductible. And prices change: the
+          same drug can be $12 at one pharmacy and $90 at another a mile away. Always
+          compare.
+        </p>
+      </section>
+
+      <section aria-labelledby="specific-conditions">
+        <h2 id="specific-conditions">Help for specific conditions</h2>
+        <p>
+          Some medications have dedicated assistance programs because the cost is so high or
+          the need so widespread.
+        </p>
+        <p>
+          <strong>Insulin.</strong> Eli Lilly, Novo Nordisk, and Sanofi all run
+          insulin-specific programs. Lilly's Insulin Value Program caps the cost at $35 a
+          month for many of its insulins; Novo Nordisk has a similar cap. Don't ration
+          insulin — call the manufacturer's hotline first.
+        </p>
+        <p>
+          <strong>HIV medications.</strong> The <strong>Ryan White Program</strong> funds free
+          or low-cost HIV care, including medications, in every state. Each state also runs an{' '}
+          <strong>AIDS Drug Assistance Program (ADAP)</strong> with its own eligibility rules.
+        </p>
+        <p>
+          <strong>Cancer medications.</strong> The <strong>Patient Advocate Foundation</strong>{' '}
+          and <strong>CancerCare</strong> both run financial assistance programs for cancer
+          patients, including copay assistance and free medications.
+        </p>
+        <p>
+          <strong>Mental health.</strong> <strong>NAMI's HelpLine</strong> (1-800-950-NAMI)
+          can connect you with medication assistance for psychiatric medications. Most
+          manufacturers also have PAPs for common antidepressants and antipsychotics.
+        </p>
+      </section>
+
+      <section aria-labelledby="state-programs">
+        <h2 id="state-programs">State pharmaceutical assistance</h2>
+        <p>
+          Many states run their own prescription assistance programs, usually for low-income
+          seniors, people with disabilities, or those with specific conditions. Eligibility
+          varies widely. Search <strong>BenefitsCheckUp.org</strong> with your zip code to
+          see what your state offers.
+        </p>
+      </section>
+
+      <section aria-labelledby="pharmacy-counter">
+        <h2 id="pharmacy-counter">At the pharmacy counter</h2>
+        <p>
+          A few practical habits save real money even after you've explored the programs above.
+        </p>
+        <p>
+          <strong>Always ask the cash price</strong> before handing over your insurance card.
+          Sometimes the cash price — or the discount card price — is lower than your insurance
+          copay.
+        </p>
+        <p>
+          <strong>Ask if a generic is available.</strong> Generics are chemically identical to
+          brand-name drugs but cost a fraction.
+        </p>
+        <p>
+          <strong>Compare 30-day and 90-day supplies.</strong> A 90-day supply often costs
+          less than three 30-day supplies. Mail-order pharmacies frequently offer the best
+          90-day prices.
+        </p>
+        <p>
+          <strong>Try multiple pharmacies.</strong> The same medication can vary by five to
+          ten times in price between pharmacies, even within a few miles.{' '}
+          <strong>Costco's pharmacy is open to non-members in most states</strong> and is
+          often among the cheapest.
+        </p>
+        <p>
+          <strong>Ask the pharmacist directly</strong> if you can't afford a prescription.
+          They've seen this many times and often know which programs apply to which
+          medications.
+        </p>
+      </section>
+
+      <section aria-labelledby="urgent-rx">
+        <h2 id="urgent-rx">When the prescription is urgent</h2>
+        <p>
+          If you've just left a doctor's appointment with a prescription you can't fill,
+          before anything else: ask the clinic for samples to cover the first few days, call
+          the manufacturer's PAP hotline for the medication (many can ship within one to two
+          weeks once approved), and use a discount card to fill the prescription at the lowest
+          available retail price while you wait for the PAP application to process.
+        </p>
+      </section>
+
+      <section aria-labelledby="note-on-guide">
+        <h2 id="note-on-guide">A note on this guide</h2>
+        <p>
+          This page is a starting point, not a substitute for talking to a pharmacist, doctor,
+          or social worker about your specific situation. Prescription costs and assistance
+          programs change constantly — eligibility rules, dollar caps, and program names all
+          shift. Always confirm details on the program's official website before applying.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> May 18, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+
+  .page-intro {
+    margin-bottom: var(--space-6);
+  }
+  .lede {
+    font-size: 1.05rem;
+    color: var(--color-text-muted);
+  }
+
+  article section {
+    margin-bottom: var(--space-6);
+  }
+  article section h2 {
+    margin-bottom: var(--space-3);
+  }
+  article section p + p {
+    margin-top: calc(-1 * var(--space-2));
+  }
+  article ul {
+    margin: var(--space-3) 0 var(--space-4);
+  }
+  article ul li {
+    margin-bottom: var(--space-1);
+    line-height: 1.65;
+  }
+</style>

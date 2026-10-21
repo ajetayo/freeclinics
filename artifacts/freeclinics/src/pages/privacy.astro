@@ -1,0 +1,236 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// TODO(owner): this is a plain-language draft based on what the site actually
+// loads (AdSense, GA4, Google's consent message, server logs). It is not legal
+// advice — have it reviewed before relying on it, especially the US state
+// privacy section.
+
+const canonicalUrl = 'https://freeclinics.us/privacy/';
+const pageTitle    = 'Privacy Policy | freeclinics.us';
+const description  = 'What freeclinics.us collects (no accounts, no health forms), how Google ads and analytics use cookies, and how to opt out of personalized ads.';
+const contactEmail = 'hello@freeclinics.us';
+const lastUpdated  = '2026-10-21';
+
+const lastUpdatedLabel = new Date(`${lastUpdated}T00:00:00Z`).toLocaleDateString('en-US', {
+  year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
+});
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',           item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Privacy Policy', item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl} noAds={true}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main">
+    <article class="privacy-page">
+      <p class="breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">›</span> Privacy Policy
+      </p>
+
+      <header class="page-intro">
+        <h1>Privacy policy</h1>
+        <p class="updated">Last updated: <time datetime={lastUpdated}>{lastUpdatedLabel}</time></p>
+        <p class="lede">
+          You can use freeclinics.us without creating an account or telling us
+          anything about your health. This page explains the limited
+          information that is collected when you visit, who collects it, and
+          the choices you have.
+        </p>
+      </header>
+
+      <section class="privacy-section" aria-labelledby="summary">
+        <h2 id="summary">The short version</h2>
+        <ul>
+          <li>We don't have accounts, sign-ups, or forms that ask about your health.</li>
+          <li>Google provides our ads and our visitor statistics, and uses cookies to do so.</li>
+          <li>Our web server keeps standard technical logs for security.</li>
+          <li>We never sell your information for money.</li>
+          <li>You can turn off personalized ads and block cookies at any time.</li>
+        </ul>
+      </section>
+
+      <section class="privacy-section" aria-labelledby="collect">
+        <h2 id="collect">Information collected when you visit</h2>
+        <h3>Server logs</h3>
+        <p>
+          Like almost every website, our server records basic details of each
+          request: your IP address, the page requested, the date and time, your
+          browser type, and the page that linked to us. We use these logs to
+          keep the site running, investigate errors, and block automated abuse.
+          Server logs are deleted after 12 months.
+        </p>
+
+        <h3>Analytics</h3>
+        <p>
+          We use Google Analytics to understand how many people visit, which
+          pages are useful, and what kind of device and approximate location
+          (city or region) they visit from. Google Analytics uses cookies and
+          similar technology to do this. We use this information only in
+          aggregate and do not use it to identify you.
+        </p>
+
+        <h3>Email</h3>
+        <p>
+          If you email us — for example to report a listing — we receive your
+          email address and whatever you include in the message. We use it only
+          to reply and to fix the listing, and we don't add you to any mailing
+          list.
+        </p>
+      </section>
+
+      <section class="privacy-section" aria-labelledby="health">
+        <h2 id="health">Health information</h2>
+        <p>
+          We never ask for your medical history, insurance details, income, or
+          any other health information, and the site has no forms that collect
+          it. Please don't send us health information by email.
+        </p>
+        <p>
+          Be aware that the pages you view — for example, a page about STD
+          testing or mental health care — can suggest a health interest. Those
+          page views are visible to Google Analytics and Google's advertising
+          service as described below. If that concerns you, use a private
+          browsing window, block third-party cookies, or opt out of
+          personalized ads.
+        </p>
+      </section>
+
+      <section class="privacy-section" aria-labelledby="ads">
+        <h2 id="ads">Advertising and cookies</h2>
+        <p>
+          freeclinics.us is funded by ads served by Google AdSense. Third-party
+          vendors, including Google, use cookies to serve ads based on your
+          previous visits to this and other websites. Google's use of
+          advertising cookies enables it and its partners to serve ads to you
+          based on your visits to this site and/or other sites on the internet.
+        </p>
+        <p>You can control this:</p>
+        <ul>
+          <li>
+            Turn off personalized advertising in Google's{' '}
+            <a href="https://myadcenter.google.com/" class="privacy-link" rel="noopener">My Ad Center</a>.
+          </li>
+          <li>
+            Opt out of personalized ads from many other vendors at{' '}
+            <a href="https://optout.aboutads.info/" class="privacy-link" rel="noopener">aboutads.info</a>.
+          </li>
+          <li>
+            Read how{' '}
+            <a href="https://policies.google.com/technologies/partner-sites" class="privacy-link" rel="noopener">Google uses information from sites that use its services</a>.
+          </li>
+          <li>
+            Block Google Analytics with Google's{' '}
+            <a href="https://tools.google.com/dlpage/gaoptout" class="privacy-link" rel="noopener">browser add-on</a>.
+          </li>
+          <li>Block or delete cookies in your browser's settings.</li>
+        </ul>
+        <p>
+          Visitors in the European Economic Area, the UK, and Switzerland are
+          shown a consent message and can accept or refuse advertising cookies
+          before they are used.
+        </p>
+      </section>
+
+      <section class="privacy-section" aria-labelledby="us-states">
+        <h2 id="us-states">Your rights under US state privacy laws</h2>
+        <p>
+          Some states, including California, give residents the right to know
+          what personal information is collected, to request its deletion, and
+          to opt out of the "sale" or "sharing" of personal information for
+          targeted advertising. We do not sell personal information for money.
+          Personalized ads served by Google may count as "sharing" under these
+          laws.
+        </p>
+        <p>
+          Visitors in US states with these laws are shown a privacy message
+          with a "Do not sell or share my personal information" option. You can
+          also opt out with the controls listed above. To make a request about
+          information we hold (such as
+          emails you've sent us), contact{' '}
+          <a href={`mailto:${contactEmail}`} class="privacy-link">{contactEmail}</a>.
+          We will not treat you differently for using these rights.
+        </p>
+      </section>
+
+      <section class="privacy-section" aria-labelledby="children">
+        <h2 id="children">Children</h2>
+        <p>
+          The site is meant for adults looking for care for themselves or their
+          families. It is not directed at children under 13, and we don't
+          knowingly collect information from them.
+        </p>
+      </section>
+
+      <section class="privacy-section" aria-labelledby="links">
+        <h2 id="links">Links to other websites</h2>
+        <p>
+          Clinic listings link to clinics' own websites. Once you leave
+          freeclinics.us, that site's privacy policy applies, not ours.
+        </p>
+      </section>
+
+      <section class="privacy-section" aria-labelledby="changes">
+        <h2 id="changes">Changes and contact</h2>
+        <p>
+          If we change this policy, we'll update the date at the top of this
+          page. Questions about privacy:{' '}
+          <a href={`mailto:${contactEmail}`} class="privacy-link">{contactEmail}</a>.
+        </p>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .privacy-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+  .updated {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-3);
+  }
+
+  .privacy-section {
+    margin-bottom: var(--space-7);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .privacy-section:last-child {
+    border-bottom: none;
+  }
+  .privacy-section h2 {
+    margin-bottom: var(--space-3);
+  }
+  .privacy-section h3 {
+    font-size: 1.05rem;
+    margin: var(--space-4) 0 var(--space-2);
+  }
+  .privacy-section p,
+  .privacy-section li {
+    line-height: 1.7;
+  }
+  .privacy-section p { margin-bottom: var(--space-3); }
+  .privacy-section ul {
+    margin: 0 0 var(--space-3);
+    padding-left: var(--space-5);
+  }
+  .privacy-link {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  .privacy-link:hover { color: var(--color-primary-dark); }
+</style>

@@ -56,7 +56,6 @@ const h1            = `Free & Low-Cost ${displayService} Clinics in ${titleCity}
 const pageTitle     = `${h1} | freeclinics.us`;
 const description   = `Find free and low-cost ${displayService.toLowerCase()} clinics in ${titleCity}, ${stateAbbr}. Verified listings with hours, fees, languages, and walk-in info for uninsured and underinsured patients.`;
 const canonicalUrl  = `https://freeclinics.us/${state}/${city}/${service}/`;
-const lastVerified  = '2026-05-01';
 
 const faqs = SERVICE_FAQS[service] ?? [];
 const hasFaqs = faqs.length > 0;
@@ -197,11 +196,11 @@ const faqJsonLd = hasFaqs
       )}
 
       <footer class="page-footer">
-        <p><span class="verified-line">Listings last verified:</span> {lastVerified}</p>
         <p class="editorial-note">
-          Listings on freeclinics.us are reviewed and re-verified by our editorial team
-          on a rolling basis. We confirm hours, services, and fee structure directly with
-          each clinic. If you spot something out of date, <a href="/contact/">please let us know</a>.
+          Listings on freeclinics.us are verified by our editorial team when they are
+          added to the directory. Hours, services, and fees can change, so please call
+          the clinic before you visit. If you spot something out of date,
+          <a href="/contact/">please let us know</a>.
         </p>
       </footer>
     </article>

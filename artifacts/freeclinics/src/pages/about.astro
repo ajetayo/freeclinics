@@ -1,0 +1,175 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getAllClinics } from '../lib/clinics';
+
+const canonicalUrl = 'https://freeclinics.us/about/';
+const pageTitle    = 'About freeclinics.us — Independent Free Clinic Directory';
+const description  = 'Who runs freeclinics.us, where our clinic listings come from, how they are checked, and how the site is funded. Independent and free to use.';
+const contactEmail = 'hello@freeclinics.us';
+const lastUpdated  = '2026-10-21';
+
+const clinicCount = getAllClinics().length.toLocaleString('en-US');
+
+const aboutJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'About freeclinics.us',
+  url: canonicalUrl,
+  dateModified: lastUpdated,
+  inLanguage: 'en-US',
+  mainEntity: {
+    '@type': 'Organization',
+    name: 'freeclinics.us',
+    url: 'https://freeclinics.us/',
+    email: contactEmail,
+  },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',  item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'About', item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl} noAds={true}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(aboutJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main">
+    <article class="about-page">
+      <p class="breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">›</span> About
+      </p>
+
+      <header class="page-intro">
+        <h1>About freeclinics.us</h1>
+        <p class="lede">
+          freeclinics.us is a free, independent directory of {clinicCount} free
+          and sliding-scale health clinics across the United States. It exists
+          to help people without insurance — or with insurance they can't
+          afford to use — find care they can pay for.
+        </p>
+      </header>
+
+      <section class="about-section" aria-labelledby="what-we-do">
+        <h2 id="what-we-do">What the directory covers</h2>
+        <p>
+          Each listing shows a clinic's address, phone number, hours, services,
+          accepted insurance, and fee structure. We focus on the question most
+          patients have before they go: <em>what will this visit actually cost
+          me?</em> Clinics are organized by state and city so you can find care
+          close to home.
+        </p>
+        <p>
+          We list community health centers, volunteer-run free clinics,
+          health-department clinics, and other providers that offer free or
+          income-based (sliding-scale) care.
+        </p>
+      </section>
+
+      <section class="about-section" aria-labelledby="independence">
+        <h2 id="independence">Independent and free to use</h2>
+        <p>
+          freeclinics.us is not a clinic, a health insurer, or a government
+          agency, and it is not affiliated with any of the clinics it lists.
+          Clinics cannot pay to be listed or to rank higher. Using the site is
+          free, and you never need an account.
+        </p>
+      </section>
+
+      <section class="about-section" aria-labelledby="who-we-are">
+        <h2 id="who-we-are">Who runs freeclinics.us</h2>
+        <p>
+          The site is run by a team of freelance health editors with
+          backgrounds in health reporting. They research, write, and maintain
+          the clinic listings and the{' '}
+          <a href="/resources/" class="about-link">health resource guides</a>.
+        </p>
+      </section>
+
+      <section class="about-section" aria-labelledby="listings">
+        <h2 id="listings">Where listings come from and how they are checked</h2>
+        <p>
+          We have built the directory independently over several years. Clinic
+          details come from intake forms and from our editors' own research
+          into information that clinics publish online. Every listing is
+          checked by our editorial team when it is added to the directory.
+        </p>
+        <p>
+          Clinic hours, fees, and services change often. Please call the clinic
+          before you visit to confirm it is open and that you qualify.
+        </p>
+        <p>
+          If a listing is wrong or a clinic has closed, tell us at{' '}
+          <a href={`mailto:${contactEmail}`} class="about-link">{contactEmail}</a>.
+          We review every report.
+        </p>
+      </section>
+
+      <section class="about-section" aria-labelledby="not-medical-advice">
+        <h2 id="not-medical-advice">Not medical advice</h2>
+        <p>
+          The directory and our <a href="/resources/" class="about-link">health
+          resources</a> are general information, not medical advice. For a
+          medical emergency, call 911 or go to the nearest emergency room.
+        </p>
+      </section>
+
+      <section class="about-section" aria-labelledby="funding">
+        <h2 id="funding">How the site is funded</h2>
+        <p>
+          freeclinics.us is supported by advertising served by Google. Ads are
+          labeled and kept separate from listings, and advertisers have no say
+          over which clinics appear or what we write. Our{' '}
+          <a href="/privacy/" class="about-link">privacy policy</a> explains
+          how advertising and analytics use cookies.
+        </p>
+      </section>
+
+      <section class="about-section" aria-labelledby="contact">
+        <h2 id="contact">Contact</h2>
+        <p>
+          Corrections, questions, and partnership enquiries:{' '}
+          <a href={`mailto:${contactEmail}`} class="about-link">{contactEmail}</a>,
+          or see our <a href="/contact/" class="about-link">contact page</a>.
+        </p>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .about-page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+
+  .about-section {
+    margin-bottom: var(--space-7);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .about-section:last-child {
+    border-bottom: none;
+  }
+  .about-section h2 {
+    margin-bottom: var(--space-3);
+  }
+  .about-section p {
+    margin-bottom: var(--space-3);
+    line-height: 1.7;
+  }
+  .about-link {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  .about-link:hover { color: var(--color-primary-dark); }
+</style>

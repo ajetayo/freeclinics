@@ -11,6 +11,12 @@ const resources = [
   { href: '/resources/medicaid-application/', label: 'How to Apply for Medicaid' },
   { href: '/resources/emergency-room/',       label: 'When to Use the ER' },
 ];
+
+const legal = [
+  { href: '/about/',   label: 'About' },
+  { href: '/privacy/', label: 'Privacy Policy' },
+  { href: '/contact/', label: 'Contact' },
+];
 ---
 <footer class="site-footer">
   <div class="site-footer__inner">
@@ -19,7 +25,7 @@ const resources = [
       A directory of free and low-cost health clinics across the United States.
     </p>
     <p class="site-footer__trust">
-      Listings are reviewed and verified by our editorial team.
+      Listings are verified by our editorial team when they are added.
     </p>
 
     <nav class="site-footer__resources" aria-label="Health resources">
@@ -29,6 +35,14 @@ const resources = [
       <ul>
         {resources.map((r) => (
           <li><a href={r.href}>{r.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <nav class="site-footer__legal" aria-label="About this site">
+      <ul>
+        {legal.map((l) => (
+          <li><a href={l.href}>{l.label}</a></li>
         ))}
       </ul>
     </nav>
@@ -89,6 +103,25 @@ const resources = [
     font-size: 0.85rem;
   }
   .site-footer__resources a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+  }
+
+  .site-footer__legal ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+  }
+  .site-footer__legal a {
+    color: var(--color-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .site-footer__legal a:hover {
     color: var(--color-primary-dark);
     text-decoration: underline;
   }

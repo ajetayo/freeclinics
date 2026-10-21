@@ -81,7 +81,6 @@ const clinics = getClinicsByCityState(city.stateSlug, city.citySlug)
   .slice()
   .sort((a, b) => a.name.localeCompare(b.name));
 
-const lastVerified = '2026-05-01';
 const stateUrl     = `https://freeclinics.us/${city.stateSlug}/`;
 const canonicalUrl = `https://freeclinics.us/${city.stateSlug}/${city.citySlug}/`;
 const pageTitle    = `Free & Low-Cost Clinics in ${city.cityName}, ${city.stateAbbr} | freeclinics.us`;
@@ -185,11 +184,11 @@ const itemListJsonLd = {
       </section>
 
       <footer class="page-footer">
-        <p><span class="verified-line">Listings last verified:</span> {lastVerified}</p>
         <p class="editorial-note">
-          Listings on freeclinics.us are reviewed and re-verified by our editorial team
-          on a rolling basis. We confirm hours, services, and fee structure directly with
-          each clinic. If you spot something out of date, <a href="/contact/">please let us know</a>.
+          Listings on freeclinics.us are verified by our editorial team when they are
+          added to the directory. Hours, services, and fees can change, so please call
+          the clinic before you visit. If you spot something out of date,
+          <a href="/contact/">please let us know</a>.
         </p>
       </footer>
     </article>

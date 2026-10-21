@@ -8,6 +8,11 @@ import { hoursLabel, hoursLines, hasTimes, openingHoursSpecification } from '../
 import type { Clinic } from '../../../lib/types';
 import clinicSlugs from '../../../data/clinic-slugs.json';
 import cities from '../../../data/cities.json';
+import noindexClinics from '../../../data/noindex-clinics.json';
+
+// Listings kept on the site (city and nearby lists still link to them) but
+// excluded from search: see src/data/noindex-clinics.json for each reason.
+const NOINDEX_SLUGS = new Set((noindexClinics as Array<{ slug: string }>).map((c) => c.slug));
 
 // Set of known "state/city" keys from cities.json. Every clinic's
 // (stateSlug, citySlug) should resolve to a real city hub now that we have
@@ -157,7 +162,7 @@ const breadcrumbJsonLd = {
   ],
 };
 ---
-<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl} noindex={NOINDEX_SLUGS.has(clinic.slug)}>
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(medicalClinicJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />

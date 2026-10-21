@@ -1,6 +1,13 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+
+// Clinic pages marked noindex (src/data/noindex-clinics.json) are left out of the sitemap.
+const NOINDEX_PATHS = new Set(
+  JSON.parse(readFileSync(new URL('./src/data/noindex-clinics.json', import.meta.url), 'utf8'))
+    .map((c) => `/clinic/${c.slug}/`),
+);
 
 // ---------------------------------------------------------------------------
 // Sitemap <lastmod>
@@ -64,6 +71,7 @@ export default defineConfig({
   // sitemap-index.xml + sitemap-N.xml chunks under /dist on every build.
   integrations: [
     sitemap({
+      filter: (page) => !NOINDEX_PATHS.has(new URL(page).pathname),
       serialize(item) {
         const lastmod = lastCommitDate(sourcesFor(new URL(item.url).pathname));
         if (lastmod) item.lastmod = lastmod;

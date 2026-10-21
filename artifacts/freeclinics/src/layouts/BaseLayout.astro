@@ -9,9 +9,11 @@ export interface Props {
   description: string;
   canonicalUrl: string;
   noAds?: boolean;
+  /** Ask search engines not to index this page (links on it are still followed). */
+  noindex?: boolean;
 }
 
-const { title, description, canonicalUrl, noAds = false } = Astro.props;
+const { title, description, canonicalUrl, noAds = false, noindex = false } = Astro.props;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -21,6 +23,7 @@ const { title, description, canonicalUrl, noAds = false } = Astro.props;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4183031888320028" crossorigin="anonymous"></script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-5SW6JT3KD3"></script>
     <script>

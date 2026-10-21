@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const canonicalUrl  = 'https://freeclinics.us/resources/sliding-scale-fees/';
+const pageTitle     = 'How Sliding-Scale Fees Work at Free Clinics';
+const description   = 'Why most "free" clinics charge by income, the federal 100%/200% poverty-line rules at community health centers, and what to bring to get the lowest fee.';
+const datePublished = '2026-10-21';
+const dateModified  = '2026-10-21';
+const headline      = 'How Sliding-Scale Fees Work';
+const hrsaSource    = 'https://bphc.hrsa.gov/compliance/compliance-manual/chapter9';
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline,
+  description,
+  datePublished,
+  dateModified,
+  inLanguage: 'en-US',
+  author:    { '@type': 'Organization', name: 'freeclinics.us' },
+  publisher: { '@type': 'Organization', name: 'freeclinics.us' },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+};
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',      item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Resources', item: 'https://freeclinics.us/resources/' },
+    { '@type': 'ListItem', position: 3, name: headline,    item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main resource-main">
+    <article>
+      <p class="breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true"> › </span>
+        <a href="/resources/">Resources</a>
+        <span aria-hidden="true"> › </span>
+        {headline}
+      </p>
+
+      <header class="page-intro">
+        <h1>{headline}</h1>
+        <p class="lede">
+          A sliding-scale fee means the clinic sets what you pay from your household
+          income and family size. If your income is low, many visits and basic services
+          are free; if you earn more, you pay a reduced fee instead of the full price.
+          This guide explains how that works and how to get the lowest fee you qualify for.
+        </p>
+      </header>
+
+      <section aria-labelledby="how-it-works">
+        <h2 id="how-it-works">How the fee is set</h2>
+        <p>
+          At your first visit, the clinic asks for your household income and how many
+          people live in your household, usually on a short form. It uses those two
+          numbers to place you on a tier of its fee schedule. If you make very little,
+          many visits are free. If you earn more, you might pay $20–$60 for a visit instead
+          of the $200–$400 a private clinic would charge.
+        </p>
+      </section>
+
+      <section aria-labelledby="free-vs-sliding">
+        <h2 id="free-vs-sliding">"Free clinic" vs. sliding-scale clinic</h2>
+        <p>
+          The phrase "free clinic" can be misleading. Most "free" clinics are actually
+          sliding-scale clinics: completely free for the lowest income tier, and very low
+          cost for everyone else. A handful of clinics, usually volunteer-run, are truly
+          free for all patients regardless of income. Both kinds are listed on
+          freeclinics.us, and each clinic's page shows its fee structure.
+        </p>
+      </section>
+
+      <section aria-labelledby="health-centers">
+        <h2 id="health-centers">The federal rules at community health centers</h2>
+        <p>
+          Many of the clinics in this directory are federally funded community health
+          centers. Federal rules set the minimum discounts they must offer, based on the
+          federal poverty guidelines:
+        </p>
+        <ul>
+          <li>
+            <strong>At or below 100% of the poverty guidelines:</strong> a full discount.
+            The health center may charge a small flat "nominal" fee instead, which must be
+            less than the fee in its first discounted tier.
+          </li>
+          <li>
+            <strong>Between 100% and 200%:</strong> partial discounts that shrink as
+            income rises, in at least three tiers.
+          </li>
+          <li>
+            <strong>Above 200%:</strong> no discount is required, though some health
+            centers offer one anyway.
+          </li>
+        </ul>
+        <p>
+          Health centers must also operate so that no patient is denied service because
+          they can't pay, and they assess eligibility on income and family size only.
+          Source: <a href={hrsaSource} rel="noopener">HRSA Health Center Program
+          Compliance Manual, Chapter 9: Sliding Fee Discount Program</a>.
+        </p>
+        <p>
+          Volunteer-run free clinics, hospital clinics, and health-department clinics set
+          their own policies, so their fees and income limits vary. Ask the clinic when
+          you call.
+        </p>
+      </section>
+
+      <section aria-labelledby="what-to-bring">
+        <h2 id="what-to-bring">What to bring to get the lowest fee</h2>
+        <ul>
+          <li><strong>Photo ID</strong> — any government-issued ID.</li>
+          <li>
+            <strong>Proof of income</strong> — a recent pay stub, an unemployment award
+            letter, or a clinic-provided self-attestation form if you are paid in cash.
+          </li>
+          <li><strong>Proof of address</strong> — a utility bill or any piece of mail.</li>
+        </ul>
+        <p>
+          If you don't have these, most clinics will still see you; they may charge their
+          standard sliding-scale rate until you can verify your income. For the full
+          check-in process, see <a href="/resources/first-visit/">Your First Free Clinic
+          Visit</a>.
+        </p>
+      </section>
+
+      <section aria-labelledby="insurance">
+        <h2 id="insurance">If you have insurance</h2>
+        <p>
+          Sliding-scale fees are not only for the uninsured. At community health centers,
+          patients who qualify for a sliding-fee discount and also have insurance are
+          charged no more out of pocket than their sliding-scale tier would cost, subject
+          to legal and contractual limits. If you might qualify for free coverage, see
+          <a href="/resources/medicaid-application/">How to Apply for Medicaid</a>.
+        </p>
+      </section>
+
+      <footer class="page-footer">
+        <p><span class="verified-line">Last updated:</span> October 21, 2026</p>
+        <p class="editorial-note">
+          If you spot something out of date, <a href="/contact/">please let us know</a>.
+        </p>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .resource-main {
+    max-width: var(--max-width-text);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .page-intro { margin-bottom: var(--space-6); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+  article section { margin-bottom: var(--space-6); }
+  article section h2 { margin-bottom: var(--space-3); }
+  article ul { margin: var(--space-3) 0 var(--space-4); }
+  article li { margin-bottom: var(--space-1); line-height: 1.65; }
+</style>

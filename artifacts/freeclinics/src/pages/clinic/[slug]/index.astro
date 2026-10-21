@@ -3,6 +3,8 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.astro';
 import { getClinicBySlug } from '../../../lib/clinics';
 import { US_STATES, getState } from '../../../lib/constants';
+import { clinicTitle, clinicDescription } from '../../../lib/titles';
+import { hoursLabel, hasTimes, openingHoursSpecification } from '../../../lib/hours';
 import type { Clinic } from '../../../lib/types';
 import clinicSlugs from '../../../data/clinic-slugs.json';
 import cities from '../../../data/cities.json';
@@ -58,8 +60,10 @@ const cityHubHref  = CITY_KEYS.has(`${clinic.stateSlug}/${clinic.citySlug}`)
   : null;
 const stateHref    = `/${clinic.stateSlug}/`;
 
-const pageTitle    = `${clinic.name} — Free or Low-Cost Clinic in ${clinic.city}, ${clinic.stateAbbr} | freeclinics.us`;
-const description  = `${clinic.name} is a free or low-cost health clinic in ${clinic.city}, ${clinic.stateAbbr}. Hours, services, eligibility, fees, and contact information.`;
+const hoursText    = hoursLabel(clinic.hours);
+const hoursHaveTimes = hasTimes(clinic.hours);
+const pageTitle    = clinicTitle(clinic);
+const description  = clinicDescription(clinic, hoursText);
 const canonicalUrl = `https://freeclinics.us/clinic/${clinic.slug}/`;
 
 const directionsHref = (() => {
@@ -110,6 +114,8 @@ if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
   };
 }
 if (clinic.website) medicalClinicJsonLd.sameAs = [clinic.website];
+const openingHours = openingHoursSpecification(clinic.hours);
+if (openingHours) medicalClinicJsonLd.openingHoursSpecification = [openingHours];
 if (clinic.services.length > 0) {
   medicalClinicJsonLd.availableService = clinic.services.map((s) => ({
     '@type': 'MedicalProcedure',
@@ -195,12 +201,17 @@ const breadcrumbJsonLd = {
               <dd><a href={clinic.website} rel="noopener" target="_blank" data-track="clinic_website_click" data-clinic={clinic.slug}>{clinic.website}</a></dd>
             </>
           )}
-          {clinic.hours && (
-            <>
-              <dt>Hours</dt>
-              <dd>{clinic.hours}</dd>
-            </>
-          )}
+          <dt>Hours</dt>
+          <dd>
+            {hoursText}
+            {!hoursHaveTimes && clinic.phone && (
+              <span class="hours-note">
+                Exact times aren't listed —{' '}
+                <a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`} data-track="phone_call" data-clinic={clinic.slug}>call {clinic.phone}</a>{' '}
+                to confirm before you go.
+              </span>
+            )}
+          </dd>
         </dl>
       </section>
 
@@ -284,6 +295,12 @@ const breadcrumbJsonLd = {
   }
   .visit-contact__details dt { font-weight: 600; color: var(--color-text); }
   .visit-contact__details dd { margin: 0; }
+  .hours-note {
+    display: block;
+    margin-top: var(--space-1);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
 
   .services-list { margin: 0 0 var(--space-4); padding-left: 1.2rem; }
 

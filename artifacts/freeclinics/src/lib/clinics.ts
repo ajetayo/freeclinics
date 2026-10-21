@@ -122,17 +122,20 @@ export interface NearbyClinic {
 }
 
 /**
- * Up to `limit` other clinics within `maxMiles` of `clinic`, nearest first.
- * Empty when the clinic has no coordinates. The scan covers enough grid cells
- * to reach `maxMiles` in every direction: a degree of latitude is ~69 mi, a
+ * Up to `limit` clinics within `maxMiles` of a point, nearest first, skipping
+ * any for which `exclude` returns true. The scan covers enough grid cells to
+ * reach `maxMiles` in every direction: a degree of latitude is ~69 mi, a
  * degree of longitude shrinks with cos(latitude).
  */
-export function getNearbyClinics(clinic: Clinic, limit = 6, maxMiles = 25): NearbyClinic[] {
-  if (!hasCoords(clinic)) return [];
-  const row = Math.floor(clinic.lat / GRID_DEG);
-  const col = Math.floor(clinic.long / GRID_DEG);
+export function getClinicsNearPoint(
+  lat: number,
+  long: number,
+  { limit = 6, maxMiles = 25, exclude = (_: Clinic) => false }: { limit?: number; maxMiles?: number; exclude?: (c: Clinic) => boolean } = {},
+): NearbyClinic[] {
+  const row = Math.floor(lat / GRID_DEG);
+  const col = Math.floor(long / GRID_DEG);
   const milesPerDegLat = 69.0;
-  const milesPerDegLong = Math.max(69.17 * Math.cos((clinic.lat * Math.PI) / 180), 1);
+  const milesPerDegLong = Math.max(69.17 * Math.cos((lat * Math.PI) / 180), 1);
   const rowSpan = Math.ceil(maxMiles / (milesPerDegLat * GRID_DEG));
   const colSpan = Math.ceil(maxMiles / (milesPerDegLong * GRID_DEG));
 
@@ -140,12 +143,43 @@ export function getNearbyClinics(clinic: Clinic, limit = 6, maxMiles = 25): Near
   for (let r = row - rowSpan; r <= row + rowSpan; r++) {
     for (let k = col - colSpan; k <= col + colSpan; k++) {
       for (const other of BY_CELL.get(`${r}:${k}`) ?? []) {
-        if (other.slug === clinic.slug || !hasCoords(other)) continue;
-        const miles = distanceMiles(clinic.lat, clinic.long, other.lat, other.long);
+        if (!hasCoords(other) || exclude(other)) continue;
+        const miles = distanceMiles(lat, long, other.lat, other.long);
         if (miles <= maxMiles) found.push({ clinic: other, miles });
       }
     }
   }
   found.sort((a, b) => a.miles - b.miles || a.clinic.name.localeCompare(b.clinic.name));
   return found.slice(0, limit);
+}
+
+/** Up to `limit` other clinics within `maxMiles` of `clinic`, nearest first. */
+export function getNearbyClinics(clinic: Clinic, limit = 6, maxMiles = 25): NearbyClinic[] {
+  if (!hasCoords(clinic)) return [];
+  return getClinicsNearPoint(clinic.lat, clinic.long, {
+    limit,
+    maxMiles,
+    exclude: (other) => other.slug === clinic.slug,
+  });
+}
+
+/**
+ * Clinics near a city but outside it, measured from the average position of
+ * the city's own clinics. Empty when none of the city's clinics have coordinates.
+ */
+export function getClinicsNearCity(
+  stateSlug: string,
+  citySlug: string,
+  limit = 8,
+  maxMiles = 25,
+): NearbyClinic[] {
+  const located = getClinicsByCityState(stateSlug, citySlug).filter(hasCoords);
+  if (located.length === 0) return [];
+  const lat = located.reduce((sum, c) => sum + c.lat, 0) / located.length;
+  const long = located.reduce((sum, c) => sum + c.long, 0) / located.length;
+  return getClinicsNearPoint(lat, long, {
+    limit,
+    maxMiles,
+    exclude: (other) => other.stateSlug === stateSlug && other.citySlug === citySlug,
+  });
 }

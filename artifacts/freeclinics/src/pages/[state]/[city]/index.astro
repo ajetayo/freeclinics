@@ -2,7 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.astro';
 import { US_STATES, getServiceDisplayName, getState } from '../../../lib/constants';
-import { getClinicsByCityState } from '../../../lib/clinics';
+import { getClinicsByCityState, getClinicsNearCity } from '../../../lib/clinics';
 import { cityTitle } from '../../../lib/titles';
 import cities from '../../../data/cities.json';
 import phase1ServiceLocations from '../../../data/phase1-service-locations.json';
@@ -84,8 +84,16 @@ const clinics = getClinicsByCityState(city.stateSlug, city.citySlug)
 
 const stateUrl     = `https://freeclinics.us/${city.stateSlug}/`;
 const canonicalUrl = `https://freeclinics.us/${city.stateSlug}/${city.citySlug}/`;
+// Small towns get a "Clinics near {City}" list so the page is useful beyond one or two listings.
+const SMALL_CITY_MAX = 5;
+const nearbyOutside = clinics.length <= SMALL_CITY_MAX
+  ? getClinicsNearCity(city.stateSlug, city.citySlug)
+  : [];
+
 const pageTitle    = cityTitle(city.cityName, city.stateAbbr, clinics.length);
-const description  = `${clinics.length} free and low-cost health ${clinics.length === 1 ? 'clinic' : 'clinics'} in ${city.cityName}, ${city.stateAbbr}, with addresses, phone numbers, hours, fees and services for each.`;
+const description  = nearbyOutside.length > 0
+  ? `${clinics.length} free and low-cost health ${clinics.length === 1 ? 'clinic' : 'clinics'} in ${city.cityName}, ${city.stateAbbr}, plus ${nearbyOutside.length} more within 25 miles — with phone numbers, hours and fees.`
+  : `${clinics.length} free and low-cost health ${clinics.length === 1 ? 'clinic' : 'clinics'} in ${city.cityName}, ${city.stateAbbr}, with addresses, phone numbers, hours, fees and services for each.`;
 
 // Full breadcrumb chain: Home → State → City.
 const breadcrumbJsonLd = {
@@ -171,6 +179,23 @@ const itemListJsonLd = {
           })}
         </ol>
       </section>
+
+      {nearbyOutside.length > 0 && (
+        <section aria-labelledby="near-city">
+          <h2 id="near-city">Clinics near {city.cityName}</h2>
+          <p>Other free and low-cost clinics within 25 miles of {city.cityName}, nearest first.</p>
+          <ol class="clinic-list">
+            {nearbyOutside.map(({ clinic, miles }) => (
+              <li class="clinic-card">
+                <h3 class="clinic-card__name">
+                  <a href={`/clinic/${clinic.slug}/`}>{clinic.name}</a>
+                </h3>
+                <p class="clinic-card__meta">{clinic.city}, {clinic.stateAbbr} · {miles.toFixed(1)} mi away</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       <section aria-labelledby="other-options">
         <h2 id="other-options">Other ways to find care</h2>

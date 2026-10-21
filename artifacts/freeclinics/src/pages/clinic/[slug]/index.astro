@@ -1,10 +1,10 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.astro';
-import { getClinicBySlug } from '../../../lib/clinics';
-import { US_STATES, getState } from '../../../lib/constants';
+import { getClinicBySlug, getClinicsByService, getNearbyClinics } from '../../../lib/clinics';
+import { US_STATES, getState, getServiceDisplayName } from '../../../lib/constants';
 import { clinicTitle, clinicDescription } from '../../../lib/titles';
-import { hoursLabel, hasTimes, openingHoursSpecification } from '../../../lib/hours';
+import { hoursLabel, hoursLines, hasTimes, openingHoursSpecification } from '../../../lib/hours';
 import type { Clinic } from '../../../lib/types';
 import clinicSlugs from '../../../data/clinic-slugs.json';
 import cities from '../../../data/cities.json';
@@ -16,6 +16,13 @@ import cities from '../../../data/cities.json';
 const CITY_KEYS = new Set(
   (cities as Array<{ stateSlug: string; citySlug: string }>).map(
     (c) => `${c.stateSlug}/${c.citySlug}`,
+  ),
+);
+
+// "state/city" → that city's service-page slugs, for the "Find care nearby" links.
+const CITY_SERVICE_PAGES = new Map(
+  (cities as Array<{ stateSlug: string; citySlug: string; servicePages: string[] }>).map(
+    (c) => [`${c.stateSlug}/${c.citySlug}`, c.servicePages],
   ),
 );
 
@@ -59,6 +66,13 @@ const cityHubHref  = CITY_KEYS.has(`${clinic.stateSlug}/${clinic.citySlug}`)
   ? `/${clinic.stateSlug}/${clinic.citySlug}/`
   : null;
 const stateHref    = `/${clinic.stateSlug}/`;
+
+const nearby = getNearbyClinics(clinic);
+// City service pages for services this clinic offers (only cities that have them).
+const cityServiceLinks = (CITY_SERVICE_PAGES.get(`${clinic.stateSlug}/${clinic.citySlug}`) ?? [])
+  .filter((slug) => getClinicsByService([clinic], slug).length > 0)
+  .map((slug) => ({ href: `/${clinic.stateSlug}/${clinic.citySlug}/${slug}/`, label: getServiceDisplayName(slug) }));
+const formatMiles = (miles: number) => (miles < 0.1 ? 'same location' : `${miles.toFixed(1)} mi`);
 
 const hoursText    = hoursLabel(clinic.hours);
 const hoursHaveTimes = hasTimes(clinic.hours);
@@ -115,7 +129,7 @@ if (typeof clinic.lat === 'number' && typeof clinic.long === 'number') {
 }
 if (clinic.website) medicalClinicJsonLd.sameAs = [clinic.website];
 const openingHours = openingHoursSpecification(clinic.hours);
-if (openingHours) medicalClinicJsonLd.openingHoursSpecification = [openingHours];
+if (openingHours) medicalClinicJsonLd.openingHoursSpecification = openingHours;
 if (clinic.services.length > 0) {
   medicalClinicJsonLd.availableService = clinic.services.map((s) => ({
     '@type': 'MedicalProcedure',
@@ -203,7 +217,7 @@ const breadcrumbJsonLd = {
           )}
           <dt>Hours</dt>
           <dd>
-            {hoursText}
+            {hoursLines(clinic.hours).map((line, i) => (<>{i > 0 && <br />}{line}</>))}
             {!hoursHaveTimes && clinic.phone && (
               <span class="hours-note">
                 Exact times aren't listed —{' '}
@@ -254,6 +268,39 @@ const breadcrumbJsonLd = {
         </section>
       )}
 
+      {(nearby.length > 0 || cityHubHref || cityServiceLinks.length > 0) && (
+        <section aria-labelledby="nearby-clinics" class="nearby">
+          <h2 id="nearby-clinics">Nearby clinics</h2>
+          {nearby.length > 0 ? (
+            <ul class="nearby__list">
+              {nearby.map(({ clinic: other, miles }) => (
+                <li class="nearby__item">
+                  <a href={`/clinic/${other.slug}/`} class="nearby__name">{other.name}</a>
+                  <span class="nearby__meta">
+                    {other.city}, {other.stateAbbr} · {formatMiles(miles)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>We don't list other clinics within 25 miles of this one.</p>
+          )}
+          {(cityHubHref || cityServiceLinks.length > 0) && (
+            <p class="nearby__more">
+              {cityHubHref && (
+                <a href={cityHubHref}>All free and low-cost clinics in {clinic.city}</a>
+              )}
+              {cityServiceLinks.map((s) => (
+                <>
+                  {' · '}
+                  <a href={s.href}>{s.label} in {clinic.city}</a>
+                </>
+              ))}
+            </p>
+          )}
+        </section>
+      )}
+
       <footer class="page-footer">
         <p class="editorial-note">
           Listings on freeclinics.us are verified by our editorial team when they are
@@ -295,6 +342,27 @@ const breadcrumbJsonLd = {
   }
   .visit-contact__details dt { font-weight: 600; color: var(--color-text); }
   .visit-contact__details dd { margin: 0; }
+  .nearby__list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-3);
+  }
+  .nearby__item {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .nearby__name {
+    display: block;
+    padding: var(--space-1) 0;
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+  .nearby__meta {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+  .nearby__more { line-height: 1.9; }
   .hours-note {
     display: block;
     margin-top: var(--space-1);

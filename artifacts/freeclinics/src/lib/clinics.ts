@@ -75,3 +75,77 @@ export function getClinicsByService(clinics: Clinic[], serviceSlug: string): Cli
   const termSet = new Set(sourceTerms);
   return clinics.filter((c) => c.services.some((s) => termSet.has(s)));
 }
+
+// ---------------------------------------------------------------------------
+// Nearby clinics
+// ---------------------------------------------------------------------------
+// Clinics are bucketed into a 0.5° lat/long grid once at module load, so a
+// nearest-neighbour lookup only scans the surrounding cells instead of all
+// ~18.8k clinics (this runs once per clinic page at build time).
+
+const GRID_DEG = 0.5;
+const EARTH_RADIUS_MI = 3958.8;
+
+const hasCoords = (c: Clinic): c is Clinic & { lat: number; long: number } =>
+  typeof c.lat === 'number' && typeof c.long === 'number';
+
+const cellKey = (lat: number, long: number) =>
+  `${Math.floor(lat / GRID_DEG)}:${Math.floor(long / GRID_DEG)}`;
+
+const BY_CELL: Map<string, Clinic[]> = (() => {
+  const map = new Map<string, Clinic[]>();
+  for (const c of ALL_CLINICS) {
+    if (!hasCoords(c)) continue;
+    const key = cellKey(c.lat, c.long);
+    let bucket = map.get(key);
+    if (!bucket) {
+      bucket = [];
+      map.set(key, bucket);
+    }
+    bucket.push(c);
+  }
+  return map;
+})();
+
+function distanceMiles(lat1: number, long1: number, lat2: number, long2: number): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLong = toRad(long2 - long1);
+  const a =
+    Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLong / 2) ** 2;
+  return 2 * EARTH_RADIUS_MI * Math.asin(Math.sqrt(a));
+}
+
+export interface NearbyClinic {
+  clinic: Clinic;
+  miles: number;
+}
+
+/**
+ * Up to `limit` other clinics within `maxMiles` of `clinic`, nearest first.
+ * Empty when the clinic has no coordinates. The scan covers enough grid cells
+ * to reach `maxMiles` in every direction: a degree of latitude is ~69 mi, a
+ * degree of longitude shrinks with cos(latitude).
+ */
+export function getNearbyClinics(clinic: Clinic, limit = 6, maxMiles = 25): NearbyClinic[] {
+  if (!hasCoords(clinic)) return [];
+  const row = Math.floor(clinic.lat / GRID_DEG);
+  const col = Math.floor(clinic.long / GRID_DEG);
+  const milesPerDegLat = 69.0;
+  const milesPerDegLong = Math.max(69.17 * Math.cos((clinic.lat * Math.PI) / 180), 1);
+  const rowSpan = Math.ceil(maxMiles / (milesPerDegLat * GRID_DEG));
+  const colSpan = Math.ceil(maxMiles / (milesPerDegLong * GRID_DEG));
+
+  const found: NearbyClinic[] = [];
+  for (let r = row - rowSpan; r <= row + rowSpan; r++) {
+    for (let k = col - colSpan; k <= col + colSpan; k++) {
+      for (const other of BY_CELL.get(`${r}:${k}`) ?? []) {
+        if (other.slug === clinic.slug || !hasCoords(other)) continue;
+        const miles = distanceMiles(clinic.lat, clinic.long, other.lat, other.long);
+        if (miles <= maxMiles) found.push({ clinic: other, miles });
+      }
+    }
+  }
+  found.sort((a, b) => a.miles - b.miles || a.clinic.name.localeCompare(b.clinic.name));
+  return found.slice(0, limit);
+}

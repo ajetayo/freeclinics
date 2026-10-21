@@ -177,7 +177,7 @@ const breadcrumbJsonLd = {
                 {directionsHref && (
                   <>
                     {' '}—{' '}
-                    <a href={directionsHref} rel="noopener" target="_blank">Get directions</a>
+                    <a href={directionsHref} rel="noopener" target="_blank" data-track="get_directions" data-clinic={clinic.slug}>Get directions</a>
                   </>
                 )}
               </dd>
@@ -186,13 +186,13 @@ const breadcrumbJsonLd = {
           {clinic.phone && (
             <>
               <dt>Phone</dt>
-              <dd><a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`}>{clinic.phone}</a></dd>
+              <dd><a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`} data-track="phone_call" data-clinic={clinic.slug}>{clinic.phone}</a></dd>
             </>
           )}
           {clinic.website && (
             <>
               <dt>Website</dt>
-              <dd><a href={clinic.website} rel="noopener" target="_blank">{clinic.website}</a></dd>
+              <dd><a href={clinic.website} rel="noopener" target="_blank" data-track="clinic_website_click" data-clinic={clinic.slug}>{clinic.website}</a></dd>
             </>
           )}
           {clinic.hours && (

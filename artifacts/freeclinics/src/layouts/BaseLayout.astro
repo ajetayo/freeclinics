@@ -28,6 +28,18 @@ const { title, description, canonicalUrl, noAds = false } = Astro.props;
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-5SW6JT3KD3');
+
+      // Key events: clicks on links marked data-track="<event name>"
+      // (phone_call, get_directions, clinic_website_click) in clinic templates.
+      document.addEventListener('click', (e) => {
+        const link = e.target instanceof Element ? e.target.closest('a[data-track]') : null;
+        if (!link) return;
+        gtag('event', link.dataset.track, {
+          clinic_slug: link.dataset.clinic,
+          link_url: link.href,
+          page_type: location.pathname.startsWith('/clinic/') ? 'clinic' : 'service',
+        });
+      });
     </script>
     <slot name="head" />
   </head>

@@ -156,13 +156,13 @@ const faqJsonLd = hasFaqs
                 {clinic.phone && (
                   <>
                     {' '}·{' '}
-                    <a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`}>{clinic.phone}</a>
+                    <a href={`tel:${clinic.phone.replace(/[^0-9+]/g, '')}`} data-track="phone_call" data-clinic={clinic.slug}>{clinic.phone}</a>
                   </>
                 )}
                 {clinic.website && (
                   <>
                     {' '}·{' '}
-                    <a href={clinic.website} rel="noopener" target="_blank">Website</a>
+                    <a href={clinic.website} rel="noopener" target="_blank" data-track="clinic_website_click" data-clinic={clinic.slug}>Website</a>
                   </>
                 )}
               </p>

@@ -74,6 +74,10 @@ const cityServiceLinks = (CITY_SERVICE_PAGES.get(`${clinic.stateSlug}/${clinic.c
   .map((slug) => ({ href: `/${clinic.stateSlug}/${clinic.citySlug}/${slug}/`, label: getServiceDisplayName(slug) }));
 const formatMiles = (miles: number) => (miles < 0.1 ? 'same location' : `${miles.toFixed(1)} mi`);
 
+const hoursCheckedLabel = clinic.hoursCheckedDate
+  ? new Date(`${clinic.hoursCheckedDate}T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+  : null;
+
 const hoursText    = hoursLabel(clinic.hours);
 const hoursHaveTimes = hasTimes(clinic.hours);
 const pageTitle    = clinicTitle(clinic);
@@ -218,6 +222,12 @@ const breadcrumbJsonLd = {
           <dt>Hours</dt>
           <dd>
             {hoursLines(clinic.hours).map((line, i) => (<>{i > 0 && <br />}{line}</>))}
+            {hoursCheckedLabel && clinic.hoursSource && (
+              <span class="hours-note">
+                Hours checked {hoursCheckedLabel} on the clinic's{' '}
+                <a href={clinic.hoursSource} rel="nofollow noopener" target="_blank">official website</a>.
+              </span>
+            )}
             {!hoursHaveTimes && clinic.phone && (
               <span class="hours-note">
                 Exact times aren't listed —{' '}

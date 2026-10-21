@@ -23,6 +23,10 @@ export interface Clinic {
   feeStructure: string | null;
   incomeEligibility: string | null;
   hours: string | null;
+  /** Official page the hours were checked against (only on re-verified listings). */
+  hoursSource?: string;
+  /** ISO date the hours were last checked against hoursSource. */
+  hoursCheckedDate?: string;
   serviceArea: string | null;
   lat: number | null;
   long: number | null;

@@ -7,6 +7,8 @@ import { US_STATES, getState, getServiceDisplayName } from '../../../lib/constan
 import { clinicTitle, clinicDescription } from '../../../lib/titles';
 import { hoursLabel, hoursLines, hasTimes, openingHoursSpecification } from '../../../lib/hours';
 import { getServicePagesForCity } from '../../../lib/servicePages';
+import { CLINIC_FILTERS } from '../../../lib/filters';
+import { feeSummary } from '../../../lib/titles';
 import type { Clinic } from '../../../lib/types';
 import clinicSlugs from '../../../data/clinic-slugs.json';
 import cities from '../../../data/cities.json';
@@ -79,6 +81,38 @@ const formatMiles = (miles: number) => (miles < 0.1 ? 'same location' : `${miles
 const hoursCheckedLabel = clinic.hoursCheckedDate
   ? new Date(`${clinic.hoursCheckedDate}T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
   : null;
+
+// Badge row under the clinic name: cost, insurance and features, all taken
+// from the listing's own data. The "Hours checked" badge only appears where
+// hours were actually re-checked against the clinic's site (hoursCheckedDate).
+const feeBadge = (() => {
+  const fs = (clinic.feeStructure ?? '').toLowerCase();
+  if (/free|no fee|donation/.test(fs)) return 'Free';
+  if (fs.includes('sliding')) return 'Sliding scale';
+  if (fs.includes('financial assistance')) return 'Financial assistance';
+  if (fs.includes('low cost')) return 'Low cost';
+  return null;
+})();
+const insurance = new Set(clinic.insuranceAccepted.map((i) => i.toLowerCase()));
+const badges: Array<{ label: string; kind: 'cost' | 'feature' | 'verified' }> = [
+  ...(feeBadge ? [{ label: feeBadge, kind: 'cost' as const }] : []),
+  ...(insurance.has('uninsured') || insurance.has('uninsured only') ? [{ label: 'Uninsured welcome', kind: 'cost' as const }] : []),
+  ...(insurance.has('medicaid') ? [{ label: 'Accepts Medicaid', kind: 'feature' as const }] : []),
+  ...(insurance.has('medicare') ? [{ label: 'Accepts Medicare', kind: 'feature' as const }] : []),
+  ...CLINIC_FILTERS.filter((f) => !['free', 'sliding'].includes(f.key) && f.matches(clinic))
+    .map((f) => ({ label: f.label, kind: 'feature' as const })),
+];
+
+const ledeLead = ({
+  'Free': 'Free health care',
+  'Sliding scale': 'Sliding-scale health care, priced by income,',
+  'Financial assistance': 'Health care with financial assistance',
+  'Low cost': 'Low-cost health care',
+} as Record<string, string>)[feeBadge ?? ''] ?? 'Health care';
+
+// "Report an error" opens an email with the clinic and page already filled in.
+const reportHref = `mailto:hello@freeclinics.us?subject=${encodeURIComponent(`Correction: ${clinic.name}`)}`
+  + `&body=${encodeURIComponent(`Page: https://freeclinics.us/clinic/${clinic.slug}/\n\nWhat's wrong or out of date:\n\n`)}`;
 
 const hoursText    = hoursLabel(clinic.hours);
 const hoursHaveTimes = hasTimes(clinic.hours);
@@ -183,10 +217,17 @@ const breadcrumbJsonLd = {
 
       <header class="page-intro">
         <h1>{clinic.name}</h1>
+        {(badges.length > 0 || hoursCheckedLabel) && (
+          <ul class="clinic-badges" aria-label="At a glance">
+            {badges.map((b) => <li class={`clinic-badges__item clinic-badges__item--${b.kind}`}>{b.label}</li>)}
+            {hoursCheckedLabel && (
+              <li class="clinic-badges__item clinic-badges__item--verified">Hours checked {hoursCheckedLabel}</li>
+            )}
+          </ul>
+        )}
         <p class="lede">
-          {clinic.name} is a free or low-cost health clinic in {clinic.city},{' '}
-          {stateName}. This page covers the services it offers, who is
-          eligible, what it costs, and how to visit.
+          {ledeLead} in {clinic.city}, {stateName}. Call ahead to confirm hours and
+          what your visit will cost.
         </p>
       </header>
 
@@ -239,6 +280,9 @@ const breadcrumbJsonLd = {
             )}
           </dd>
         </dl>
+        <p class="visit-contact__report">
+          Something wrong or out of date? <a href={reportHref}>Report an error</a>
+        </p>
       </section>
 
       {clinic.services.length > 0 && (
@@ -355,6 +399,38 @@ const breadcrumbJsonLd = {
   }
   .visit-contact__details dt { font-weight: 600; color: var(--color-text); }
   .visit-contact__details dd { margin: 0; }
+  .visit-contact__report {
+    margin: var(--space-3) 0 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+  .visit-contact__report a { font-weight: 600; display: inline-block; padding: var(--space-1) 0; }
+  .clinic-badges {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-2) 0 var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+  }
+  .clinic-badges__item {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 2px var(--space-2);
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+  }
+  .clinic-badges__item--cost {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+  }
+  .clinic-badges__item--verified {
+    border-color: var(--color-verified);
+    color: var(--color-verified);
+  }
   .nearby__list {
     list-style: none;
     padding: 0;

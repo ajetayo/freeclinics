@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SlidingScaleExplainer from '../components/SlidingScaleExplainer.astro';
+import ClinicSearchForm from '../components/ClinicSearchForm.astro';
 import { US_STATES } from '../lib/constants';
 import cities from '../data/cities.json';
 
@@ -26,9 +27,35 @@ const totalCities = Array.from(cityCountByState.values()).reduce((a, b) => a + b
 
 const canonicalUrl = 'https://freeclinics.us/';
 const pageTitle    = 'Free Clinics US — Find Free and Low-Cost Clinics Near You';
+// Site-level structured data: who publishes the site, and the site search
+// (lets search engines offer a search box for the site in results).
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'freeclinics.us',
+  url: canonicalUrl,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: { '@type': 'EntryPoint', urlTemplate: 'https://freeclinics.us/near-me/?q={search_term_string}' },
+    'query-input': 'required name=search_term_string',
+  },
+};
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'freeclinics.us',
+  url: canonicalUrl,
+  email: 'hello@freeclinics.us',
+  description: 'Independent directory of free and sliding-scale health clinics in the United States.',
+};
+
 const description  = `freeclinics.us is a directory of free and low-cost health clinics across the United States. Browse ${totalCities.toLocaleString()} cities in ${ALL_STATES.length} states and territories.`;
 ---
 <BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} />
+  </Fragment>
   <main class="site-main site-main--wide">
     <header class="page-intro">
       <h1>Free &amp; low-cost clinics across the United States</h1>
@@ -41,6 +68,9 @@ const description  = `freeclinics.us is a directory of free and low-cost health 
         actually cost before walking in the door.
       </p>
     </header>
+
+    <ClinicSearchForm />
+    <p class="home-near-me"><a href="/near-me/">Or find clinics near your current location</a></p>
 
     <section aria-labelledby="browse-by-state">
       <h2 id="browse-by-state">Browse by state</h2>
@@ -58,6 +88,7 @@ const description  = `freeclinics.us is a directory of free and low-cost health 
 </BaseLayout>
 
 <style>
+  .home-near-me { margin: calc(-1 * var(--space-3)) 0 var(--space-5); font-weight: 600; }
   .page-intro { margin-bottom: var(--space-5); }
   .lede { font-size: 1.05rem; color: var(--color-text-muted); }
 

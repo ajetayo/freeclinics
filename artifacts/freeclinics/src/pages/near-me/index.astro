@@ -1,0 +1,287 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ClinicSearchForm from '../../components/ClinicSearchForm.astro';
+import { getAllClinics } from '../../lib/clinics';
+import { US_STATES } from '../../lib/constants';
+
+const canonicalUrl = 'https://freeclinics.us/near-me/';
+const pageTitle    = 'Free Clinics Near Me: Search by ZIP Code or City';
+const description  = 'Find the nearest free and sliding-scale health clinics by ZIP code, city, or your location. Distances, phone numbers, hours and fees for each.';
+const clinicCount  = getAllClinics().length.toLocaleString('en-US');
+// Full state name (lower case) → abbreviation, so "Tulsa, Oklahoma" works too.
+const stateNames = Object.fromEntries(Object.values(US_STATES).map((s) => [s.name.toLowerCase(), s.abbr]));
+
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home',         item: 'https://freeclinics.us/' },
+    { '@type': 'ListItem', position: 2, name: 'Clinics near me', item: canonicalUrl },
+  ],
+};
+---
+<BaseLayout title={pageTitle} description={description} canonicalUrl={canonicalUrl}>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+  </Fragment>
+
+  <main class="site-main">
+    <article class="near-me">
+      <p class="breadcrumb">
+        <a href="/">Home</a> <span aria-hidden="true">›</span> Clinics near me
+      </p>
+
+      <header class="page-intro">
+        <h1>Free clinics near me</h1>
+        <p class="lede">
+          Search {clinicCount} free and sliding-scale clinics by ZIP code or city, or use
+          your location. Results show the nearest clinics first, with distance, phone
+          number, hours and fees.
+        </p>
+      </header>
+
+      <ClinicSearchForm withLocation />
+
+      <p class="near-me__privacy">
+        Your location is only used if you press "Use my location". It stays in your
+        browser: we work out the distances on your device and never send or store it.
+      </p>
+
+      <section aria-live="polite" aria-labelledby="results-heading" class="near-me__results">
+        <h2 id="results-heading" hidden></h2>
+        <p id="results-status" class="near-me__status"></p>
+        <ol id="results-list" class="near-me__list"></ol>
+        <p id="results-more" class="near-me__more" hidden></p>
+      </section>
+
+      <script type="application/json" id="state-names" set:html={JSON.stringify(stateNames)} />
+
+      <noscript>
+        <p>
+          Search needs JavaScript. You can also <a href="/">browse clinics by state</a>.
+        </p>
+      </noscript>
+    </article>
+  </main>
+</BaseLayout>
+
+<script>
+  // Client-side search: ZIP → centroid (/data/zip/NNN.json), city name →
+  // city centroid (/data/places.json), or browser geolocation. Clinics come
+  // from 1° tiles (/data/geo/LAT_LONG.json) around the point. Nothing the
+  // visitor types or their location is sent anywhere except these static
+  // file requests (the ZIP prefix appears in a file name, not the full query).
+  type Point = [string, string, string, string, number, number, string, string, string];
+  type Place = [string, string, string, number, number];
+
+  const MAX_RESULTS = 20;
+  const RADII = [25, 50, 100];
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const status = $('results-status');
+  const list = $('results-list') as HTMLOListElement;
+  const heading = $('results-heading');
+  const more = $('results-more');
+  const form = document.querySelector('form.clinic-search') as HTMLFormElement;
+  const input = document.getElementById('clinic-search-q') as HTMLInputElement;
+  const locate = document.getElementById('use-my-location') as HTMLButtonElement | null;
+
+  // Analytics: record that a search happened and how, never what was searched.
+  (window as any).dataLayer = (window as any).dataLayer || [];
+  function gtag(..._args: unknown[]) { (window as any).dataLayer.push(arguments); }
+
+  const cache = new Map<string, Promise<any>>();
+  const getJson = (url: string) => {
+    if (!cache.has(url)) {
+      cache.set(url, fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null));
+    }
+    return cache.get(url)!;
+  };
+
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  function miles(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const a = Math.sin(toRad(lat2 - lat1) / 2) ** 2
+      + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(toRad(lon2 - lon1) / 2) ** 2;
+    return 2 * 3958.8 * Math.asin(Math.sqrt(a));
+  }
+
+  async function clinicsNear(lat: number, lon: number) {
+    const tiles: string[] = (await getJson('/data/geo/tiles.json')) ?? [];
+    const exists = new Set(tiles);
+    for (const radius of RADII) {
+      const latSpan = Math.ceil(radius / 69);
+      const lonSpan = Math.ceil(radius / Math.max(69.17 * Math.cos(toRad(lat)), 1));
+      const keys: string[] = [];
+      for (let a = Math.floor(lat) - latSpan; a <= Math.floor(lat) + latSpan; a++) {
+        for (let o = Math.floor(lon) - lonSpan; o <= Math.floor(lon) + lonSpan; o++) {
+          if (exists.has(`${a}_${o}`)) keys.push(`${a}_${o}`);
+        }
+      }
+      const points: Point[] = (await Promise.all(keys.map((k) => getJson(`/data/geo/${k}.json`))))
+        .flat().filter(Boolean);
+      const found = points
+        .map((p) => ({ p, d: miles(lat, lon, p[4], p[5]) }))
+        .filter((x) => x.d <= radius)
+        .sort((x, y) => x.d - y.d);
+      if (found.length > 0 || radius === RADII[RADII.length - 1]) return { found, radius };
+    }
+    return { found: [], radius: RADII[RADII.length - 1] };
+  }
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string, cls?: string) {
+    const e = document.createElement(tag);
+    if (text) e.textContent = text;
+    if (cls) e.className = cls;
+    return e;
+  }
+
+  function render(label: string, found: { p: Point; d: number }[], radius: number, cityUrl?: string) {
+    list.replaceChildren();
+    more.hidden = true;
+    heading.hidden = false;
+    heading.textContent = `Clinics near ${label}`;
+    if (found.length === 0) {
+      status.textContent = `We don't list any clinics within ${radius} miles of ${label}.`;
+      return;
+    }
+    status.textContent = `${Math.min(found.length, MAX_RESULTS)} nearest of ${found.length} clinics within ${radius} miles, closest first.`;
+    for (const { p, d } of found.slice(0, MAX_RESULTS)) {
+      const [slug, name, city, st, , , phone, fee, hours] = p;
+      const li = el('li', undefined, 'near-me__item');
+      const a = el('a', name, 'near-me__name') as HTMLAnchorElement;
+      a.href = `/clinic/${slug}/`;
+      li.append(a, el('span', `${city}, ${st} · ${d < 0.1 ? 'under 0.1' : d.toFixed(1)} mi`, 'near-me__meta'));
+      const details = [fee, hours && `Hours: ${hours}`].filter(Boolean).join(' · ');
+      if (details) li.append(el('span', details, 'near-me__meta'));
+      if (phone) {
+        const tel = el('a', `Call ${phone}`, 'near-me__phone') as HTMLAnchorElement;
+        tel.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+        tel.dataset.track = 'phone_call';
+        tel.dataset.clinic = slug;
+        li.append(tel);
+      }
+      list.append(li);
+    }
+    if (cityUrl) {
+      more.replaceChildren();
+      const link = el('a', `See every clinic in ${label}`) as HTMLAnchorElement;
+      link.href = cityUrl;
+      more.append(link);
+      more.hidden = false;
+    }
+  }
+
+  const STATE_BY_NAME: Record<string, string> = JSON.parse($('state-names').textContent || '{}');
+  const STATE_ABBRS = new Set(Object.values(STATE_BY_NAME));
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+  async function search(raw: string) {
+    const q = raw.trim();
+    if (!q) return;
+    status.textContent = 'Searching…';
+    list.replaceChildren();
+    heading.hidden = true;
+    more.hidden = true;
+    gtag('event', 'clinic_search', { search_method: /^\d{5}/.test(q) ? 'zip' : 'city' });
+
+    const zip = q.match(/^(\d{5})(?:-\d{4})?$/);
+    if (zip) {
+      const shard = await getJson(`/data/zip/${zip[1].slice(0, 3)}.json`);
+      const c = shard?.[zip[1]];
+      if (!c) { status.textContent = `We couldn't find ZIP code ${zip[1]}. Check it, or try a city name.`; return; }
+      const { found, radius } = await clinicsNear(c[0], c[1]);
+      render(zip[1], found, radius);
+      return;
+    }
+
+    const places: Place[] = (await getJson('/data/places.json')) ?? [];
+    // Split "City, ST", "City ST", "City, State Name" or "City State Name".
+    let cityPart = norm(q);
+    let state = '';
+    const comma = q.split(/,\s*/);
+    if (comma.length > 1) {
+      const tail = comma[comma.length - 1].trim();
+      const abbr = STATE_BY_NAME[tail.toLowerCase()] ?? tail.toUpperCase();
+      if (STATE_ABBRS.has(abbr)) { state = abbr; cityPart = norm(comma.slice(0, -1).join(' ')); }
+    } else {
+      const words = norm(q).split(' ');
+      for (let k = Math.min(3, words.length - 1); k >= 1 && !state; k--) {
+        const tail = words.slice(-k).join(' ');
+        const abbr = STATE_BY_NAME[tail] ?? (k === 1 ? tail.toUpperCase() : '');
+        if (STATE_ABBRS.has(abbr)) { state = abbr; cityPart = words.slice(0, -k).join(' '); }
+      }
+    }
+    let matches = places.filter((pl) => norm(pl[0]) === cityPart && (!state || pl[1] === state));
+    if (matches.length === 0) {
+      matches = places.filter((pl) => norm(pl[0]).startsWith(cityPart) && (!state || pl[1] === state)).slice(0, 12);
+    }
+    if (matches.length === 0) {
+      status.textContent = `We couldn't find "${q}". Try a 5-digit ZIP code, or a city and state like "Tulsa, OK".`;
+      return;
+    }
+    if (matches.length > 1) {
+      heading.hidden = false;
+      heading.textContent = 'Which one did you mean?';
+      status.textContent = '';
+      for (const pl of matches) {
+        const li = el('li', undefined, 'near-me__item');
+        const b = el('button', `${pl[0]}, ${pl[1]}`, 'near-me__choice') as HTMLButtonElement;
+        b.type = 'button';
+        b.addEventListener('click', () => { input.value = `${pl[0]}, ${pl[1]}`; go(input.value); });
+        li.append(b);
+        list.append(li);
+      }
+      return;
+    }
+    const [name, st, url, lat, lon] = matches[0];
+    const { found, radius } = await clinicsNear(lat, lon);
+    render(`${name}, ${st}`, found, radius, url);
+  }
+
+  function go(q: string) {
+    const url = new URL(location.href);
+    url.searchParams.set('q', q);
+    history.replaceState(null, '', url);
+    search(q);
+  }
+
+  form.addEventListener('submit', (e) => { e.preventDefault(); go(input.value); });
+
+  if (locate && 'geolocation' in navigator) {
+    locate.hidden = false;
+    locate.addEventListener('click', () => {
+      status.textContent = 'Finding your location…';
+      gtag('event', 'clinic_search', { search_method: 'location' });
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const { found, radius } = await clinicsNear(pos.coords.latitude, pos.coords.longitude);
+          render('your location', found, radius);
+        },
+        () => { status.textContent = "We couldn't get your location. Enter a ZIP code or city instead."; },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
+      );
+    });
+  }
+
+  const initial = new URLSearchParams(location.search).get('q');
+  if (initial) { input.value = initial; search(initial); }
+</script>
+
+<style>
+  .near-me { max-width: 720px; margin: 0 auto; padding: 0 var(--space-4); }
+  .page-intro { margin-bottom: var(--space-3); }
+  .lede { font-size: 1.05rem; color: var(--color-text-muted); }
+  .near-me__privacy { font-size: 0.9rem; color: var(--color-text-muted); }
+  .near-me__status { font-weight: 600; }
+  .near-me__list { list-style: none; padding: 0; margin: 0; }
+  .near-me__item { padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); }
+  .near-me__name { display: block; font-weight: 700; color: var(--color-primary); padding: var(--space-1) 0; }
+  .near-me__meta { display: block; font-size: 0.92rem; color: var(--color-text-muted); }
+  .near-me__phone { display: inline-block; margin-top: var(--space-1); padding: var(--space-1) 0; font-weight: 600; }
+  .near-me__choice {
+    min-height: 44px; width: 100%; text-align: left; padding: 0 var(--space-3);
+    background: transparent; border: 1px solid var(--color-border); border-radius: var(--radius);
+    font-size: 1rem; cursor: pointer;
+  }
+  .near-me__more { margin-top: var(--space-4); font-weight: 600; }
+</style>

@@ -5,6 +5,7 @@ import { getClinicBySlug, getClinicsByService, getNearbyClinics } from '../../..
 import { US_STATES, getState, getServiceDisplayName } from '../../../lib/constants';
 import { clinicTitle, clinicDescription } from '../../../lib/titles';
 import { hoursLabel, hoursLines, hasTimes, openingHoursSpecification } from '../../../lib/hours';
+import { getServicePagesForCity } from '../../../lib/servicePages';
 import type { Clinic } from '../../../lib/types';
 import clinicSlugs from '../../../data/clinic-slugs.json';
 import cities from '../../../data/cities.json';
@@ -24,12 +25,7 @@ const CITY_KEYS = new Set(
   ),
 );
 
-// "state/city" → that city's service-page slugs, for the "Find care nearby" links.
-const CITY_SERVICE_PAGES = new Map(
-  (cities as Array<{ stateSlug: string; citySlug: string; servicePages: string[] }>).map(
-    (c) => [`${c.stateSlug}/${c.citySlug}`, c.servicePages],
-  ),
-);
+
 
 // ---------------------------------------------------------------------------
 // Routes — one page per slug in clinic-slugs.json (~18,800)
@@ -74,7 +70,7 @@ const stateHref    = `/${clinic.stateSlug}/`;
 
 const nearby = getNearbyClinics(clinic);
 // City service pages for services this clinic offers (only cities that have them).
-const cityServiceLinks = (CITY_SERVICE_PAGES.get(`${clinic.stateSlug}/${clinic.citySlug}`) ?? [])
+const cityServiceLinks = getServicePagesForCity(clinic.stateSlug, clinic.citySlug)
   .filter((slug) => getClinicsByService([clinic], slug).length > 0)
   .map((slug) => ({ href: `/${clinic.stateSlug}/${clinic.citySlug}/${slug}/`, label: getServiceDisplayName(slug) }));
 const formatMiles = (miles: number) => (miles < 0.1 ? 'same location' : `${miles.toFixed(1)} mi`);

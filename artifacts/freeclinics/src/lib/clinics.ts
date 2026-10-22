@@ -166,20 +166,25 @@ export function getNearbyClinics(clinic: Clinic, limit = 6, maxMiles = 25): Near
 /**
  * Clinics near a city but outside it, measured from the average position of
  * the city's own clinics. Empty when none of the city's clinics have coordinates.
+ * With `serviceSlug`, only clinics offering that service are returned.
  */
 export function getClinicsNearCity(
   stateSlug: string,
   citySlug: string,
   limit = 8,
   maxMiles = 25,
+  serviceSlug?: string,
 ): NearbyClinic[] {
   const located = getClinicsByCityState(stateSlug, citySlug).filter(hasCoords);
   if (located.length === 0) return [];
   const lat = located.reduce((sum, c) => sum + c.lat, 0) / located.length;
   const long = located.reduce((sum, c) => sum + c.long, 0) / located.length;
+  const offers = serviceSlug ? new Set(SERVICE_TAXONOMY[serviceSlug] ?? []) : null;
   return getClinicsNearPoint(lat, long, {
     limit,
     maxMiles,
-    exclude: (other) => other.stateSlug === stateSlug && other.citySlug === citySlug,
+    exclude: (other) =>
+      (other.stateSlug === stateSlug && other.citySlug === citySlug) ||
+      (offers !== null && !other.services.some((s) => offers.has(s))),
   });
 }

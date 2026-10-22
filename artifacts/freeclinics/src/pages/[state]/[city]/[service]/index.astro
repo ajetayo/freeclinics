@@ -3,9 +3,10 @@ import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import SlidingScaleExplainer from '../../../../components/SlidingScaleExplainer.astro';
 import { getState, getServiceDisplayName, toTitleCase } from '../../../../lib/constants';
 import type { Clinic } from '../../../../lib/types';
-import { getClinicsByCityState, getClinicsByService } from '../../../../lib/clinics';
+import { getClinicsByCityState, getClinicsByService, getClinicsNearCity } from '../../../../lib/clinics';
+import { getServiceCombos } from '../../../../lib/servicePages';
 import { SERVICE_FAQS } from '../../../../data/service-faqs';
-import phase1Combos from '../../../../data/phase1-service-locations.json';
+import serviceTaxonomy from '../../../../data/service-taxonomy.json';
 
 // ---------------------------------------------------------------------------
 // Routes — Phase 1
@@ -16,11 +17,7 @@ export function getStaticPaths() {
     props: { clinics: Clinic[] };
   }> = [];
 
-  for (const combo of phase1Combos as Array<{
-    stateSlug: string;
-    citySlug: string;
-    serviceSlug: string;
-  }>) {
+  for (const combo of getServiceCombos()) {
     const cityClinics = getClinicsByCityState(combo.stateSlug, combo.citySlug);
     const matching = getClinicsByService(cityClinics, combo.serviceSlug);
 
@@ -51,10 +48,36 @@ const stateAbbr      = stateInfo?.abbr ?? state.toUpperCase();
 const stateName      = stateInfo?.name ?? toTitleCase(state);
 const titleCity      = toTitleCase(city);
 const displayService = getServiceDisplayName(service);
+// Lower-cased for use mid-sentence, keeping acronyms like "STD" or "OB-GYN" as written.
+const serviceInText  = displayService.replace(/\b[A-Z][a-z]+\b/g, (w) => w.toLowerCase());
 
+// Other clinics within 25 miles that offer the same service.
+const nearby = getClinicsNearCity(state, city, 8, 25, service);
+
+// HIV testing marker on STD-testing pages.
+const HIV_TERMS = new Set((serviceTaxonomy as Record<string, string[]>)['hiv-testing'] ?? []);
+const testsHiv = (c: Clinic) => service === 'std-testing' && c.services.some((s) => HIV_TERMS.has(s));
+const hivCount = clinics.filter(testsHiv).length;
+
+const n = clinics.length;
+const clinicWord = n === 1 ? 'clinic' : 'clinics';
 const h1            = `Free & Low-Cost ${displayService} Clinics in ${titleCity}, ${stateAbbr}`;
-const pageTitle     = `${h1} | freeclinics.us`;
-const description   = `Find free and low-cost ${displayService.toLowerCase()} clinics in ${titleCity}, ${stateAbbr}. Verified listings with hours, fees, languages, and walk-in info for uninsured and underinsured patients.`;
+// Titles lead with the search phrase ("STD Testing in Lompoc, CA") and stay <= 60 chars.
+const pageTitle     = [
+  `${displayService} in ${titleCity}, ${stateAbbr}: ${n} Free & Low-Cost ${n === 1 ? 'Clinic' : 'Clinics'}`,
+  `${displayService} in ${titleCity}, ${stateAbbr}: Free & Low-Cost`,
+  `${displayService} in ${titleCity}, ${stateAbbr}`,
+].find((t) => t.length <= 60) ?? `${displayService} in ${titleCity}, ${stateAbbr}`;
+const descriptionCore = `${n} free and low-cost ${clinicWord} offering ${serviceInText} in ${titleCity}, ${stateAbbr}`
+  + (nearby.length > 0 ? `, plus ${nearby.length} more within 25 miles` : '');
+const description   = [`${descriptionCore}. Phone numbers, hours, fees and eligibility for each.`, `${descriptionCore}.`]
+  .find((d) => d.length <= 155) ?? `${descriptionCore}.`;
+
+const ledeText = `${n} ${clinicWord} in ${titleCity} ${n === 1 ? 'offers' : 'offer'} ${serviceInText} on a free or sliding-scale basis, so what you pay depends on your income`
+  + (nearby.length > 0 ? `, and ${nearby.length} more within 25 miles ${nearby.length === 1 ? 'is' : 'are'} listed further down` : '')
+  + '.'
+  + (hivCount > 0 ? ` ${hivCount === n ? (n === 1 ? 'It also tests' : 'All of them also test') : `${hivCount} of them also test`} for HIV.` : '')
+  + ' Call ahead to confirm hours and what your visit will cost.';
 const canonicalUrl  = `https://freeclinics.us/${state}/${city}/${service}/`;
 
 const faqs = SERVICE_FAQS[service] ?? [];
@@ -128,14 +151,7 @@ const faqJsonLd = hasFaqs
 
       <header class="page-intro">
         <h1>{h1}</h1>
-        <p class="lede">
-          If you are uninsured or underinsured in {titleCity}, you can still get
-          {' '}{displayService.toLowerCase()} care. The clinics listed below offer free
-          or sliding-scale services — meaning what you pay is based on your income, not a
-          fixed price. This page covers how that pricing actually works, what to bring to
-          your first appointment, and a verified list of clinics in {titleCity},{' '}
-          {stateName} that provide {displayService.toLowerCase()} services.
-        </p>
+        <p class="lede">{ledeText}</p>
       </header>
 
       <SlidingScaleExplainer compact />
@@ -148,6 +164,7 @@ const faqJsonLd = hasFaqs
               <h3 class="clinic-card__name">
                 <a href={`/clinic/${clinic.slug}/`}>{clinic.name}</a>
               </h3>
+              {testsHiv(clinic) && <p class="clinic-card__badge">Also tests for HIV</p>}
               <p class="clinic-card__meta">
                 <span>
                   {[clinic.streetAddress, clinic.city, clinic.stateAbbr].filter(Boolean).join(', ')}
@@ -180,6 +197,25 @@ const faqJsonLd = hasFaqs
           ))}
         </ol>
       </section>
+
+      {nearby.length > 0 && (
+        <section aria-labelledby="nearby-service">
+          <h2 id="nearby-service">{displayService} near {titleCity}</h2>
+          <p>Other free and low-cost clinics offering {serviceInText} within 25 miles, nearest first.</p>
+          <ol class="nearby-list">
+            {nearby.map(({ clinic: other, miles }) => (
+              <li>
+                <a href={`/clinic/${other.slug}/`}>{other.name}</a>
+                <span class="nearby-list__meta">
+                  {other.city}, {other.stateAbbr} · {miles.toFixed(1)} mi
+                  {testsHiv(other) ? ' · also tests for HIV' : ''}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p><a href={`/${state}/${city}/`}>All free and low-cost clinics in {titleCity}</a></p>
+        </section>
+      )}
 
       {hasFaqs && (
         <section aria-labelledby="faq" class="faq-section">
@@ -225,6 +261,19 @@ const faqJsonLd = hasFaqs
     padding: var(--space-4) var(--space-5);
   }
   .clinic-card__name { margin: 0 0 var(--space-1); }
+  .clinic-card__badge {
+    display: inline-block;
+    margin: 0 0 var(--space-2);
+    padding: 0 var(--space-2);
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+  }
+  .nearby-list { list-style: none; padding: 0; margin: 0 0 var(--space-3); }
+  .nearby-list li { padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); }
+  .nearby-list a { font-weight: 600; }
+  .nearby-list__meta { display: block; font-size: 0.9rem; color: var(--color-text-muted); }
   .clinic-card__name a { text-decoration: none; }
   .clinic-card__name a:hover { text-decoration: underline; }
   .clinic-card__meta {

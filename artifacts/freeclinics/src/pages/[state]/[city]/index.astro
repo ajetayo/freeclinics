@@ -4,6 +4,7 @@ import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.ast
 import { US_STATES, getServiceDisplayName, getState } from '../../../lib/constants';
 import { getClinicsByCityState, getClinicsNearCity } from '../../../lib/clinics';
 import { cityTitle } from '../../../lib/titles';
+import { getServicePagesForCity } from '../../../lib/servicePages';
 import cities from '../../../data/cities.json';
 import phase1ServiceLocations from '../../../data/phase1-service-locations.json';
 
@@ -84,6 +85,8 @@ const clinics = getClinicsByCityState(city.stateSlug, city.citySlug)
 
 const stateUrl     = `https://freeclinics.us/${city.stateSlug}/`;
 const canonicalUrl = `https://freeclinics.us/${city.stateSlug}/${city.citySlug}/`;
+const servicePages = getServicePagesForCity(city.stateSlug, city.citySlug);
+
 // Small towns get a "Clinics near {City}" list so the page is useful beyond one or two listings.
 const SMALL_CITY_MAX = 5;
 const nearbyOutside = clinics.length <= SMALL_CITY_MAX
@@ -146,11 +149,11 @@ const itemListJsonLd = {
         </p>
       </header>
 
-      {city.servicePages.length > 0 && (
+      {servicePages.length > 0 && (
         <section aria-labelledby="browse-by-service">
           <h2 id="browse-by-service">Browse by service</h2>
           <ul class="service-chips">
-            {city.servicePages.map((slug) => (
+            {servicePages.map((slug) => (
               <li>
                 <a href={`/${city.stateSlug}/${city.citySlug}/${slug}/`} class="service-chip tap-target">
                   {getServiceDisplayName(slug)} in {city.cityName}

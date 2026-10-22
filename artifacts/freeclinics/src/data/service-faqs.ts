@@ -6,6 +6,30 @@
 import type { FAQ } from '../lib/types';
 
 export const SERVICE_FAQS: Record<string, FAQ[]> = {
+  // Sources: Guttmacher Institute, "Minors' Access to STI Services" (state
+  // policy table, checked 2026-10-22); CDC GetTested, gettested.cdc.gov.
+  'std-testing': [
+    {
+      question: 'Can I get tested for STDs without insurance?',
+      answer:
+        "Yes. The clinics listed here serve uninsured patients, and most charge on a sliding scale based on your household income, so testing may be free or low-cost depending on what you earn. Each listing shows the clinic's fee structure; call ahead to confirm what testing costs there.",
+    },
+    {
+      question: 'Do these clinics also test for HIV?',
+      answer:
+        'Many do. Clinics on this page that list HIV testing among their services are marked "Also tests for HIV". If HIV testing matters to you, confirm it when you call.',
+    },
+    {
+      question: 'Can a teenager get tested without a parent?',
+      answer:
+        "In every state and Washington, DC, minors can consent to STI testing and treatment themselves, according to the Guttmacher Institute. Eight states set a minimum age (12 or 14, for example), and some states allow or require a provider to notify parents in certain situations, such as a positive HIV test. Ask the clinic about its confidentiality policy when you call.",
+    },
+    {
+      question: "What if there's no clinic close enough?",
+      answer:
+        "The CDC's GetTested locator (gettested.cdc.gov) lists HIV, STD and hepatitis testing sites across the country, many of them free or low-cost. Your county health department is also worth calling: many run their own STD clinics.",
+    },
+  ],
   'womens-health': [
     {
       question: "Can I get a Pap smear if I don't have insurance?",

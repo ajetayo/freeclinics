@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SlidingScaleExplainer from '../../../components/SlidingScaleExplainer.astro';
+import StickyActionBar from '../../../components/StickyActionBar.astro';
 import { getClinicBySlug, getClinicsByService, getNearbyClinics } from '../../../lib/clinics';
 import { US_STATES, getState, getServiceDisplayName } from '../../../lib/constants';
 import { clinicTitle, clinicDescription } from '../../../lib/titles';
@@ -321,6 +322,7 @@ const breadcrumbJsonLd = {
         </p>
       </footer>
     </article>
+    <StickyActionBar phone={clinic.phone} directionsHref={directionsHref} clinicSlug={clinic.slug} clinicName={clinic.name} />
   </main>
 </BaseLayout>
 

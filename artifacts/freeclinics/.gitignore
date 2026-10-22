@@ -1,2 +1,4 @@
 # IndexNow run state (see scripts/indexnow.mjs)
 .indexnow-state.json
+# Page content hashes behind sitemap lastmod (see scripts/update-lastmod.mjs)
+.page-hashes.json

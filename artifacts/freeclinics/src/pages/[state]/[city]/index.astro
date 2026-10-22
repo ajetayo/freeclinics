@@ -5,6 +5,7 @@ import { US_STATES, getServiceDisplayName, getState } from '../../../lib/constan
 import { getClinicsByCityState, getClinicsNearCity } from '../../../lib/clinics';
 import { cityTitle } from '../../../lib/titles';
 import { getServicePagesForCity } from '../../../lib/servicePages';
+import { CLINIC_FILTERS, clinicFilterKeys } from '../../../lib/filters';
 import cities from '../../../data/cities.json';
 import phase1ServiceLocations from '../../../data/phase1-service-locations.json';
 
@@ -87,6 +88,17 @@ const stateUrl     = `https://freeclinics.us/${city.stateSlug}/`;
 const canonicalUrl = `https://freeclinics.us/${city.stateSlug}/${city.citySlug}/`;
 const servicePages = getServicePagesForCity(city.stateSlug, city.citySlug);
 
+// Filters (city pages with 4+ clinics): only filters that match at least one
+// clinic here, each with its count.
+const FILTER_MIN_CLINICS = 4;
+const clinicKeys = new Map(clinics.map((c) => [c.slug, clinicFilterKeys(c)]));
+const filterOptions = clinics.length >= FILTER_MIN_CLINICS
+  ? CLINIC_FILTERS
+      .map((f) => ({ key: f.key, label: f.label, count: clinics.filter((c) => clinicKeys.get(c.slug)!.includes(f.key)).length }))
+      .filter((f) => f.count > 0)
+  : [];
+const filterLabel = new Map(CLINIC_FILTERS.map((f) => [f.key, f.label]));
+
 // Small towns get a "Clinics near {City}" list so the page is useful beyond one or two listings.
 const SMALL_CITY_MAX = 5;
 const nearbyOutside = clinics.length <= SMALL_CITY_MAX
@@ -166,17 +178,35 @@ const itemListJsonLd = {
 
       <section aria-labelledby="all-clinics">
         <h2 id="all-clinics">All clinics in {city.cityName}</h2>
-        <ol class="clinic-list">
+        {filterOptions.length > 1 && (
+          <div class="clinic-filters" id="clinic-filters" hidden>
+            <p class="clinic-filters__label" id="filters-label">Show only clinics that are:</p>
+            <div class="clinic-filters__buttons" role="group" aria-labelledby="filters-label">
+              {filterOptions.map((f) => (
+                <button type="button" class="clinic-filters__btn" data-filter={f.key} aria-pressed="false">
+                  {f.label} <span class="clinic-filters__count">({f.count})</span>
+                </button>
+              ))}
+            </div>
+            <p class="clinic-filters__status" id="filters-status" aria-live="polite"></p>
+          </div>
+        )}
+        <ol class="clinic-list" id="city-clinic-list">
           {clinics.map((clinic) => {
             const addr = [clinic.streetAddress, clinic.city, clinic.stateAbbr]
               .filter(Boolean)
               .join(', ') + (clinic.postalCode ? ` ${clinic.postalCode}` : '');
             return (
-              <li class="clinic-card">
+              <li class="clinic-card" data-filters={clinicKeys.get(clinic.slug)!.join(' ')}>
                 <h3 class="clinic-card__name">
                   <a href={`/clinic/${clinic.slug}/`}>{clinic.name}</a>
                 </h3>
                 {addr && <p class="clinic-card__meta">{addr}</p>}
+                {clinicKeys.get(clinic.slug)!.length > 0 && (
+                  <ul class="clinic-card__tags" aria-label="Features">
+                    {clinicKeys.get(clinic.slug)!.map((k) => <li>{filterLabel.get(k)}</li>)}
+                  </ul>
+                )}
               </li>
             );
           })}
@@ -224,7 +254,53 @@ const itemListJsonLd = {
   </main>
 </BaseLayout>
 
+<script>
+  // City clinic filters: show clinics matching ALL selected filters. The
+  // toolbar stays hidden without JavaScript, so the full list always shows.
+  const box = document.getElementById('clinic-filters');
+  const list = document.getElementById('city-clinic-list');
+  if (box && list) {
+    const buttons = [...box.querySelectorAll<HTMLButtonElement>('.clinic-filters__btn')];
+    const cards = [...list.querySelectorAll<HTMLElement>(':scope > .clinic-card')];
+    const status = document.getElementById('filters-status')!;
+    const apply = () => {
+      const active = buttons.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.filter!);
+      let shown = 0;
+      for (const card of cards) {
+        const keys = (card.dataset.filters ?? '').split(' ');
+        const show = active.every((k) => keys.includes(k));
+        card.hidden = !show;
+        if (show) shown++;
+      }
+      status.replaceChildren();
+      if (active.length > 0) {
+        status.append(shown === 0
+          ? 'No clinics here match all of those. '
+          : `Showing ${shown} of ${cards.length} clinics. `);
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'clinic-filters__clear';
+        clear.textContent = 'Clear filters';
+        clear.addEventListener('click', () => { buttons.forEach((b) => b.setAttribute('aria-pressed', 'false')); apply(); });
+        status.append(clear);
+      }
+    };
+    for (const b of buttons) {
+      b.addEventListener('click', () => {
+        b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+        apply();
+      });
+    }
+    box.hidden = false;
+  }
+</script>
+
 <style>
+  /* Created by the filter script, so outside Astro's scoped styles. */
+  :global(.clinic-filters__clear) {
+    background: none; border: none; padding: var(--space-1) 0; min-height: 44px;
+    color: var(--color-primary); font-weight: 600; text-decoration: underline; cursor: pointer;
+  }
   .page-intro { margin-bottom: var(--space-5); }
   .lede { font-size: 1.05rem; color: var(--color-text-muted); }
 
@@ -275,4 +351,26 @@ const itemListJsonLd = {
   .clinic-card__name a { text-decoration: none; }
   .clinic-card__name a:hover { text-decoration: underline; }
   .clinic-card__meta { margin: 0; color: var(--color-text-muted); font-size: 0.9rem; }
+  .clinic-card__tags {
+    list-style: none; padding: 0; margin: var(--space-2) 0 0;
+    display: flex; flex-wrap: wrap; gap: var(--space-1);
+  }
+  .clinic-card__tags li {
+    font-size: 0.8rem; font-weight: 600; padding: 0 var(--space-2);
+    border: 1px solid var(--color-border); border-radius: 999px; color: var(--color-text);
+  }
+  .clinic-filters { margin: 0 0 var(--space-4); }
+  .clinic-filters__label { margin: 0 0 var(--space-2); font-weight: 600; }
+  .clinic-filters__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .clinic-filters__btn {
+    min-height: 44px; padding: 0 var(--space-3); font-size: 0.95rem; cursor: pointer;
+    background: var(--color-bg); color: var(--color-text);
+    border: 1px solid var(--color-border); border-radius: 999px;
+  }
+  .clinic-filters__btn[aria-pressed="true"] {
+    background: var(--color-primary); color: #fff; border-color: var(--color-primary);
+  }
+  .clinic-filters__count { opacity: 0.8; }
+  .clinic-filters__status { margin: var(--space-2) 0 0; font-size: 0.9rem; color: var(--color-text-muted); }
+  .clinic-card[hidden] { display: none; }
 </style>
